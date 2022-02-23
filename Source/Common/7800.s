@@ -148,3 +148,24 @@ PAUDCTL  = $8    ; Audio Control
 PSTIMER  = $9
 PRANDOM  = $A    ; 17 bit polycounter pseudo random
 PSKCTL   = $F    ; Serial Port control
+
+;;; Constants for creating display lists
+
+;;; DLL Header
+
+          DLLDLI = $80
+          DLLHoley16 = $40      ; treat odd 2kiB blocks as zeroes
+          DLLHoley8 = $20       ; tread odd 4kiB blocks as zeroes
+          DLLOffsetMask = $0f
+
+;;; MARIA CTRL port
+
+          CTRLBW = $80          ; kill color
+          CTRLDMAEnable = $40
+          CTRLDMADisable = $60
+          CTRLCharByte = $10    ; else 2 bytes per char
+          CTRLBlackBorder = $08 ; else background color
+          CTRLKangaroo = $04
+          CTRLRead160AB = $00
+          CTRLRead320BD = $02
+          CTRLRead320AC = $03

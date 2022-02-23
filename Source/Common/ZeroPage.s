@@ -8,7 +8,11 @@ Temp:
           .byte ?
 
 Pointer:
-          .byte ?
+          .word ?
+
+;;; Vector to the next NMI (presumably, DLI) handler
+NMINext:
+          .word ?
 
           .if * > $100
             .error format("Overran Zero Page, must end by $ff but ran to $%04x", *-1)

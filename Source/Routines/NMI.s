@@ -3,7 +3,10 @@
 
 NMI:      .block
 
-          brk
-          rts
+          jsr NMINextV
+          rti
+
+NMINextV:
+          jmp (NMINext)         ; because there's no jsr (indirect)
 
           .bend

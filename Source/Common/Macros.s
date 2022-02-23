@@ -137,29 +137,7 @@ Locale .macro ThisLang, string
           .MiniText \string
           .fi
           .endm
-
 ;;; 
-
-StyAllGraphics:   .macro
-          sty PF0
-          sty PF1
-          sty PF2
-          sty ENABL
-          sty ENAM0
-          sty ENAM1
-          sty GRP0
-          sty GRP1
-          sty NUSIZ0
-          sty NUSIZ1
-          sty VDELP0
-          sty VDELP1
-          .endm
-
-ClearAllGraphics: .macro
-          ldy #0
-          .StyAllGraphics
-          .endm
-
 sound:    .macro volume, control, frequency, duration, end
           .switch FramesPerSecond
           .case 60
@@ -169,49 +147,6 @@ sound:    .macro volume, control, frequency, duration, end
           .default
           .error "Unsupported frame rate: ", FramesPerSecond
           .endswitch
-          .endm
-
-TimeLines:          .macro lines
-          SkipCycles = 76 * (\lines)
-          .if ( (SkipCycles/64) <= $100 )
-          lda # (SkipCycles/64) - 1
-          sta TIM64T
-          .else
-          .error "Cannot skip ", \lines, " lines with TIM64T"
-          .fi
-          .endm
-
-WaitScreenTop:      .macro
-          jsr JVSync
-          .if TV == NTSC
-          .TimeLines KernelLines - 1
-          .else
-          lda #$ff              ; 214.74 lines
-          sta TIM64T
-          .fi
-          .endm
-
-WaitScreenTopMinus: .macro NTSCMinus, PALMinus
-          jsr JVSync
-          .if TV == NTSC
-          .TimeLines KernelLines - \NTSCMinus
-          .else
-          .TimeLines 214 - \PALMinus
-          .fi
-          .endm
-
-WaitForTimer:       .macro
--
-          lda INSTAT
-          bpl -
-          .endm
-
-WaitScreenBottom:      .macro
-          jsr JWaitScreenBottomSub
-          .endm
-
-WaitScreenBottomTail:      .macro
-          jmp JWaitScreenBottomSub
           .endm
 ;;; 
 KillMusic:          .macro
@@ -229,7 +164,6 @@ FarJSR:   .macro bank, service
             .fi
           .pron
           ldy #\service
-          lda #\bank
           jsr JFarCall
           .endm
 
@@ -241,14 +175,7 @@ FarJMP:   .macro bank, service
           .pron
           ldy #\service
           lda #\bank
-          jmp JFarCall
-          .endm
-;;; 
-Move16: .macro dest, src
-          lda dest
-          sta src
-          lda dest + 1
-          sta src + 1
+          jmp JFarJump
           .endm
 ;;; 
 SkipLines:          .macro length
@@ -312,8 +239,8 @@ SetBitFlag:         .macro flag
           and #$07
           tax
           lda BitMask, x
-          ora ProvinceFlags, y
-          sta ProvinceFlags, y
+          ora GameFlags, y
+          sta GameFlags, y
           .endm
 
 ClearBitFlag:       .macro flag
@@ -327,8 +254,8 @@ ClearBitFlag:       .macro flag
           tax
           lda BitMask, x
           eor #$ff
-          and ProvinceFlags, y
-          sta ProvinceFlags, y
+          and GameFlags, y
+          sta GameFlags, y
           .endm
 ;;; 
 ;;; From Ryan Witmer / PhaserCat
@@ -361,3 +288,22 @@ mvap:     .macro dest, source
           lda \source + 1
           sta \dest + 1
           .endm
+;;; 
+;;; From Lee Davison
+
+between:  .macro low, high
+          clc
+          adc #$ff - \high
+          adc #\high - \low + 1
+          ;; C is set iff (low < A < high)
+          .endm
+;;; 
+;;; 7800-specific stuff here
+
+;;; Functions useful for making slightly more readable bit-banging
+DLPalWidth:         .function palette, width
+          .endf (\palette << 4) | ($0f & ~\width)
+DLMode:   .function wmode, indirect
+          .endf (\wmode << 7) | $40 | (\indirect << 5)
+CoLu:     .function color, lum
+          .endf(\color << 4) | \lum

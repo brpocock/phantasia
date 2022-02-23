@@ -4,6 +4,6 @@
 IRQ:      .block
 
           brk
-          rts
+          rti
 
           .bend

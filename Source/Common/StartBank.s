@@ -11,6 +11,7 @@
           .include "Constants.s"
           .include "JumpTable.s"
 
+          .include "ZeroPage.s"
           .include "RIOTRAM.s"
           .include "SysRAM.s"
           .include "CartRAM.s"

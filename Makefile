@@ -1,10 +1,8 @@
-default:	game doc
+default:	game
 
-all:	game demo no-save atariage doc
+all:	game demo doc
 
-atariage:	Dist/Phantasia.AtariAge.zip
-
-publish:	game demo no-save atariage doc Dist/Phantasia.Source.tar.gz
+publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 	@until rsync -essh --progress \
 		Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78 \
 		Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78 \
@@ -161,9 +159,6 @@ release:	all
 	for file in Phantasia.*.{a78,pdf}; do \
 		mv -v $$file $$(echo $$file | perl -pne 's(Phantasia\.(.+)\.(pdf|a78)) (Phantasia.\1.$(RELEASE).\2)'); \
 	done
-	@echo "AtariAge Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
-		(cd Dist; zip --archive-comment -9 \
-		$(RELEASE)/Phantasia.AtariAge.$(RELEASE).zip \
 	@echo "Public Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.$(RELEASE).zip \
