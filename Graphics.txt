@@ -1,0 +1,115 @@
+Graphics organization and availability
+
+
+Bank 0
+
+This bank is for dealing with text and menu displays primarily.
+
+Palettes:
+
+0 Black
+1 Blue
+2 Red
+3 Green
+4
+5
+6
+7
+
+Text character set:
+
+  0123456789abcdef
+0 0123456789ABCDEF
+1 GHIJKLMNOPQRSTUV
+2 WXYZ ,.?!/abcdef
+3 ghijklmnopqrstuv
+4 wxyz&+-×÷=#
+5 ┏┓┗┛^_[]
+6 ☐☑©①②↑↓←→•
+7
+
+Note that ^_[] represent box top, bottom, left, and right straight edges
+
+Chars are 320A monochrome high-resolution 8×8px tiles
+
+
+
+
+Bank 1
+
+This bank is for dealing with the map view.
+
+Palettes:
+
+0 Foliage (green and brown)
+1 Foliage (orange and black)
+2 Water (blues)
+3 Stone (greys, tan)
+4 Dynamic colors 3
+5 Dynamic colors 2
+6 Dynamic colors 1
+7 Player Hair, Skin, Costume colors
+
+A tile set exists for the background artwork.
+
+Sprite  graphics  exist  for  various   moving  objects  in  the  scene,
+including:  Player (human),  other  humans, monster  parties of  various
+strengths, and other moving objects.
+
+The palette entries in palettes 4, 5,  6 are assigned per each screen as
+needed for objects  on that screen, whereas palettes  0-3 are consistent
+throughout the world, but can be used for sprites as needed.
+
+
+Bank 2
+
+This bank is for dealing with the combat view, the player's party
+
+Palettes:
+
+0 Background scene colors
+1 UI elements colors
+2 
+3 
+4 Party member 4 colors (if any)
+5 Party member 3 colors (if any)
+6 Party member 2 colors (if any)
+7 Player Hair, Skin, Costume colors
+
+Graphics exist for humans and monsters
+
+Bank 3
+
+This bank is for dealing with the combat view, the enemies' party
+
+Palettes:
+
+0 Background scene colors
+1 UI elements colors
+2
+3
+4 Enemy 4 colors (if any)
+5 Enemy 3 colors (if any)
+6 Enemy 2 colors (if any)
+7 Enemy 1 colors
+
+
+Bank 4
+
+This bank is for dealing with shops, inns, and NPC art.
+
+Palettes are all dynamic, to best represent the “bitmap” art
+
+Bank 5
+
+This bank is not used yet.
+
+Bank 6
+
+This bank is for doing the prelude, title, and some attract work.
+
+Palettes are all dynamic, to best represent the “bitmap” art
+
+Bank 7
+
+There are no graphics in bank 7 (fixed bank)

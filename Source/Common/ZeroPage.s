@@ -1,0 +1,15 @@
+;;; Phantasia Source/Source/Common/ZeroPage.s
+;;;; Copyright © 2022 Bruce-Robert Pocock
+
+
+          * = $40
+
+Temp:
+          .byte ?
+
+Pointer:
+          .byte ?
+
+          .if * > $100
+            .error format("Overran Zero Page, must end by $ff but ran to $%04x", *-1)
+          .fi
