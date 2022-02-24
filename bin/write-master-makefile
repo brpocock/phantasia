@@ -78,7 +78,7 @@ for my $tv (qw(NTSC PAL)) {
       {
         opendir my $src, "$bankdir/";
         while (my $file = readdir $src) {
-          next unless $file =~ /\.(s|txt|png|midi)$/;
+          next unless $file =~ /\.(s|txt|art|midi)$/;
           push @todo => "$bankdir/$file";
         }
         closedir $src;
@@ -91,7 +91,7 @@ for my $tv (qw(NTSC PAL)) {
           $orig_path =~ s(Generated/Common) (Common);
           $orig_path =~ s(Generated/Bank) (Banks/Bank);
           $orig_path =~ s(\.s$) ();
-          if (-f "$orig_path.png" or -f "$orig_path.midi" or -f "$orig_path.txt") {
+          if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt") {
             unless ($seen{ $path }) {
               ++$seen{ $path };
               push @files => $path;
@@ -120,14 +120,22 @@ for my $tv (qw(NTSC PAL)) {
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-music \$\@ \$<\n\n";
           push @files => "$genrdir/$base.s";
-        } elsif ('png' eq $ext) {
+        } elsif ('art' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
-          print "$genrdir/$base.s:\t$bankdir/$base.png \\
-\t\tbin/skyline-tool
+          print "$genrdir/$base.art.bin:\t$bankdir/$base.art bin/skyline-tool";
+          open my $art, '<', $path or die;
+          while (my $line = <$art>) {
+            next if $line =~ /^\s*$/;
+            next if $line =~ /^\s*#/;
+            die unless $line =~ /\s*(.+?)\s+/;
+            my $file = $1;
+            print "\\\n\t\t$bankdir/$file";
+          }
+          print "
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-art-7800 \$\@ \$<\n\n";
-          push @files => "$genrdir/$base.s";
+          push @files => "$genrdir/$base.art.bin";
         } elsif ('s' eq $ext) {
           push @files => $path;
           open my $text, '<', $path;
@@ -141,6 +149,15 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
+            } elsif ($line =~ /\.binclude "(.+).bin"/) {
+              my $dep = $1;
+              if ($bank ne 'Common') {
+                push @todo => "$bankdir/$dep";
+                push @todo => "$genrdir/$dep";
+              }
+              push @todo => "Source/Common/$dep";
+              push @todo => "Source/Routines/$dep";
+              push @todo => "Source/Generated/Common/$dep";
             }
           }
           close $text;
