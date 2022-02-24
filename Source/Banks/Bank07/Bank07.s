@@ -9,6 +9,7 @@
           .offs $c000
 
           ;; This must be kept in sync with Source/Common/JumpTable.s
+          ;; (ColdStart must stay the first entry as well)
 JumpTable:
           jmp ColdStart
           jmp WarmStart
