@@ -307,3 +307,4 @@ DLMode:   .function wmode, indirect
           .endf (\wmode << 7) | $40 | (\indirect << 5)
 CoLu:     .function color, lum
           .endf(\color << 4) | \lum
+

@@ -11,4 +11,6 @@ BankEntry:
 
           brk
 
+          .binary "Tileset.art.bin"
+
           .include "EndBank.s"

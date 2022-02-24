@@ -10,10 +10,7 @@ BankEntry:
           
           brk
 
-          .binclude "Font.art.bin"
-
-          .binclude "BigFont.art.bin"
-
-          .binclude "Tileset.art.bin"
+          .binary "Font.art.bin"
+          .binary "BigFont.art.bin"
 
           .include "EndBank.s"

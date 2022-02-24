@@ -149,7 +149,7 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
-            } elsif ($line =~ /\.binclude "(.+).bin"/) {
+            } elsif ($line =~ /\.binary "(.+).bin"/) {
               my $dep = $1;
               if ($bank ne 'Common') {
                 push @todo => "$bankdir/$dep";

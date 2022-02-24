@@ -572,6 +572,7 @@ Shape:~{~a~}
                    out-dir)))
     (format *trace-output* "~% Ripping MOBs from ~D×~D sprite" width height)
     (with-output-to-file (binary-file out-file
+                                      :element-type '(unsigned-byte 8)
                                       :if-exists :supersede)
       (multiple-value-bind (mobs index) (gather-mobs image-nybbles height width)
         (assert (>= 6 (length index)) nil
@@ -935,7 +936,9 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                      png height width α palette-pixels))))
 
 (defun write-7800-binary (index-out bytes-lists)
-  (with-output-to-file (binary index-out :if-exists :supersede)
+  (with-output-to-file (binary index-out   
+                               :element-type '(unsigned-byte 8)
+                               :if-exists :supersede)
     (let ((page-length (length (first bytes-lists))))
       (format t "~&~A: Writing ~:D pages, each of which is ~:D bytes (out of 256 possible) …"
               index-out (length bytes-lists) page-length)
@@ -949,10 +952,11 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
 
 (defun interleave-7800-bytes (bytes-lists)
   ;; Interleave and reverse bytes
-  ;;; all byte lists MUST be the same length 
-  (loop for j below (length (first bytes-lists))
+  (loop for j below (apply #'max (mapcar #'length bytes-lists))
         collect (loop for i from (1- (length bytes-lists)) downto 0
-                      collect (elt (elt bytes-lists i) j))))
+                      collect (if (< j (length (elt bytes-lists i)))
+                                  (elt (elt bytes-lists i) j)
+                                  0))))
 
 (defgeneric parse-7800-object (mode png &key width height palette))
 
@@ -1071,10 +1075,10 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                                (+ b 7) y)))
               (push (reduce #'logior
                             (mapcar (lambda (bit)
-                                      (ash (if (aref byte-pixels (- 7 bit) 0)
+                                      (ash (if (zerop (aref byte-pixels (- 7 bit) 0))
                                                0 1) 
                                            bit))
-                                    '(7 6 5 4 3 2 1)))
+                                    '(7 6 5 4 3 2 1 0)))
                     bytes)))
           (push bytes bytes-lists))))
     bytes-lists))
@@ -1115,7 +1119,9 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                              (png-read:image-data png)
                                              α))
                (palette (grab-7800-palette mode palette-pixels)))
-          (parse-7800-object mode palette-pixels :width width-px :height height-px :palette palette))
+          (appendf bytes
+                   (parse-7800-object mode palette-pixels :width width-px :height height-px
+                                                          :palette palette)))
         (format t " … Done.")))
     (reverse bytes)))
 
@@ -1149,7 +1155,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
   (let ((*machine* 7800))
     (write-7800-binary index-out
                        (interleave-7800-bytes
-                        (parse-into-7800-bytes 
+                        (parse-into-7800-bytes
                          (read-7800-art-index index-in))))))
 
 (defun compile-art (index-out &rest png-files)
