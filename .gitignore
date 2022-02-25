@@ -5,14 +5,7 @@ DEADJOE
 .DS_Store
 *.orig
 
-Dist/
-Dist/Grizzards.zip
-Dist/Grizzards.NTSC.a26
-Dist/Grizzards.NTSC.pdf
-Dist/Grizzards.PAL.a26
-Dist/Grizzards.PAL.pdf
-Dist/Grizzards.SECAM.a26
-Dist/Grizzards.SECAM.pdf
+Dist/*
 
 Object/*
 
@@ -22,3 +15,6 @@ Source/Generated/*
 
 bin/skyline-tool
 bin/buildapp
+
+cfg
+*.log
