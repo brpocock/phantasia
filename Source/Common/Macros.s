@@ -313,7 +313,7 @@ between:  .macro low, high
 
 ;;; Functions useful for making slightly more readable bit-banging
 DLPalWidth:         .function palette, width
-          .endf ((palette << 5) | ($1f ^ ($1f & width)))
+          .endf ((palette << 5) | ($1f ^ ($1f & (width - 1))))
 DLMode:   .function wmode, indirect
           .endf ((wmode << 7) | (indirect << 5))
 CoLu:     .function color, lum
