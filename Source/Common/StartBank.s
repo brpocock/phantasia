@@ -54,6 +54,7 @@
 	.cdef "→→", $3f
 
 	.enc "bigfont"
+          ;; characters are 2 bytes wide so each pointer is doubled
 	.cdef "09", 0
 	.cdef "az", $0a * 2
 	.cdef "AZ", $0a * 2
@@ -86,6 +87,12 @@
 
           .enc "Unicode"
 
+bigtext:  .macro string
+          .for i := 0, i < len(\string), i += 1
+          .byte \string[i] * 2, 1+ \string[i] * 2
+          .next
+          .endm
+          
 Pack6:   .macro byteA, byteB, byteC, byteD
           .byte ((\byteA & $3f) << 2) | ((\byteB & $30) >> 4)
           .byte ((\byteB & $0f) << 4) | ((\byteC & $3c) >> 2)

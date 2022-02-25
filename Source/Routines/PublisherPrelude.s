@@ -19,23 +19,23 @@ PublisherPrelude:	.block
           ;; Hello world text display list
           ldy # 0
 
-          ;; ;; Random bit of data to display
-          .mvayi HelloWorldDList, #<Font
-          .mvayi HelloWorldDList, #DLPalWidth(0, 10)
-          .mvayi HelloWorldDList, #>Font
-          .mvayi HelloWorldDList, y
+          ;; ;; ;; Random bit of data to display
+          ;; .mvayi HelloWorldDList, #<Font
+          ;; .mvayi HelloWorldDList, #DLPalWidth(0, 10)
+          ;; .mvayi HelloWorldDList, #>Font
+          ;; .mvayi HelloWorldDList, 100 ; XXX why is this being ignored??
           ;; Hello, World string
           .mvayi HelloWorldDList, #<HelloWorldString
-          .mvayi HelloWorldDList, #DLMode(0, 1)
+          .mvayi HelloWorldDList, #DLExtMode(false, true)
           .mvayi HelloWorldDList, #>HelloWorldString
           .mvayi HelloWorldDList, #DLPalWidth(0, 13)
-          .mvayi HelloWorldDList, #56
+          .mvayi HelloWorldDList, #16
           ;; End of Hello World display list
           .mvayi HelloWorldDList, #0
           .mvay HelloWorldDList, #0
 
           ;; The actual character data for the string
-          ldx # 13
+          ldx # 26
 -
           lda HelloWorldText - 1, x
           sta HelloWorldString - 1, x
@@ -45,7 +45,7 @@ PublisherPrelude:	.block
           ;; Display List List
           ldy # 0
 
-          ldx # 4
+          ldx # 7
 FillTopBlank:
           .mvayi PreludeDLL, #10
           .mvayi PreludeDLL, #>BlankDList
@@ -54,14 +54,10 @@ FillTopBlank:
           dex
           bne FillTopBlank
 
-          ldx # 4
 HelloWorld:
           .mvayi PreludeDLL, #7
           .mvayi PreludeDLL, #>HelloWorldDList
           .mvayi PreludeDLL, #<HelloWorldDList
-
-          dex
-          bne HelloWorld
           
           ldx # 10
 FillBottomBlank:
@@ -80,19 +76,10 @@ FillBottomBlank:
           .WaitForVBlank
           ;; Set up Maria controls
           .mva BACKGRND, #CoLu(COLBLUE, $8)
-          ldy # 0
-          ldx # 8
-FillPals:
-          .mvay P0C1, #CoLu(COLYELLOW, $f)
-          .mvay P0C2, #CoLu(COLGRAY, $f)
-          .mvay P0C3, #CoLu(COLGRAY, $0)
-          iny
-          iny
-          iny
-          iny
-          dex
-          bne FillPals
-          .mva CHARBASE, #>BigFont
+          .mva P0C1, #CoLu(COLYELLOW, $f)
+          .mva P0C2, #CoLu(COLGRAY, $f)
+          .mva P0C3, #CoLu(COLGRAY, $0)
+          .mva CHARBASE, #>Font
           .mva DPPL, #<PreludeDLL
           .mva DPPH, #>PreludeDLL
           ;; Turn on the Maria
@@ -106,4 +93,5 @@ HelloWorldText:
           .enc "minifont"
           .text "hello, world." ; 13 characters
 
+          .fill 50, 0           ; XXX
           .bend

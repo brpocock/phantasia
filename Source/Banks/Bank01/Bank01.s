@@ -14,8 +14,11 @@ BankEntry:
 
           .include "PublisherPrelude.s"  ; XXX belongs in bank 6
 
+          .align $800, 0
 Font:
           .binary "Font.art.bin"
+
+          .align $800, 0
 BigFont:
           .binary "BigFont.art.bin"
 

@@ -276,6 +276,17 @@ mvayi:     .macro dest, src
           iny
           .endm
 
+mvax:     .macro dest, src
+          lda \src
+          sta \dest, x
+          .endm
+
+mvaxd:     .macro dest, src
+          lda \src
+          sta \dest, x
+          dex
+          .endm
+
 mvx:      .macro dest, src
           ldx \src
           stx \dest
@@ -311,11 +322,28 @@ between:  .macro low, high
 ;;; 
 ;;; 7800-specific stuff here
 
-;;; Functions useful for making slightly more readable bit-banging
+;;; Combine palette and (inverted) width values
 DLPalWidth:         .function palette, width
           .endf ((palette << 5) | ($1f ^ ($1f & (width - 1))))
-DLMode:   .function wmode, indirect
-          .endf ((wmode << 7) | (indirect << 5))
+
+;;; Create an extended header with the specific write mode and indirect mode bits
+DLExtMode:   .function wmodep, indirectp
+          .endf ((wmodep ? $80 : 0) | $40 | (indirectp ? $20 : 0))
+
+DLHeader: .macro address, palette, width, xpos
+          ;; address, palette/width, address, xpos
+          .byte <\address, DLPalWidth(\palette, \width), >\address, \xpos
+          .endm
+
+DLExtHeader:       .macro address, palette, width, xpos, wmodep, indirectp
+          ;; address, write mode/indirect, address
+          .byte <\address, DLExtMode(\wmodep, \indirectp), >\address
+          ;; palette/width, xpos
+          .byte DLPalWidth(\palette, \width), \xpos
+          .endm
+          
+;;; Combine base color and luminance. By using COL* constants these should
+;;; translate OK to PAL colors as well.
 CoLu:     .function color, lum
           .endf (color | lum)
 
@@ -334,3 +362,4 @@ Wait1:
           bpl Wait1
           .bend
           .endm
+
