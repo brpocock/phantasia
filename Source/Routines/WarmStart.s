@@ -12,7 +12,7 @@ WarmStart:	.block
           sty AUDV1
 
           .mvx s, #$ff          ; smash stack, if any
-          .mva GameMode, #ModePublisherPrelude
+          .mva GameMode, #ModeTitleScreen
 
           .BankSwitch #1
           jmp $8000

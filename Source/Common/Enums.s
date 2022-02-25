@@ -3,3 +3,5 @@
 
 
           ModePublisherPrelude = $10
+          ModeAuthorPrelude = $11
+          ModeTitleScreen = $12

@@ -351,6 +351,17 @@ DLExtHeader:       .macro address, palette, width, xpos, wmodep, indirectp
           .byte DLPalWidth(\palette, \width), \xpos
           .endm
 
+DLStringHeader:    .macro address, palette, xpos
+          ;; header for string
+          .byte <\address+1, DLExtMode(false, true), >\address+1
+          ;; palette/width, xpos
+          .byte DLPalWidth(\palette, (\address[0])), \xpos
+          .endm
+
+DLEnd:    .macro
+          .word 0            ; end of drawing list
+          .endm
+
 ;;; Combine base color and luminance. By using COL* constants these should
 ;;; translate OK to PAL colors as well.
 CoLu:     .function color, lum

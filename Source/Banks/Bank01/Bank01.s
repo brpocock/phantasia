@@ -9,10 +9,14 @@ BankEntry:
           lda GameMode
           cmp #ModePublisherPrelude
           beq PublisherPrelude
-          
+          cmp #ModeTitleScreen
+          beq TitleScreen
+
           brk
 
           .include "PublisherPrelude.s"  ; XXX belongs in bank 6
+          .include "AuthorPrelude.s"  ; XXX belongs in bank 6
+          .include "TitleScreen.s"  ; XXX belongs in bank 6
 
           .align $800, 0
 Font:
