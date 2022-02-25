@@ -16,7 +16,7 @@ BankEntry:
 
           .align $800, 0
 Font:
-          .binary "Font.art.bin"
+          .binary "UI.art.bin"
 
           .align $800, 0
 BigFont:
