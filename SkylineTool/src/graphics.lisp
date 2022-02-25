@@ -1010,7 +1010,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                      (aref indices 3))
                     bytes)))
           (push bytes bytes-lists))))
-    bytes-lists))
+    (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :160b)) pixels &key width height palette)
   (assert (= 12 (length palette)))
@@ -1050,7 +1050,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                 (ash (truthy (logand b #x4)) 0))
                         bytes)))))
           (push bytes bytes-lists))))
-    bytes-lists))
+    (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :320a)) pixels &key width height palette)
   (declare (ignore palette))
@@ -1081,7 +1081,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                     '(7 6 5 4 3 2 1 0)))
                     bytes)))
           (push bytes bytes-lists))))
-    bytes-lists))
+    (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :320b)) png &key width height palette)
   (error "unimplemented mode ~A" mode))
