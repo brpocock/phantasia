@@ -21,5 +21,45 @@
             PUBLISHER=false
           .endweak
 
+
+	.enc "minifont"
+	.cdef "09", 0
+	.cdef "az", $0a
+	.cdef "AZ", $0a
+	.cdef "  ", $24
+	.cdef ",,", $25
+	.cdef "..", $26
+	.cdef "??", $27
+	.cdef "!!", $28
+	.cdef "//", $29
+	.cdef "&&", $2a
+	.cdef "++", $2b
+	.cdef "--", $2c
+	.cdef "××", $2d
+	.cdef "÷÷", $2e
+	.cdef "==", $2f
+	.cdef "““", $30
+	.cdef "””", $31
+	.cdef "’’", $32
+	.cdef "''", $32
+	.cdef "::", $33
+	.cdef ";;", $34
+          .cdef "……", $35       ; actually only the first two dots, follow with a .
+          ;; …
+	.cdef "©©", $3a
+	.cdef "••", $3b
+	.cdef "↑↑", $3c
+	.cdef "↓↓", $3d
+	.cdef "←←", $3e
+	.cdef "→→", $3f
+          .enc "Unicode"
+
+Pack6:   .macro byteA, byteB, byteC, byteD
+          .byte ((\byteA & $3f) << 2) | ((\byteB & $30) >> 4)
+          .byte ((\byteB & $0f) << 4) | ((\byteC & $3c) >> 2)
+          .byte ((\byteC & $03) << 6) | (\byteD & $3f)
+          .endm
+
+          
           * = $8000
           .offs -$8000

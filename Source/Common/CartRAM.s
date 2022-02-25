@@ -5,6 +5,9 @@
 
           * = $4000
 
+GameMode:
+          .byte ?
+          
 SaveGameSlot:
           .byte ?
 

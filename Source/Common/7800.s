@@ -1,5 +1,3 @@
- ; Provided under the CC0 license. See the included LICENSE.txt for details.
-
 ; 7800.h
 ; Version 1.0, 2019/12/13
 
@@ -156,7 +154,6 @@ PSKCTL   = $F    ; Serial Port control
           DLLDLI = $80
           DLLHoley16 = $40      ; treat odd 2kiB blocks as zeroes
           DLLHoley8 = $20       ; tread odd 4kiB blocks as zeroes
-          DLLOffsetMask = $0f
 
 ;;; MARIA CTRL port
 
@@ -169,3 +166,50 @@ PSKCTL   = $F    ; Serial Port control
           CTRLRead160AB = $00
           CTRLRead320BD = $02
           CTRLRead320AC = $03
+
+;;; TV Standards
+
+          NTSC = $be
+          PAL = $ef
+          
+;;; Color Constants
+
+          .switch TV
+          .case NTSC
+          COLGREY = 0
+          COLYELLOW = $10
+          COLBROWN = $20
+          COLORANGE = $30
+          COLRED = $40
+          COLMAGENTA = $50
+          COLPURPLE = $60
+          COLINDIGO = $70
+          COLBLUE = $80
+          COLTURQUOISE = $90
+          COLCYAN = $a0
+          COLTEAL = $b0
+          COLSEAFOAM = $c0
+          COLGREEN = $d0
+          COLSPRINGGREEN = $e0
+          COLGOLD = $f0
+          
+          .case PAL
+          COLGREY = 0
+          COLGOLD = $20
+          COLSPRINGGREEN = $30
+          COLORANGE = $40
+          COLGREEN = $50
+          COLRED = $60
+          COLTEAL = $70
+          COLMAGENTA = $80
+          COLCYAN = $90
+          COLPURPLE = $a0
+          COLTURQUOISE = $b0
+          COLINDIGO = $c0
+          COLBLUE = $d0
+          ;; not actually available on PAL:
+          COLYELLOW = COLGOLD
+          COLSEAFOAM = COLSPRINGGREEN
+          COLBROWN = COLORANGE
+
+          .endswitch

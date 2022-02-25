@@ -3,8 +3,17 @@
 
 WarmStart:	.block
 
-          
-          brk
-          rts
+          ldy # 0
+          sty AUDC0
+          sty AUDC1
+          sty AUDF0
+          sty AUDF1
+          sty AUDV0
+          sty AUDV1
+
+          .mvx s, #$ff          ; smash stack, if any
+          .mva GameMode, ModePublisherPrelude
+          .BankSwitch #1
+          jmp $8000
 
           .bend

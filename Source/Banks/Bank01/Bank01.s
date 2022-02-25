@@ -6,11 +6,17 @@
           .include "StartBank.s"
 
 BankEntry:
-          
+          lda GameMode
+          cmp #ModePublisherPrelude
+          beq PublisherPrelude
           
           brk
 
+          .include "PublisherPrelude.s"  ; XXX belongs in bank 6
+
+Font:
           .binary "Font.art.bin"
+BigFont:
           .binary "BigFont.art.bin"
 
           .include "EndBank.s"

@@ -20,6 +20,7 @@ JumpTable:
           jmp FarJump
 
           .include "ColdStart.s"
+          ;; falls through to
           .include "WarmStart.s"
           .include "IRQ.s"
           .include "NMI.s"

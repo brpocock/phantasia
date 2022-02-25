@@ -302,9 +302,13 @@ between:  .macro low, high
 
 ;;; Functions useful for making slightly more readable bit-banging
 DLPalWidth:         .function palette, width
-          .endf (\palette << 4) | ($0f & ~\width)
+          .endf ((palette << 4) | ($f ^ ($f & width)))
 DLMode:   .function wmode, indirect
-          .endf (\wmode << 7) | $40 | (\indirect << 5)
+          .endf ((wmode << 7) | $40 | (indirect << 5))
 CoLu:     .function color, lum
-          .endf(\color << 4) | \lum
+          .endf ((color << 4) | lum)
 
+BankSwitch:         .macro bank
+          lda \bank
+          sta $8001             ; bank switch “register”
+          .endm
