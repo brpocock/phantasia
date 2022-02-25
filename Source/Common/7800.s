@@ -153,8 +153,8 @@ PSKCTL   = $F    ; Serial Port control
 ;;; DLL Header
 
           DLLDLI = $80
-          DLLHoley16 = $40      ; treat odd 2kiB blocks as zeroes
-          DLLHoley8 = $20       ; tread odd 4kiB blocks as zeroes
+          DLLHoley16 = $40      ; treat odd 4kiB blocks as zeroes
+          DLLHoley8 = $20       ; tread odd 2kiB blocks as zeroes
 
 ;;; Set to 7800 mode
 

@@ -9,8 +9,8 @@ PublisherPrelude:	.block
           ;; XXX Build the initial display lists
           PreludeDLL = SysRAMHigh
           BlankDList = SysRAMHigh + $40
-          HelloWorldDList = SysRAMHigh + $50
-          HelloWorldString = SysRAMHigh + $60
+          TitleTextDList = SysRAMHigh + $50
+          SubtitleTextDList = SysRAMHigh + $50
 
           ;; Blank row display list is empty.
           .mva BlankDList, #0
@@ -19,29 +19,28 @@ PublisherPrelude:	.block
           ;; Hello world text display list
           ldy # 0
 
-          ;; ;; ;; Random bit of data to display
-          ;; .mvayi HelloWorldDList, #<Font
-          ;; .mvayi HelloWorldDList, #DLPalWidth(0, 10)
-          ;; .mvayi HelloWorldDList, #>Font
-          ;; .mvayi HelloWorldDList, 100 ; XXX why is this being ignored??
-          ;; Hello, World string
-          .mvayi HelloWorldDList, #<HelloWorldString
-          .mvayi HelloWorldDList, #DLExtMode(false, true)
-          .mvayi HelloWorldDList, #>HelloWorldString
-          .mvayi HelloWorldDList, #DLPalWidth(0, 13)
-          .mvayi HelloWorldDList, #16
-          ;; End of Hello World display list
-          .mvayi HelloWorldDList, #0
-          .mvay HelloWorldDList, #0
+          .mvayi TitleTextDList, #<TitleTextString+1
+          .mvayi TitleTextDList, #DLExtMode(false, true)
+          .mvayi TitleTextDList, #>TitleTextString+1
+          .DLPalDynWidth 0, TitleTextString
+          sta TitleTextDList, y
+          iny
+          .mvayi TitleTextDList, #16
 
-          ;; The actual character data for the string
-          ldx # 26
--
-          lda HelloWorldText - 1, x
-          sta HelloWorldString - 1, x
-          dex
-          bne -
+          .mvayi TitleTextDList, #0
+          .mvay TitleTextDList, #0
 
+          .mvayi SubtitleTextDList, #<SubtitleTextString+1
+          .mvayi SubtitleTextDList, #DLExtMode(false, true)
+          .mvayi SubtitleTextDList, #>SubtitleTextString+1
+          .DLPalDynWidth 0, SubtitleTextString
+          sta SubtitleTextDList, y
+          iny
+          .mvayi SubtitleTextDList, #16
+
+          .mvayi SubtitleTextDList, #0
+          .mvay SubtitleTextDList, #0
+          
           ;; Display List List
           ldy # 0
 
@@ -54,10 +53,15 @@ FillTopBlank:
           dex
           bne FillTopBlank
 
-HelloWorld:
-          .mvayi PreludeDLL, #7
-          .mvayi PreludeDLL, #>HelloWorldDList
-          .mvayi PreludeDLL, #<HelloWorldDList
+TitleText:
+          .mvayi PreludeDLL, #15 | DLLDLI | DLLHoley16
+          .mvayi PreludeDLL, #>TitleTextDList
+          .mvayi PreludeDLL, #<TitleTextDList
+          
+SubtitleText:
+          .mvayi PreludeDLL, #7 | DLLDLI | DLLHoley8
+          .mvayi PreludeDLL, #>SubtitleTextDList
+          .mvayi PreludeDLL, #<SubtitleTextDList
           
           ldx # 10
 FillBottomBlank:
@@ -75,13 +79,13 @@ FillBottomBlank:
 
           .WaitForVBlank
           ;; Set up Maria controls
-          .mva BACKGRND, #CoLu(COLBLUE, $8)
-          .mva P0C1, #CoLu(COLYELLOW, $f)
+          .mva BACKGRND, #CoLu(COLYELLOW, $f)
+          .mva P0C1, #CoLu(COLGRAY, $0)
           .mva P0C2, #CoLu(COLGRAY, $f)
           .mva P0C3, #CoLu(COLGRAY, $0)
-          .mva CHARBASE, #>Font
           .mva DPPL, #<PreludeDLL
           .mva DPPH, #>PreludeDLL
+          .mvaw NMINext, NMISwitchToBigFont
           ;; Turn on the Maria
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
 
@@ -89,9 +93,30 @@ FillBottomBlank:
 Hang:
           jmp Hang
 
-HelloWorldText:
+;;; 
+          
+NMISwitchToBigFont:
+          .mvaw NMINext, NMISwitchToFont
+          .mva BACKGRND, #CoLu(COLGREEN, $8)
+          .mva CHARBASE, #>BigFont
+          rti
+
+NMISwitchToFont:
+          .mvaw NMINext, NMISwitchToBigFont
+          .mva BACKGRND, #CoLu(COLBLUE, $8)
+          .mva CHARBASE, #>Font
+          rti
+
+;;; 
+          
           .enc "minifont"
-          .text "hello, world." ; 13 characters
+
+TitleTextString:
+          .ptext "phantasia"
+          .fill 50, 0           ; XXX
+
+SubtitleTextString:
+          .ptext "© 2022 bruce-robert pocock"
 
           .fill 50, 0           ; XXX
           .bend

@@ -3,7 +3,6 @@
 
 IRQ:      .block
 
-          brk
           rti
 
           .bend

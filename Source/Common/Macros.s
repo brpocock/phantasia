@@ -301,7 +301,7 @@ mvaw:     .macro dest, word
           lda #<\word
           sta \dest
           lda #>\word
-          sta \dest
+          sta \dest + 1
           .endm
 
 mvap:     .macro dest, source
@@ -326,6 +326,15 @@ between:  .macro low, high
 DLPalWidth:         .function palette, width
           .endf ((palette << 5) | ($1f ^ ($1f & (width - 1))))
 
+;;; Dynamic width requires this, palette must still be a constant
+DLPalDynWidth:        .macro palette, width
+          lda # 0
+          sec
+          sbc \width
+          and #$1f
+          ora #\palette
+          .endm
+
 ;;; Create an extended header with the specific write mode and indirect mode bits
 DLExtMode:   .function wmodep, indirectp
           .endf ((wmodep ? $80 : 0) | $40 | (indirectp ? $20 : 0))
@@ -341,7 +350,7 @@ DLExtHeader:       .macro address, palette, width, xpos, wmodep, indirectp
           ;; palette/width, xpos
           .byte DLPalWidth(\palette, \width), \xpos
           .endm
-          
+
 ;;; Combine base color and luminance. By using COL* constants these should
 ;;; translate OK to PAL colors as well.
 CoLu:     .function color, lum
