@@ -5,20 +5,24 @@ ColdStart:	.block
           sei
           cld
 
-          .mva INPTCTRL, #$17   ; set to 7800 mode
-          .mva CTRL, #$7f       ; disable DMA
+          .mva INPTCTRL, #INPTCTRL7800
+          .mva CTRL, #CTRLDMADisable
           ldx # 0
           stx OFFSET
           stx INPTCTRL
           dex                   ; X = $ff
           txs                   ; clear stack
 
-ZeroRAM:
+          lda #$14
+          sta CTLSWB            ; enable 7800 dual-button controllers
+          lda #0
+          sta SWCHB
 
+ZeroRAM:
 	ldx #$40
 	lda # 0
 ZeroLowMemory:
-	sta $00, x
+	sta $40, x
 	sta $100,x
 	inx
 	bne ZeroLowMemory
@@ -53,7 +57,7 @@ ZeroSysRAMHigh:
           inc Pointer + 1
           dex
           bne ZeroSysRAMHigh
-          
+
           .mva Pointer+1, $40
           txa                   ; A ← 0
           ldx #$20              ; pages to clear

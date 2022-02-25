@@ -3,87 +3,100 @@
 
 PublisherPrelude:	.block
 
+          .WaitForVBlank
           .mva CTRL, CTRLDMADisable
 
-          ;; Build the initial display lists
-
+          ;; XXX Build the initial display lists
           PreludeDLL = SysRAMHigh
-          BlankDList = SysRAMHigh + 64
-          HelloWorldDList = SysRAMHigh + 128
-          HelloWorldString = SysRAMHigh + 192
+          BlankDList = SysRAMHigh + $40
+          HelloWorldDList = SysRAMHigh + $50
+          HelloWorldString = SysRAMHigh + $60
 
+          ;; Blank row display list is empty.
           .mva BlankDList, #0
           .mva BlankDList + 1, #0
 
-          .mva HelloWorldDList, #<HelloWorldString
-          .mva HelloWorldDList + 1, #DLMode(0, 1)
-          .mva HelloWorldDList + 2, #>HelloWorldString
-          .mva HelloWorldDList + 3, #DLPalWidth(0, 13)
-          .mva HelloWorldDList + 4, #(160 - 13*16/2) ; centering
+          ;; Hello world text display list
+          ldy # 0
 
-          .mva HelloWorldDList + 5, #0
-          .mva HelloWorldDList + 6, #0
+          ;; ;; Random bit of data to display
+          .mvayi HelloWorldDList, #<Font
+          .mvayi HelloWorldDList, #DLPalWidth(0, 10)
+          .mvayi HelloWorldDList, #>Font
+          .mvayi HelloWorldDList, y
+          ;; Hello, World string
+          .mvayi HelloWorldDList, #<HelloWorldString
+          .mvayi HelloWorldDList, #DLMode(0, 1)
+          .mvayi HelloWorldDList, #>HelloWorldString
+          .mvayi HelloWorldDList, #DLPalWidth(0, 13)
+          .mvayi HelloWorldDList, #56
+          ;; End of Hello World display list
+          .mvayi HelloWorldDList, #0
+          .mvay HelloWorldDList, #0
 
+          ;; The actual character data for the string
           ldx # 13
 -
-          lda HelloWorldText, x
-          sta HelloWorldString, x
+          lda HelloWorldText - 1, x
+          sta HelloWorldString - 1, x
           dex
           bne -
 
           ;; Display List List
-          ldy # 0               ; index into the DLL
+          ldy # 0
 
-          ldx # 6               ; scan lines 16 - 112
+          ldx # 4
 FillTopBlank:
-          lda #16
-          sta PreludeDLL, y
-          iny
-          lda #>BlankDList
-          sta PreludeDLL, y
-          iny
-          lda #<BlankDList
-          sta PreludeDLL, y
-          iny
+          .mvayi PreludeDLL, #10
+          .mvayi PreludeDLL, #>BlankDList
+          .mvayi PreludeDLL, #<BlankDList
 
           dex
           bne FillTopBlank
 
+          ldx # 4
 HelloWorld:
-          lda #16
-          sta PreludeDLL, y
-          iny
-          lda #>HelloWorldDList
-          sta PreludeDLL, y
-          iny
-          lda #<HelloWorldDList
-          sta PreludeDLL, y
-          iny
+          .mvayi PreludeDLL, #7
+          .mvayi PreludeDLL, #>HelloWorldDList
+          .mvayi PreludeDLL, #<HelloWorldDList
+
+          dex
+          bne HelloWorld
           
-          ldx # 8               ; remaining zones to fill screen (and then a bit)
+          ldx # 10
 FillBottomBlank:
-          lda #16
-          sta PreludeDLL, y
-          iny
-          lda #>BlankDList
-          sta PreludeDLL, y
-          iny
-          lda #<BlankDList
-          sta PreludeDLL, y
-          iny
+          .mvayi PreludeDLL, #15
+          .mvayi PreludeDLL, #>BlankDList
+          .mvayi PreludeDLL, #<BlankDList
 
           dex
           bne FillBottomBlank
 
-          ;; Set up Maria controls
-          .mva BACKGRND, CoLu(COLBLUE, $8)
-          .mva OFFSET, #0
-          .mva CHARBASE, #>BigFont
-          .mva DPPL, #>PreludeDLL
-          .mva DPPH, #<PreludeDLL
-          ;; Turn it on
-          .mva CTRL, CTRLDMAEnable
+          .mvayi PreludeDLL, #10
+          .mvayi PreludeDLL, #>BlankDList
+          .mvayi PreludeDLL, #<BlankDList
 
+
+          .WaitForVBlank
+          ;; Set up Maria controls
+          .mva BACKGRND, #CoLu(COLBLUE, $8)
+          ldy # 0
+          ldx # 8
+FillPals:
+          .mvay P0C1, #CoLu(COLYELLOW, $f)
+          .mvay P0C2, #CoLu(COLGRAY, $f)
+          .mvay P0C3, #CoLu(COLGRAY, $0)
+          iny
+          iny
+          iny
+          iny
+          dex
+          bne FillPals
+          .mva CHARBASE, #>BigFont
+          .mva DPPL, #<PreludeDLL
+          .mva DPPH, #>PreludeDLL
+          ;; Turn on the Maria
+          .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
 
           ;; XXX Hang
 Hang:
@@ -91,6 +104,6 @@ Hang:
 
 HelloWorldText:
           .enc "minifont"
-          .text "hello, world."
-          
+          .text "hello, world." ; 13 characters
+
           .bend

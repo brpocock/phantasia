@@ -4,6 +4,7 @@
 NMI:      .block
 
           jsr NMINextV
+Return:
           rti
 
 NMINextV:

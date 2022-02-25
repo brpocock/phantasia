@@ -265,6 +265,17 @@ mva:      .macro dest, src
           sta \dest
           .endm
 
+mvay:     .macro dest, src
+          lda \src
+          sta \dest, y
+          .endm
+
+mvayi:     .macro dest, src
+          lda \src
+          sta \dest, y
+          iny
+          .endm
+
 mvx:      .macro dest, src
           ldx \src
           stx \dest
@@ -302,13 +313,24 @@ between:  .macro low, high
 
 ;;; Functions useful for making slightly more readable bit-banging
 DLPalWidth:         .function palette, width
-          .endf ((palette << 4) | ($f ^ ($f & width)))
+          .endf ((palette << 5) | ($1f ^ ($1f & width)))
 DLMode:   .function wmode, indirect
-          .endf ((wmode << 7) | $40 | (indirect << 5))
+          .endf ((wmode << 7) | (indirect << 5))
 CoLu:     .function color, lum
-          .endf ((color << 4) | lum)
+          .endf (color | lum)
 
 BankSwitch:         .macro bank
           lda \bank
           sta $8001             ; bank switch “register”
+          .endm
+
+WaitForVBlank:      .macro
+          .block
+Wait0:
+          bit MSTAT
+          bmi Wait0
+Wait1:
+          bit MSTAT
+          bpl Wait1
+          .bend
           .endm

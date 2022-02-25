@@ -52,6 +52,38 @@
 	.cdef "↓↓", $3d
 	.cdef "←←", $3e
 	.cdef "→→", $3f
+
+	.enc "bigfont"
+	.cdef "09", 0
+	.cdef "az", $0a * 2
+	.cdef "AZ", $0a * 2
+	.cdef "  ", $24 * 2
+	.cdef ",,", $25 * 2
+	.cdef "..", $26 * 2
+	.cdef "??", $27 * 2
+	.cdef "!!", $28 * 2
+	.cdef "//", $29 * 2
+	.cdef "&&", $2a * 2
+	.cdef "++", $2b * 2
+	.cdef "--", $2c * 2
+	.cdef "××", $2d * 2
+	.cdef "÷÷", $2e * 2
+	.cdef "==", $2f * 2
+	.cdef "““", $30 * 2
+	.cdef "””", $31 * 2
+	.cdef "’’", $32 * 2
+	.cdef "''", $32 * 2
+	.cdef "::", $33 * 2
+	.cdef ";;", $34 * 2
+          .cdef "……", $35 * 2       ; actually only the first two dots, follow with a .
+          ;; …
+	.cdef "©©", $3a * 2
+	.cdef "••", $3b * 2
+	.cdef "↑↑", $3c * 2
+	.cdef "↓↓", $3d * 2
+	.cdef "←←", $3e * 2
+	.cdef "→→", $3f * 2
+
           .enc "Unicode"
 
 Pack6:   .macro byteA, byteB, byteC, byteD

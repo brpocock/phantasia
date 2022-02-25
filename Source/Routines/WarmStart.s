@@ -12,7 +12,10 @@ WarmStart:	.block
           sty AUDV1
 
           .mvx s, #$ff          ; smash stack, if any
-          .mva GameMode, ModePublisherPrelude
+          .mva GameMode, #ModePublisherPrelude
+
+          .mvaw NMINext, NMI.Return
+           
           .BankSwitch #1
           jmp $8000
 

@@ -52,13 +52,13 @@ INPT3    = $0B     ;Paddle Control Input 3                       read-only
 
 ; ** some common alternate names for INPT0/1/2/3
 INPT4B   = $08     ;Joystick 0 Fire 1                            read-only
-INPT4A   = $09     ;Joystick 0 Fire 1                            read-only
-INPT5B   = $0A     ;Joystick 1 Fire 0                            read-only
-INPT5A   = $0B     ;Joystick 1 Fire 1                            read-only
+INPT4A   = $09     ;Joystick 0 Fire 0                            read-only
+INPT5B   = $0A     ;Joystick 1 Fire 1                            read-only
+INPT5A   = $0B     ;Joystick 1 Fire 0                            read-only
 INPT4R   = $08     ;Joystick 0 Fire 1                            read-only
-INPT4L   = $09     ;Joystick 0 Fire 1                            read-only
-INPT5R   = $0A     ;Joystick 1 Fire 0                            read-only
-INPT5L   = $0B     ;Joystick 1 Fire 1                            read-only
+INPT4L   = $09     ;Joystick 0 Fire 0                            read-only
+INPT5R   = $0A     ;Joystick 1 Fire 1                            read-only
+INPT5L   = $0B     ;Joystick 1 Fire 0                            read-only
 
 INPT4    = $0C     ;Player 0 Fire Button Input                   read-only
 INPT5    = $0D     ;Player 1 Fire Button Input                   read-only
@@ -84,7 +84,8 @@ MSTAT    = $28     ;Maria Status                                 read-only
 P2C1     = $29     ;Palette 2 - Color 1                          write-only
 P2C2     = $2A     ;Palette 2 - Color 2                          write-only
 P2C3     = $2B     ;Palette 2 - Color 3                          write-only
-DPPH     = $2C     ;Display List List Pointer High               write-only
+          DPPH     = $2C     ;Display List List Pointer High               write-only
+          
 P3C1     = $2D     ;Palette 3 - Color 1                          write-only
 P3C2     = $2E     ;Palette 3 - Color 2                          write-only
 P3C3     = $2F     ;Palette 3 - Color 3                          write-only
@@ -155,6 +156,10 @@ PSKCTL   = $F    ; Serial Port control
           DLLHoley16 = $40      ; treat odd 2kiB blocks as zeroes
           DLLHoley8 = $20       ; tread odd 4kiB blocks as zeroes
 
+;;; Set to 7800 mode
+
+          INPTCTRL7800 = $17
+          
 ;;; MARIA CTRL port
 
           CTRLBW = $80          ; kill color
@@ -213,3 +218,5 @@ PSKCTL   = $F    ; Serial Port control
           COLBROWN = COLORANGE
 
           .endswitch
+
+          COLGRAY = COLGREY
