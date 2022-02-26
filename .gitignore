@@ -18,3 +18,4 @@ bin/buildapp
 
 cfg
 *.log
+snap/
