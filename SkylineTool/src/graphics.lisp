@@ -1083,8 +1083,36 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
           (push bytes bytes-lists))))
     (reverse bytes-lists)))
 
-(defmethod parse-7800-object ((mode (eql :320b)) png &key width height palette)
-  (error "unimplemented mode ~A" mode))
+(defmethod parse-7800-object ((mode (eql :320b)) pixels &key width height palette)
+  (assert (= 3 (length palette)))
+  (let ((total-width (array-dimension pixels 0))
+        (total-height (1- (array-dimension pixels 1))))
+    (assert (zerop (mod total-height height)) (total-height)
+            "Image height must be modulo ~:Dpx plus 1px for palette strip, but got ~:Dpx"
+            height (1+ total-height))
+    (assert (zerop (mod total-width width)) (total-width)
+            "Image width must be module ~:Dpx, but get ~:Dpx" width total-width)
+    (assert (zerop (mod width 4)) (width)
+            "Width for mode 320B must be modulo 4px, not ~:Dpx" width))
+  (let* ((byte-width (/ width 4))
+         (images (extract-regions pixels width height))
+         (bytes-lists (list)))
+    (dolist (image images)
+      (dotimes (b byte-width)
+        (let ((bytes (list)))
+          (dotimes (y height)
+            (let* ((byte-pixels (extract-region image
+                                                (* b 4) y
+                                                (1- (* (1+ b) 4)) y))
+                   (indices (pixels-into-palette byte-pixels palette)))
+              (push (logior
+                     (ash (aref indices 0) 6)
+                     (ash (aref indices 1) 4)
+                     (ash (aref indices 2) 2)
+                     (aref indices 3))
+                    bytes)))
+          (push bytes bytes-lists))))
+    (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :320c)) png &key width height palette)
   (error "unimplemented mode ~A" mode))

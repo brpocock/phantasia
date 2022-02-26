@@ -91,6 +91,7 @@ for my $tv (qw(NTSC PAL)) {
           $orig_path =~ s(Generated/Common) (Common);
           $orig_path =~ s(Generated/Bank) (Banks/Bank);
           $orig_path =~ s(\.s$) ();
+          $orig_path =~ s(\.bin$) ();
           if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt") {
             unless ($seen{ $path }) {
               ++$seen{ $path };
@@ -128,7 +129,7 @@ for my $tv (qw(NTSC PAL)) {
           while (my $line = <$art>) {
             next if $line =~ /^\s*$/;
             next if $line =~ /^\s*#/;
-            die unless $line =~ /\s*(.+?)\s+/;
+            die unless $line =~ /^\s*(.+?)\s+/;
             my $file = $1;
             print "\\\n\t\t$bankdir/$file";
           }
@@ -140,7 +141,7 @@ for my $tv (qw(NTSC PAL)) {
           push @files => $path;
           open my $text, '<', $path;
           while (my $line = <$text>) {
-            if ($line =~ /\.include "(.+).s"/) {
+            if ($line =~ /\.include "(.+)\.s"/) {
               my $dep = $1;
               if ($bank ne 'Common') {
                 push @todo => "$bankdir/$dep.s";
@@ -149,7 +150,7 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
-            } elsif ($line =~ /\.binary "(.+).bin"/) {
+            } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
               if ($bank ne 'Common') {
                 push @todo => "$bankdir/$dep";

@@ -21,7 +21,6 @@
             PUBLISHER=false
           .endweak
 
-
 	.enc "minifont"
 	.cdef "09", 0
 	.cdef "az", $0a

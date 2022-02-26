@@ -17,3 +17,4 @@
           JBreak = $c00c
           JFarCall = $c00f
           JFarJump = $c012
+          JFrameService = $c015

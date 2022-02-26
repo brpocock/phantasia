@@ -14,7 +14,7 @@ WarmStart:	.block
           .mvx s, #$ff          ; smash stack, if any
           .mva GameMode, #ModeTitleScreen
 
-          .BankSwitch #1
+          .BankSwitch # 6
           jmp $8000
 
           .bend

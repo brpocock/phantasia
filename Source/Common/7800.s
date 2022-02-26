@@ -220,3 +220,9 @@ PSKCTL   = $F    ; Serial Port control
           .endswitch
 
           COLGRAY = COLGREY
+
+          .if NTSC == TV
+            FramesPerSecond=60
+          .else
+            FramesPerSecond=50
+          .fi

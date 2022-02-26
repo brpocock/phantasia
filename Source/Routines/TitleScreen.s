@@ -62,7 +62,6 @@ FillBottomBlank:
           .mvayi PreludeDLL, # 15
           .mvayi PreludeDLL, #>BlankDL
           .mvayi PreludeDLL, #<BlankDL
-
 ;;; 
           .WaitForVBlank
           ;; Set up Maria controls
@@ -79,16 +78,35 @@ FillBottomBlank:
           ;; Turn on the Maria
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
 
-          ldx # 60
-Wait:
+          .mvaw AlarmV, ShowPressRightButton
+          .mva AlarmSeconds, # 5
+          .mva AlarmEnabledP, #$80
+Loop:
           .WaitForVBlank
-          dex
-          bne Wait
+          jsr JFrameService
+          jmp Loop
 
+ShowPressRightButton:
           ldy # 3 * 15
           .mvayi PreludeDLL, # 7
           .mvayi PreludeDLL, #>PressRightButtonDL
           .mvayi PreludeDLL, #<PressRightButtonDL
+
+          .mvaw AlarmV, HidePressRightButton
+          .mva AlarmSeconds, # 3
+          .mva AlarmEnabledP, #$80
+          rts
+
+HidePressRightButton:
+          ldy # 3 * 15
+          .mvayi PreludeDLL, # 7
+          .mvayi PreludeDLL, #>BlankDL
+          .mvayi PreludeDLL, #<BlankDL
+
+          .mvaw AlarmV, ShowPressRightButton
+          .mva AlarmSeconds, # 3
+          .mva AlarmEnabledP, #$80
+          rts
 
 Hang:
           jmp Hang
@@ -115,23 +133,25 @@ BuildTextString:      .ptext format("build %s", BUILD)
 CopyrightTextString:  .ptext "© 2022 bruce-robert pocock"
 PressRightButtonString: .ptext "press right button to begin"
 ;;; 
-BlankDL:
-          .DLEnd
 TitleTextDL:
           .DLStringHeader TitleTextString, 0, 32
+BlankDL:
           .DLEnd
+
 SubtitleTextDL:
           .DLStringHeader SubtitleTextString, 1, 32
           .DLEnd
+
 CopyrightTextDL:
           .DLStringHeader CopyrightTextString, 2, 52
           .DLEnd
+
 BuildTextDL:
           .DLStringHeader BuildTextString, 2, 108
           .DLEnd
+
 PressRightButtonDL:
           .DLStringHeader PressRightButtonString, 1, 32
           .DLEnd
 ;;; 
-
           .bend
