@@ -3,7 +3,7 @@
 
 TitleScreen:	.block
 
-         .WaitForVBlank
+          .WaitForVBlank
           .mva CTRL, CTRLDMADisable
 
           ;; XXX Build the initial display lists
@@ -84,7 +84,14 @@ FillBottomBlank:
 Loop:
           .WaitForVBlank
           jsr JFrameService
-          jmp Loop
+
+          lda NewINPT0
+          bpl Loop
+
+          lda #ModeMap
+          sta GameMode
+          ldx # 0
+          jmp JFarJump
 
 ShowPressRightButton:
           ldy # 3 * 15
@@ -116,6 +123,7 @@ NMISwitchToBigFont:
           .mva BACKGRND, #CoLu(COLGREEN, $8)
           .mva CHARBASE, #>BigFont
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC | CTRLCharWide
+RTI:
           rti
 
 NMISwitchToFont:

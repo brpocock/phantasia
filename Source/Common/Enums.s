@@ -5,3 +5,5 @@
           ModePublisherPrelude = $10
           ModeAuthorPrelude = $11
           ModeTitleScreen = $12
+
+          ModeMap = $80

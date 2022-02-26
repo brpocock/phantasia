@@ -381,5 +381,5 @@ Wait1:
           bit MSTAT
           bpl Wait1
           .bend
-          .endm
 
+          .endm

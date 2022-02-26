@@ -3,6 +3,10 @@
 
 NMI:      .block
 
+          lda NMINext
+          beq +
           jmp (NMINext)
++
+          rti
 
           .bend

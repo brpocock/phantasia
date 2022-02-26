@@ -107,28 +107,45 @@ SWCHBHeld:
           sta HeldSWCHB
 DoneSWCHB:
 
-          ldx # 4
-Button:
-          lda INPT0 - 1, x
-          cmp DebounceINPT0 - 1, x
-          beq ButtonHeld
+ReadINPT0:
+          lda INPT0 
           and #$80
+          cmp DebounceINPT0 
+          beq INPT0Held
           ora #$01
-          sta NewINPT0 - 1, x
-          jmp DoneButton
+          sta NewINPT0 
+          jmp DoneINPT0
 
-ButtonHeld:
+INPT0Held:
           lda # 0
-          sta NewINPT0 - 1, x
-          inc HeldINPT0 - 1, x
-          lda HeldINPT0 - 1, x
+          sta NewINPT0 
+          inc HeldINPT0 
+          lda HeldINPT0 
           cmp #FramesPerSecond
-          blt DoneButton
+          blt DoneINPT0
           lda #FramesPerSecond
-          sta HeldINPT0 - 1, x
-DoneButton:
-          dex
-          bne Button
+          sta HeldINPT0 
+DoneINPT0:
+
+ReadINPT1:
+          lda INPT1 
+          and #$80
+          cmp DebounceINPT1 
+          beq INPT1Held
+          ora #$01
+          sta NewINPT1 
+          jmp DoneINPT1
+
+INPT1Held:
+          lda # 0
+          sta NewINPT1 
+          inc HeldINPT1 
+          lda HeldINPT1 
+          cmp #FramesPerSecond
+          blt DoneINPT1
+          lda #FramesPerSecond
+          sta HeldINPT1 
+DoneINPT1:
 
           rts
 
