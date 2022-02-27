@@ -3,7 +3,7 @@
 
 FarJump:      .block
 
-          brk
-          rts
+          stx $8001
+          jmp $8000
 
           .bend
