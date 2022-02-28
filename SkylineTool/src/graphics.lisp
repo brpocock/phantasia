@@ -977,12 +977,12 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
          (output (make-array (list width) :element-type '(unsigned-byte 8))))
     (dotimes (x width)
       (let ((index (position (aref pixels x 0) palette)))
-        (assert index (index) "Color value not found in palette, error")
+        (assert index (index) "Color value ~x not found in palette, error" (aref pixels x 0))
         (setf (aref output x) index)))
     output))
 
 (defmethod parse-7800-object ((mode (eql :160a)) pixels &key width height palette)
-  (assert (= 3 (length palette)))
+  (assert (>= 4 (length palette)))
   (let ((total-width (array-dimension pixels 0))
         (total-height (1- (array-dimension pixels 1))))
     (assert (zerop (mod total-height height)) (total-height)
@@ -1013,7 +1013,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
     (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :160b)) pixels &key width height palette)
-  (assert (= 12 (length palette)))
+  (assert (>= 13 (length palette)))
   (let ((total-width (array-dimension pixels 0))
         (total-height (1- (array-dimension pixels 1))))
     (assert (zerop (mod total-height height)) (total-height)
@@ -1056,9 +1056,9 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
   (declare (ignore palette))
   (let ((total-width (array-dimension pixels 0))
         (total-height (array-dimension pixels 1)))
-    (assert (zerop (mod total-height height)) (total-height)
-            "Image height must be modulo ~:Dpx, but got ~:Dpx"
-            height (1+ total-height))
+    (unless (zerop (mod total-height height)) 
+      (warn "Image height must be modulo ~:Dpx, but got ~:Dpx"
+            height (1+ total-height)))
     (assert (zerop (mod total-width width)) (total-width)
             "Image width must be module ~:Dpx, but get ~:Dpx" width total-width)
     (assert (zerop (mod width 8)) (width)
@@ -1084,7 +1084,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
     (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :320b)) pixels &key width height palette)
-  (assert (= 3 (length palette)))
+  (assert (>= 4 (length palette)))
   (let ((total-width (array-dimension pixels 0))
         (total-height (1- (array-dimension pixels 1))))
     (assert (zerop (mod total-height height)) (total-height)
@@ -1114,8 +1114,51 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
           (push bytes bytes-lists))))
     (reverse bytes-lists)))
 
-(defmethod parse-7800-object ((mode (eql :320c)) png &key width height palette)
-  (error "unimplemented mode ~A" mode))
+(defmethod parse-7800-object ((mode (eql :320c)) pixels &key width height palette)
+  (assert (>= 8 (length palette)))
+  (let ((total-width (array-dimension pixels 0))
+        (total-height (1- (array-dimension pixels 1))))
+    (assert (zerop (mod total-height height)) (total-height)
+            "Image height must be modulo ~:Dpx plus 1px for palette strip, but got ~:Dpx"
+            height (1+ total-height))
+    (assert (zerop (mod total-width width)) (total-width)
+            "Image width must be module ~:Dpx, but get ~:Dpx" width total-width)
+    (assert (zerop (mod width 4)) (width)
+            "Width for mode 320C must be modulo 4px, not ~:Dpx" width))
+  (let* ((byte-width (/ width 4))
+         (images (extract-regions pixels width height))
+         (bytes-lists (list)))
+    (dolist (image images)
+      (dotimes (b byte-width)
+        (let ((bytes (list)))
+          (dotimes (y height)
+            (let* ((byte-pixels (extract-region image
+                                                (* b 4) y
+                                                (1- (* (1+ b) 4)) y))
+                   (indices (pixels-into-palette byte-pixels palette))
+                   (px-pair-palette (mapcar (lambda (pair)
+                                              (cond
+                                                ((and (zerop (car pair))
+                                                      (zerop (cdr pair)))
+                                                 0)
+                                                ((zerop (car pair))
+                                                 (ash (logand (cdr pair) #x06) -1))
+                                                (t
+                                                 (ash (logand (car pair) #x06) -1))))
+                                            (list (cons (aref indices 0)
+                                                        (aref indices 1))
+                                                  (cons (aref indices 2)
+                                                        (aref indices 3))))))
+              (push (logior
+                     (ash (logand (aref indices 0) #x01) 7)
+                     (ash (logand (aref indices 1) #x01) 6)
+                     (ash (logand (aref indices 2) #x01) 5)
+                     (ash (logand (aref indices 3) #x01) 4)
+                     (ash (first px-pair-palette) 2)
+                     (second px-pair-palette))
+                    bytes)))
+          (push bytes bytes-lists))))
+    (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :320d)) png &key width height palette)
   (error "unimplemented mode ~A" mode))
@@ -1124,15 +1167,17 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
   (when (member mode '(:320a :320d))
     (return-from grab-7800-palette nil))
   (let* ((palette-size (ecase mode
-                         (:160a 3)
-                         (:160b 12)
-                         (:320b 3)
-                         (:320c (error "unimplemented mode 320C"))))
+                         (:160a 4)
+                         (:160b 13)
+                         (:320b 4)
+                         (:320c 8)))
          (palette-strip (extract-region png
                                         0 (1- (array-dimension png 1))
                                         palette-size (1- (array-dimension png 1)))))
-    (loop for i below palette-size
-          collect (aref palette-strip i 0))))
+    (let ((palette (loop for i below palette-size
+                         collect (aref palette-strip i 0))))
+      (format t "~&Palette detected: ~{~x~^, ~}" palette)
+      palette)))
 
 (defun parse-into-7800-bytes (art-index)
   (let ((bytes (list)))

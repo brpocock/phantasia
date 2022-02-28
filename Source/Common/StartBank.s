@@ -67,6 +67,6 @@ Pack6:   .macro byteA, byteB, byteC, byteD
           .byte ((\byteC & $03) << 6) | (\byteD & $3f)
           .endm
 
-          
+
           * = $8000
           .offs -$8000

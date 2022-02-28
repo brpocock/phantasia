@@ -92,7 +92,7 @@ Loop:
           sta GameMode
           ldx # 0
           jmp JFarJump
-
+;;; 
 ShowPressRightButton:
           ldy # 3 * 15
           .mvayi PreludeDLL, # 7
@@ -114,9 +114,6 @@ HidePressRightButton:
           .mva AlarmSeconds, # 3
           .mva AlarmEnabledP, #$80
           rts
-
-Hang:
-          jmp Hang
 ;;; 
 NMISwitchToBigFont:
           .mvaw NMINext, NMISwitchToFont

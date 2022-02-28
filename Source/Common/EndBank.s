@@ -7,3 +7,6 @@
 
           .enc "Unicode"
           .fill $c000-*, format("https://star-hope.org/games/Phantasia%cBRPocock%c%s%c", 0, 0, BUILD, 0)
+
+          * = $bfff
+          .byte $b9

@@ -16,7 +16,7 @@ BankEntry:
           DLL = SysRAMHigh
 
           ldy # 0
-          
+
           .mvayi DLL, # 11
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
@@ -67,9 +67,10 @@ MapFillDLL:
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
 
-          .mva P6C1, #CoLu(COLGRAY, $0)
-          .mva P6C2, #CoLu(COLGRAY, $c)
-          .mva P6C3, #CoLu(COLGRAY, $f)
+          .mva P0C2, #CoLu(COLGRAY, $9)
+          .mva P1C2, #CoLu(COLGRAY, $b)
+          .mva P2C2, #CoLu(COLBLUE, $c)
+          .mva P3C2, #CoLu(COLGRAY, $d)
           .WaitForVBlank
           .mva CTRL, #CTRLDMAEnable
 
@@ -77,13 +78,13 @@ Loop:
           jmp Loop
 ;;; 
 BeginTopBar:
-          stx WSYNC
-          .mva BACKGRND, #CoLu(COLYELLOW, $9)
-          .mva CTRL, #CTRLDMAEnable | CTRLRead320BD
+          .mva BACKGRND, #CoLu(COLGRAY, $0)
+          .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
           .mvaw NMINext, EndTopBar
           rti
 
 EndTopBar:
+          stx WSYNC
           stx WSYNC
           .mva BACKGRND, #CoLu(COLGREEN, $f)
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
@@ -99,33 +100,54 @@ SwitchToOverscan:
 MapFillDL:
           .DLEnd
 TopBarDL1:
-          .DLHeader DrawUI + $00, 6, 4, $00
-          ;; .DLHeader DrawUI + $02, 6, 2, $08
-          .DLHeader DrawUI + $02, 6, 4, $10
-          ;; .DLHeader DrawUI + $04, 6, 2, $18
+          .DLExtHeader DrawUI + $00, 0, 4, $04, true, false
+          .DLExtHeader DrawUI + $02, 0, 4, $0c, true, false
 BlankDL:
           .DLEnd
 TopBarDL2:
-          .DLHeader DrawUI + $10, 6, 2, $00
-          .DLHeader DrawUI + $14, 6, 2, $18
+          .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
+          .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
           .DLEnd
 TopBarDL3:
-          .DLHeader DrawUI + $10, 6, 2, $00
-          .DLHeader DrawUI + $14, 6, 2, $18
+          .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
+          .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+          .DLExtHeader Items + $2c * 2, 1, 2, $48, true, false
+          .DLExtHeader Items + $0b * 2, 1, 2, $4c, true, false
+          .DLExtHeader Items + $0b * 2, 1, 2, $50, true, false
+          .DLExtHeader Items + $0b * 2, 1, 2, $54, true, false
+          .DLExtHeader Items + $0b * 2, 1, 2, $58, true, false
+          .DLExtHeader Items + $0b * 2, 1, 2, $5c, true, false
+          .DLExtHeader Items + $0c * 2, 1, 2, $60, true, false
+          .DLExtHeader Items + $0f * 2, 1, 2, $64, true, false
+          .DLExtHeader Items + $0f * 2, 1, 2, $68, true, false
+          .DLExtHeader Items + $2f * 2, 1, 2, $6c, true, false
           .DLEnd
 TopBarDL4:
-          .DLHeader DrawUI + $20, 6, 2, $00
-          .DLHeader DrawUI + $22, 6, 2, $08
-          .DLHeader DrawUI + $22, 6, 2, $10
-          .DLHeader DrawUI + $24, 6, 2, $18
+          .DLExtHeader DrawUI + $20, 0, 4, $04, true, false
+          .DLExtHeader DrawUI + $22, 0, 4, $0c, true, false
+          .DLExtHeader Items + $3c * 2, 1, 2, $48, true, false
+          .DLExtHeader Items + $1b * 2, 1, 2, $4c, true, false
+          .DLExtHeader Items + $1b * 2, 1, 2, $50, true, false
+          .DLExtHeader Items + $1b * 2, 1, 2, $54, true, false
+          .DLExtHeader Items + $1b * 2, 1, 2, $58, true, false
+          .DLExtHeader Items + $1b * 2, 1, 2, $5c, true, false
+          .DLExtHeader Items + $1c * 2, 1, 2, $60, true, false
+          .DLExtHeader Items + $1f * 2, 1, 2, $64, true, false
+          .DLExtHeader Items + $1f * 2, 1, 2, $68, true, false
+          .DLExtHeader Items + $3f * 2, 1, 2, $6c, true, false
           .DLEnd
 ;;; 
-          .align $100
+          .align $400
 Font:
           .binary "UI.art.bin"
           DrawUI = Font + 64
 
-          .align $100
+          .align $400
+Items:
+          .binary "Items.art.bin"
+          
+          .align $400
+Tileset:
           .binary "Tileset.art.bin"
 
           .include "EndBank.s"
