@@ -103,11 +103,18 @@ TopBarDL1:
           .DLExtHeader DrawUI + $00, 0, 4, $04, true, false
           .DLExtHeader DrawUI + $02, 0, 4, $0c, true, false
 
+          .DLExtHeader DrawUI + $00, 0, 4, $10, true, false
+          .DLExtHeader DrawUI + $02, 0, 4, $18, true, false
+
 BlankDL:
           .DLEnd
+
 TopBarDL2:
           .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
           .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+
+          .DLExtHeader DrawUI + $10, 0, 2, $10, true, false
+          .DLExtHeader DrawUI + $14, 0, 2, $18, true, false
 
           .DLExtHeader Items + $00 * 2, 1, 2, $08, true, false
           .DLExtHeader Items + $01 * 2, 1, 2, $0c, true, false
@@ -116,6 +123,9 @@ TopBarDL2:
 TopBarDL3:
           .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
           .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+
+          .DLExtHeader DrawUI + $10, 0, 2, $10, true, false
+          .DLExtHeader DrawUI + $14, 0, 2, $18, true, false
 
           .DLExtHeader Items + $10 * 2, 1, 2, $08, true, false
           .DLExtHeader Items + $11 * 2, 1, 2, $0c, true, false
@@ -134,6 +144,10 @@ TopBarDL3:
 TopBarDL4:
           .DLExtHeader DrawUI + $20, 0, 4, $04, true, false
           .DLExtHeader DrawUI + $22, 0, 4, $0c, true, false
+
+          .DLExtHeader DrawUI + $20, 0, 4, $10, true, false
+          .DLExtHeader DrawUI + $22, 0, 4, $18, true, false
+
           .DLExtHeader Items + $3c * 2, 1, 2, $48, true, false
           .DLExtHeader Items + $1b * 2, 1, 2, $4c, true, false
           .DLExtHeader Items + $1b * 2, 1, 2, $50, true, false
