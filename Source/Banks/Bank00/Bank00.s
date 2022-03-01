@@ -26,19 +26,19 @@ BankEntry:
           .mvayi DLL, #<BlankDL
 
 TopBarDLL:
-          .mvayi DLL, # 7
+          .mvayi DLL, # 7 | DLLHoley8
           .mvayi DLL, #>TopBarDL1
           .mvayi DLL, #<TopBarDL1
 
-          .mvayi DLL, # 7
+          .mvayi DLL, # 7 | DLLHoley8
           .mvayi DLL, #>TopBarDL2
           .mvayi DLL, #<TopBarDL2
 
-          .mvayi DLL, # 7
+          .mvayi DLL, # 7 | DLLHoley8
           .mvayi DLL, #>TopBarDL3
           .mvayi DLL, #<TopBarDL3
 
-          .mvayi DLL, # 7
+          .mvayi DLL, # 7 | DLLHoley8
           .mvayi DLL, #>TopBarDL4
           .mvayi DLL, #<TopBarDL4
 
@@ -86,7 +86,7 @@ BeginTopBar:
 EndTopBar:
           stx WSYNC
           stx WSYNC
-          .mva BACKGRND, #CoLu(COLGREEN, $f)
+          .mva BACKGRND, #CoLu(COLGREEN, $8)
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
           .mvaw NMINext, SwitchToOverscan
           rti
@@ -102,15 +102,24 @@ MapFillDL:
 TopBarDL1:
           .DLExtHeader DrawUI + $00, 0, 4, $04, true, false
           .DLExtHeader DrawUI + $02, 0, 4, $0c, true, false
+
 BlankDL:
           .DLEnd
 TopBarDL2:
           .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
           .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+
+          .DLExtHeader Items + $00 * 2, 1, 2, $08, true, false
+          .DLExtHeader Items + $01 * 2, 1, 2, $0c, true, false
+
           .DLEnd
 TopBarDL3:
           .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
           .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+
+          .DLExtHeader Items + $10 * 2, 1, 2, $08, true, false
+          .DLExtHeader Items + $11 * 2, 1, 2, $0c, true, false
+
           .DLExtHeader Items + $2c * 2, 1, 2, $48, true, false
           .DLExtHeader Items + $0b * 2, 1, 2, $4c, true, false
           .DLExtHeader Items + $0b * 2, 1, 2, $50, true, false
@@ -137,16 +146,16 @@ TopBarDL4:
           .DLExtHeader Items + $3f * 2, 1, 2, $6c, true, false
           .DLEnd
 ;;; 
-          .align $400
+          .align $1000
 Font:
           .binary "UI.art.bin"
           DrawUI = Font + 64
 
-          .align $400
+          .align $1000
 Items:
           .binary "Items.art.bin"
           
-          .align $400
+          .align $1000
 Tileset:
           .binary "Tileset.art.bin"
 
