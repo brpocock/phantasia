@@ -344,6 +344,13 @@ DLHeader: .macro address, palette, width, xpos
           .byte <\address, DLPalWidth(\palette, \width), >\address, \xpos
           .endm
 
+DLAltHeader:        .macro address, palette, width, xpos
+          ;; address, write mode/indirect, address
+          .byte <\address, DLExtMode(true, false), >\address
+          ;; palette/width, xpos
+          .byte DLPalWidth(\palette, \width), \xpos
+          .endm
+          
 DLExtHeader:       .macro address, palette, width, xpos, wmodep, indirectp
           ;; address, write mode/indirect, address
           .byte <\address, DLExtMode(\wmodep, \indirectp), >\address

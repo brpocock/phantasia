@@ -69,8 +69,16 @@ MapFillDLL:
 
           .mva P0C2, #CoLu(COLGRAY, $9)
           .mva P1C2, #CoLu(COLGRAY, $b)
+          .mva P2C1, #CoLu(COLBLUE, $8)
           .mva P2C2, #CoLu(COLBLUE, $c)
+          .mva P2C3, #CoLu(COLBLUE, $f)
           .mva P3C2, #CoLu(COLGRAY, $d)
+
+          .mva P4C2, #CoLu(COLGRAY, $c)
+          .mva P5C2, #CoLu(COLBLUE, $4)
+          .mva P6C2, #CoLu(COLBROWN, $4)
+          .mva P7C2, #CoLu(COLORANGE, $8)
+
           .WaitForVBlank
           .mva CTRL, #CTRLDMAEnable
 
@@ -97,67 +105,75 @@ SwitchToOverscan:
           .mvaw NMINext, BeginTopBar
           rti
 ;;; 
+          .enc "minifont"
+LocationNameString: .ptext "locale name here"
+
 MapFillDL:
           .DLEnd
-TopBarDL1:
-          .DLExtHeader DrawUI + $00, 0, 4, $04, true, false
-          .DLExtHeader DrawUI + $02, 0, 4, $0c, true, false
 
-          .DLExtHeader DrawUI + $00, 0, 4, $10, true, false
-          .DLExtHeader DrawUI + $02, 0, 4, $18, true, false
+TopBarDL1:
+          .DLAltHeader DrawUI + $00, 0, 4, $04
+          .DLAltHeader DrawUI + $02, 0, 4, $0c
+
+          .DLStringHeader LocationNameString, 2, $60
+
+          .DLAltHeader DrawUI + $00, 0, 4, $18
+          .DLAltHeader DrawUI + $02, 0, 4, $20
 
 BlankDL:
           .DLEnd
 
 TopBarDL2:
-          .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
-          .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+          .DLAltHeader DrawUI + $10, 0, 2, $04
+          .DLAltHeader DrawUI + $14, 0, 2, $10
 
-          .DLExtHeader DrawUI + $10, 0, 2, $10, true, false
-          .DLExtHeader DrawUI + $14, 0, 2, $18, true, false
+          .DLAltHeader Items + $00 * 2, 4, 4, $08
 
-          .DLExtHeader Items + $00 * 2, 1, 2, $08, true, false
-          .DLExtHeader Items + $01 * 2, 1, 2, $0c, true, false
+          .DLAltHeader DrawUI + $10, 0, 2, $18
+          .DLAltHeader DrawUI + $14, 0, 2, $24
+
+          .DLAltHeader Items + $02 * 2, 4, 4, $1c
 
           .DLEnd
 TopBarDL3:
-          .DLExtHeader DrawUI + $10, 0, 2, $04, true, false
-          .DLExtHeader DrawUI + $14, 0, 2, $10, true, false
+          .DLAltHeader DrawUI + $10, 0, 2, $04
+          .DLAltHeader DrawUI + $14, 0, 2, $10
 
-          .DLExtHeader DrawUI + $10, 0, 2, $10, true, false
-          .DLExtHeader DrawUI + $14, 0, 2, $18, true, false
+          .DLAltHeader Items + $10 * 2, 4, 4, $08
 
-          .DLExtHeader Items + $10 * 2, 1, 2, $08, true, false
-          .DLExtHeader Items + $11 * 2, 1, 2, $0c, true, false
+          .DLAltHeader DrawUI + $10, 0, 2, $18
+          .DLAltHeader DrawUI + $14, 0, 2, $24
 
-          .DLExtHeader Items + $2c * 2, 1, 2, $48, true, false
-          .DLExtHeader Items + $0b * 2, 1, 2, $4c, true, false
-          .DLExtHeader Items + $0b * 2, 1, 2, $50, true, false
-          .DLExtHeader Items + $0b * 2, 1, 2, $54, true, false
-          .DLExtHeader Items + $0b * 2, 1, 2, $58, true, false
-          .DLExtHeader Items + $0b * 2, 1, 2, $5c, true, false
-          .DLExtHeader Items + $0c * 2, 1, 2, $60, true, false
-          .DLExtHeader Items + $0f * 2, 1, 2, $64, true, false
-          .DLExtHeader Items + $0f * 2, 1, 2, $68, true, false
-          .DLExtHeader Items + $2f * 2, 1, 2, $6c, true, false
+          .DLAltHeader Items + $12 * 2, 4, 4, $1c
+
+          .DLAltHeader Items + $2c * 2, 4, 2, $50
+          .DLAltHeader Items + $0b * 2, 4, 2, $54
+          .DLAltHeader Items + $0b * 2, 4, 2, $58
+          .DLAltHeader Items + $0b * 2, 4, 2, $5c
+          .DLAltHeader Items + $0b * 2, 4, 2, $60
+          .DLAltHeader Items + $0b * 2, 4, 2, $64
+          .DLAltHeader Items + $0c * 2, 4, 2, $68
+          .DLAltHeader Items + $0f * 2, 4, 2, $6c
+          .DLAltHeader Items + $0f * 2, 4, 2, $70
+          .DLAltHeader Items + $2f * 2, 4, 2, $74
           .DLEnd
 TopBarDL4:
-          .DLExtHeader DrawUI + $20, 0, 4, $04, true, false
-          .DLExtHeader DrawUI + $22, 0, 4, $0c, true, false
+          .DLAltHeader DrawUI + $20, 0, 4, $04
+          .DLAltHeader DrawUI + $22, 0, 4, $0c
 
-          .DLExtHeader DrawUI + $20, 0, 4, $10, true, false
-          .DLExtHeader DrawUI + $22, 0, 4, $18, true, false
+          .DLAltHeader DrawUI + $20, 0, 4, $18
+          .DLAltHeader DrawUI + $22, 0, 4, $20
 
-          .DLExtHeader Items + $3c * 2, 1, 2, $48, true, false
-          .DLExtHeader Items + $1b * 2, 1, 2, $4c, true, false
-          .DLExtHeader Items + $1b * 2, 1, 2, $50, true, false
-          .DLExtHeader Items + $1b * 2, 1, 2, $54, true, false
-          .DLExtHeader Items + $1b * 2, 1, 2, $58, true, false
-          .DLExtHeader Items + $1b * 2, 1, 2, $5c, true, false
-          .DLExtHeader Items + $1c * 2, 1, 2, $60, true, false
-          .DLExtHeader Items + $1f * 2, 1, 2, $64, true, false
-          .DLExtHeader Items + $1f * 2, 1, 2, $68, true, false
-          .DLExtHeader Items + $3f * 2, 1, 2, $6c, true, false
+          .DLAltHeader Items + $3c * 2, 4, 2, $50
+          .DLAltHeader Items + $1b * 2, 4, 2, $54
+          .DLAltHeader Items + $1b * 2, 4, 2, $58
+          .DLAltHeader Items + $1b * 2, 4, 2, $5c
+          .DLAltHeader Items + $1b * 2, 4, 2, $60
+          .DLAltHeader Items + $1b * 2, 4, 2, $64
+          .DLAltHeader Items + $1c * 2, 4, 2, $68
+          .DLAltHeader Items + $1f * 2, 4, 2, $6c
+          .DLAltHeader Items + $1f * 2, 4, 2, $70
+          .DLAltHeader Items + $3f * 2, 4, 2, $74
           .DLEnd
 ;;; 
           .align $1000
