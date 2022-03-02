@@ -46,7 +46,35 @@ TopBarDLL:
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
 
-          ldx # 12
+          .mvayi DLL, # 7 | DLLHoley8
+          .mvayi DLL, #>DialogueDL1
+          .mvayi DLL, #<DialogueDL1
+
+          .mvayi DLL, # 7 | DLLHoley8
+          .mvayi DLL, #>DialogueDL2
+          .mvayi DLL, #<DialogueDL2
+
+          .mvayi DLL, # 7 | DLLHoley8
+          .mvayi DLL, #>DialogueDL3
+          .mvayi DLL, #<DialogueDL3
+
+          .mvayi DLL, # 7 | DLLHoley8
+          .mvayi DLL, #>DialogueDL4
+          .mvayi DLL, #<DialogueDL4
+
+          .mvayi DLL, # 7 | DLLHoley8
+          .mvayi DLL, #>DialogueDL5
+          .mvayi DLL, #<DialogueDL5
+
+          .mvayi DLL, # 7 | DLLHoley8
+          .mvayi DLL, #>DialogueDL6
+          .mvayi DLL, #<DialogueDL6
+
+          .mvayi DLL, # 15 | DLLDLI
+          .mvayi DLL, #>MapFillDL
+          .mvayi DLL, #<MapFillDL
+
+          ldx # 8
 MapFillDLL:
           .mvayi DLL, # 15
           .mvayi DLL, #>MapFillDL
@@ -69,9 +97,7 @@ MapFillDLL:
 
           .mva P0C2, #CoLu(COLGRAY, $9)
           .mva P1C2, #CoLu(COLGRAY, $b)
-          .mva P2C1, #CoLu(COLBLUE, $8)
-          .mva P2C2, #CoLu(COLBLUE, $c)
-          .mva P2C3, #CoLu(COLBLUE, $f)
+          .mva P2C2, #CoLu(COLGRAY, $f)
           .mva P3C2, #CoLu(COLGRAY, $d)
 
           .mva P4C2, #CoLu(COLGRAY, $c)
@@ -87,15 +113,28 @@ Loop:
 ;;; 
 BeginTopBar:
           .mva BACKGRND, #CoLu(COLGRAY, $0)
+          .mva P2C2, #CoLu(COLGRAY, $f)
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
+          .mva CHARBASE, #>Font
           .mvaw NMINext, EndTopBar
           rti
 
 EndTopBar:
           stx WSYNC
           stx WSYNC
+          .mva BACKGRND, #CoLu(COLGRAY, $c)
+          .mva P2C2, #CoLu(COLGRAY, $0)
+          .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
+          .mva CHARBASE, #>Font
+          .mvaw NMINext, EndDialogue
+          rti
+
+EndDialogue:
+          stx WSYNC
+          stx WSYNC
           .mva BACKGRND, #CoLu(COLGREEN, $8)
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
+          .mva CHARBASE, #>Tileset
           .mvaw NMINext, SwitchToOverscan
           rti
 
@@ -107,6 +146,10 @@ SwitchToOverscan:
 ;;; 
           .enc "minifont"
 LocationNameString: .ptext "locale name here"
+
+Dialogue2Text:      .ptext "hello, world."
+Dialogue3Text:      .ptext "this is a test"
+Dialogue4Text:      .ptext "this is only a test"
 
 MapFillDL:
           .DLEnd
@@ -135,6 +178,7 @@ TopBarDL2:
           .DLAltHeader Items + $02 * 2, 4, 4, $1c
 
           .DLEnd
+
 TopBarDL3:
           .DLAltHeader DrawUI + $10, 0, 2, $04
           .DLAltHeader DrawUI + $14, 0, 2, $10
@@ -157,6 +201,7 @@ TopBarDL3:
           .DLAltHeader Items + $0f * 2, 4, 2, $70
           .DLAltHeader Items + $2f * 2, 4, 2, $74
           .DLEnd
+
 TopBarDL4:
           .DLAltHeader DrawUI + $20, 0, 4, $04
           .DLAltHeader DrawUI + $22, 0, 4, $0c
@@ -175,6 +220,52 @@ TopBarDL4:
           .DLAltHeader Items + $1f * 2, 4, 2, $70
           .DLAltHeader Items + $3f * 2, 4, 2, $74
           .DLEnd
+
+DialogueDL1:
+          .DLAltHeader DrawUI + $03 * 2, 0, 8, $00
+          .for x := $08, x < $9c, x := x + 12
+            .DLAltHeader DrawUI + $04 * 2, 0, 6, x
+          .next
+          .DLAltHeader DrawUI + $04 * 2, 0, 8, $9b
+
+          .DLEnd
+
+DialogueDL2:
+          .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
+          .DLStringHeader Dialogue2Text, 2, $06
+          .DLAltHeader DrawUI + $0c * 2, 0, 2, $9b
+
+          .DLEnd
+
+DialogueDL3:
+          .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
+          .DLStringHeader Dialogue3Text, 2, $06
+          .DLAltHeader DrawUI + $0c * 2, 0, 2, $9b
+
+          .DLEnd
+
+DialogueDL4:
+          .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
+          .DLStringHeader Dialogue4Text, 2, $06
+          .DLAltHeader DrawUI + $0c * 2, 0, 2, $9b
+
+          .DLEnd
+
+DialogueDL5:
+          .DLAltHeader DrawUI + $13 * 2, 0, 6, $00
+          .for x := $0c, x < $9c, x := x + 12
+            .DLAltHeader DrawUI + $14 * 2, 0, 6, x
+          .next
+          .DLAltHeader DrawUI + $1d * 2, 0, 2, $60
+          .DLAltHeader DrawUI + $17 * 2, 0, 2, $9b
+
+          .DLEnd
+
+DialogueDL6:
+          .DLAltHeader DrawUI + $1e * 2, 0, 2, $60
+
+          .DLEnd
+
 ;;; 
           .align $1000
 Font:
