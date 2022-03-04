@@ -30,9 +30,9 @@ concerto:	Dist/Phantasia.NTSC.a78 \
 		Dist/Phantasia.Demo.NTSC.a78
 	[ "$(USBMOUNT)" != "" ]
 	@if [ $$(uname -s) = 'Linux' ] ; then \
-	  mkdir $(USBMOUNT)/Phantasia ;\
-	  cp -v Dist/Phantasia.NTSC.a26 $(USBMOUNT)/Phantasia/ ;
-	  cp -v Dist/Phantasia.Demo.NTSC.a26 $(USBMOUNT)/Phantasia/ ;
+	  mkdir -p $(USBMOUNT)/Phantasia ;\
+	  cp -v Dist/Phantasia.NTSC.a78 $(USBMOUNT)/Phantasia/ ; \
+	  cp -v Dist/Phantasia.Demo.NTSC.a78 $(USBMOUNT)/Phantasia/ ; \
 	else \
 	  echo "Patch Makefile for your $$(uname -s) OS" ; \
 	fi
