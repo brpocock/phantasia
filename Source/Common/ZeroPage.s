@@ -7,6 +7,12 @@
 Temp:
           .byte ?
 
+Counter:
+          .byte ?
+
+Swap:
+          .byte ?
+
 Pointer:
           .word ?
 

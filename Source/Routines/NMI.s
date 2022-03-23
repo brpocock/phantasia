@@ -3,7 +3,7 @@
 
 NMI:      .block
 
-          lda NMINext
+          lda NMINext + 1
           beq +
           jmp (NMINext)
 +

@@ -19,6 +19,24 @@ JumpTable:
           jmp FarCall
           jmp FarJump
           jmp FrameService
+          jmp SaveRegs
+          jmp ReturnFromInterrupt
+
+SaveRegs:
+          pha
+          txa
+          pha
+          tya
+          pha
+          rts
+
+ReturnFromInterrupt:
+          pla
+          tay
+          pla
+          tax
+          pla
+          rti
 
           .include "ColdStart.s"
           ;; falls through to

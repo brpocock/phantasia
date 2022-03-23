@@ -88,8 +88,14 @@ Loop:
           lda NewINPT0
           bpl Loop
 
-          lda #ModeMap
-          sta GameMode
+          ldy # 0
+          sty NMINext + 1
+          sty NMINext
+
+          .mva GameMode, #ModeMap
+
+          ;; FIXME clear the DLL before leaving the ROM bank
+
           ldx # 0
           jmp JFarJump
 ;;; 

@@ -6,15 +6,25 @@
           .include "StartBank.s"
 
 BankEntry:
+          .mva StatsLines, $20  ; 4 × 8
+          .mva DialogueLines, $28 ; 5 × 8
 
           .mva NMINext, 0
           .WaitForVBlank
           .mva CTRL, #CTRLDMADisable
-          .mvaw NMINext, BeginTopBar
+          .mvaw NMINext, IBeginStats
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
           DLL = SysRAMHigh
+          DialogueDL = DLL + $200
 
+BuildDLL:
+          lda # 192
+          sec
+          sbc StatsLines
+          sbc DialogueLines
+          sta MapLines
+          
           ldy # 0
 
           .mvayi DLL, # 11
@@ -25,52 +35,114 @@ BankEntry:
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
 
-TopBarDLL:
+StatsDLL:
           .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>TopBarDL1
-          .mvayi DLL, #<TopBarDL1
-
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>TopBarDL2
-          .mvayi DLL, #<TopBarDL2
+          .mvayi DLL, #>StatsDL1
+          .mvayi DLL, #<StatsDL1
 
           .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>TopBarDL3
-          .mvayi DLL, #<TopBarDL3
+          .mvayi DLL, #>StatsDL2
+          .mvayi DLL, #<StatsDL2
 
           .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>TopBarDL4
-          .mvayi DLL, #<TopBarDL4
-
-          .mvayi DLL, # 0 | DLLDLI
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvayi DLL, #>StatsDL3
+          .mvayi DLL, #<StatsDL3
 
           .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL1
-          .mvayi DLL, #<DialogueDL1
+          .mvayi DLL, #>StatsDL4
+          .mvayi DLL, #<StatsDL4
+
+DialogueDLL:
+          lda StatsLines
+          cmp #$21
+          bge DoneDialogue
+
+          lda DialogueLines
+          beq DoneDialogue
+
+          sec
+          sbc #$10              ; XXX minimum height
+          bmi DoneDialogue
+
+          lsr a
+          lsr a
+          lsr a
+          sta Counter         ; lines in mid section @ 8px
+          ;; XXX no partial zones
+
+          .mvayi DLL, # 7 | DLLHoley8 | DLLDLI
+          .mvayi DLL, #>DialogueTopDL
+          .mvayi DLL, #<DialogueTopDL
+
+          sty Temp              ; DLL index
+          ldy # 0
+          .mvaw Pointer, DialogueDL ; end of DialogueDLs
+NextDialogueZone:
+          ldx # DialogueBottomDL - DialogueMidDL + 1
+CopyDialogueMidDL:
+          lda DialogueMidDL, x
+          sta (Pointer), y
+          iny
+          dex
+          bne CopyDialogueMidDL
+
+          sty Swap              ; DialogueDL index
+
+          ldy # 4               ; index of string header padding
+          lda #<Dialogue2Text + 1
+          sta DialogueDL, y
+          iny
+          lda Dialogue2Text
+          sec
+          sbc # 1
+          eor #$1f              ; encode width
+          ora #$20              ; palette 2
+          iny
+          lda #>Dialogue2Text + 1
+          sta DialogueDL, y
+
+          ldy Temp              ; DLL index
 
           .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL2
-          .mvayi DLL, #<DialogueDL2
+          .mvayi DLL, #>DialogueDL
+          .mvayi DLL, #<DialogueDL
 
+          sty Temp              ; DLL index
+          ldy Swap              ; DialogueDL index
+          tya
+          clc
+          adc Pointer           ; end of DialogueDLs
+          bcc +
+          inc Pointer + 1
++
+
+          lda Counter
+          sec
+          sbc # 8
+          sta Counter
+          beq DoneDialogueMid
+          bpl NextDialogueZone
+
+          ;; partial zone only
+          lda Temp              ; DLL index
+          sec
+          sbc # 2
+          tax
+          lda DLL, x
+          adc Counter           ; negative
+          sta DLL, x
+
+DoneDialogueMid:
           .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL3
-          .mvayi DLL, #<DialogueDL3
+          .mvayi DLL, #>DialogueBottomDL
+          .mvayi DLL, #<DialogueBottomDL
 
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL4
-          .mvayi DLL, #<DialogueDL4
+DoneDialogue:
+          lda MapLines
+          cmp #$10
+          blt DoneMap
 
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL5
-          .mvayi DLL, #<DialogueDL5
-
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL6
-          .mvayi DLL, #<DialogueDL6
-
-          .mvayi DLL, # 15 | DLLDLI
+          .mvayi DLL, # 15 | DLLHoley16 | DLLDLI
           .mvayi DLL, #>MapFillDL
           .mvayi DLL, #<MapFillDL
 
@@ -95,6 +167,30 @@ MapFillDLL:
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
 
+DoneMap:
+
+          ldx # 8 * 4
+          lda #CoLu(COLGRAY, $0)
+          sta BACKGRND
+
+ZeroPalettes:
+          sta P0C1, x
+          sta P0C2, x
+          sta P0C3, x
+
+          dex
+          dex
+          dex
+          dex
+          bpl ZeroPalettes
+
+          .WaitForVBlank
+          .mva CTRL, #CTRLDMAEnable
+
+Loop:
+          jmp Loop
+;;; 
+BeginStats:
           .mva P0C2, #CoLu(COLGRAY, $9)
           .mva P1C2, #CoLu(COLGRAY, $b)
           .mva P2C2, #CoLu(COLGRAY, $f)
@@ -105,44 +201,57 @@ MapFillDLL:
           .mva P6C2, #CoLu(COLBROWN, $4)
           .mva P7C2, #CoLu(COLORANGE, $8)
 
-          .WaitForVBlank
-          .mva CTRL, #CTRLDMAEnable
-
-Loop:
-          jmp Loop
-;;; 
-BeginTopBar:
           .mva BACKGRND, #CoLu(COLGRAY, $0)
-          .mva P2C2, #CoLu(COLGRAY, $f)
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
           .mva CHARBASE, #>Font
-          .mvaw NMINext, EndTopBar
-          rti
+          rts
 
-EndTopBar:
+IBeginStats:
+          jsr JSaveRegs
+          jsr BeginStats
+          .mvaw NMINext, IEndStats
+          jmp JReturnFromInterrupt
+
+BeginDialogue:
           stx WSYNC
           stx WSYNC
-          .mva BACKGRND, #CoLu(COLGRAY, $c)
           .mva P2C2, #CoLu(COLGRAY, $0)
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
           .mva CHARBASE, #>Font
-          .mvaw NMINext, EndDialogue
-          rti
-
-EndDialogue:
           stx WSYNC
+          .mva BACKGRND, #CoLu(COLGRAY, $c)
+          rts
+
+IEndStats:
+          jsr JSaveRegs
+          lda DialogueLines
+          beq DoBeginMap
+
+          jsr BeginDialogue
+          .mvaw NMINext, IEndDialogue
+          jmp JReturnFromInterrupt
+
+BeginMap:
           stx WSYNC
           .mva BACKGRND, #CoLu(COLGREEN, $8)
+          stx WSYNC
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
           .mva CHARBASE, #>Tileset
-          .mvaw NMINext, SwitchToOverscan
-          rti
+          rts
 
-SwitchToOverscan:
+IEndDialogue:
+          jsr JSaveRegs
+DoBeginMap:
+          jsr BeginMap
+          .mvaw NMINext, ISwitchToOverscan
+          jmp JReturnFromInterrupt
+
+ISwitchToOverscan:
+          jsr JSaveRegs
           stx WSYNC
           .mva BACKGRND, #CoLu(COLGRAY, $0)
-          .mvaw NMINext, BeginTopBar
-          rti
+          .mvaw NMINext, IBeginStats
+          jmp JReturnFromInterrupt
 ;;; 
           .enc "minifont"
 LocationNameString: .ptext "locale name here"
@@ -154,7 +263,7 @@ Dialogue4Text:      .ptext "this is only a test"
 MapFillDL:
           .DLEnd
 
-TopBarDL1:
+StatsDL1:
           .DLAltHeader DrawUI + $00, 0, 4, $04
           .DLAltHeader DrawUI + $02, 0, 4, $0c
 
@@ -166,7 +275,7 @@ TopBarDL1:
 BlankDL:
           .DLEnd
 
-TopBarDL2:
+StatsDL2:
           .DLAltHeader DrawUI + $10, 0, 2, $04
           .DLAltHeader DrawUI + $14, 0, 2, $10
 
@@ -179,7 +288,7 @@ TopBarDL2:
 
           .DLEnd
 
-TopBarDL3:
+StatsDL3:
           .DLAltHeader DrawUI + $10, 0, 2, $04
           .DLAltHeader DrawUI + $14, 0, 2, $10
 
@@ -202,7 +311,7 @@ TopBarDL3:
           .DLAltHeader Items + $2f * 2, 4, 2, $74
           .DLEnd
 
-TopBarDL4:
+StatsDL4:
           .DLAltHeader DrawUI + $20, 0, 4, $04
           .DLAltHeader DrawUI + $22, 0, 4, $0c
 
@@ -221,50 +330,35 @@ TopBarDL4:
           .DLAltHeader Items + $3f * 2, 4, 2, $74
           .DLEnd
 
-DialogueDL1:
+DialogueTopDL:
           .DLAltHeader DrawUI + $03 * 2, 0, 8, $00
-          .for x := $08, x < $9c, x := x + 12
+          .for x := $08, x < $90, x := x + 12
             .DLAltHeader DrawUI + $04 * 2, 0, 6, x
           .next
-          .DLAltHeader DrawUI + $04 * 2, 0, 8, $9b
+          .DLAltHeader DrawUI + $04 * 2, 0, 8, $90
 
           .DLEnd
 
-DialogueDL2:
+DialogueMidDL:
           .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
-          .DLStringHeader Dialogue2Text, 2, $06
-          .DLAltHeader DrawUI + $0c * 2, 0, 2, $9b
+          .fill 5, 0            ; placeholder for string header
+          .DLAltHeader DrawUI + $0f * 2, 0, 2, $9c
 
           .DLEnd
 
-DialogueDL3:
-          .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
-          .DLStringHeader Dialogue3Text, 2, $06
-          .DLAltHeader DrawUI + $0c * 2, 0, 2, $9b
-
-          .DLEnd
-
-DialogueDL4:
-          .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
-          .DLStringHeader Dialogue4Text, 2, $06
-          .DLAltHeader DrawUI + $0c * 2, 0, 2, $9b
-
-          .DLEnd
-
-DialogueDL5:
+DialogueBottomDL:
           .DLAltHeader DrawUI + $13 * 2, 0, 6, $00
-          .for x := $0c, x < $9c, x := x + 12
+          .for x := $0c, x < $60, x := x + 12
             .DLAltHeader DrawUI + $14 * 2, 0, 6, x
           .next
-          .DLAltHeader DrawUI + $1d * 2, 0, 2, $60
-          .DLAltHeader DrawUI + $17 * 2, 0, 2, $9b
+          .DLAltHeader DrawUI + $1b * 2, 0, 10, $60
+          .for x := $6a, x < $90, x := x + 12
+            .DLAltHeader DrawUI + $14 * 2, 0, 6, x
+          .next
+          .DLAltHeader DrawUI + $14 * 2, 0, 8, $90
 
           .DLEnd
 
-DialogueDL6:
-          .DLAltHeader DrawUI + $1e * 2, 0, 2, $60
-
-          .DLEnd
 
 ;;; 
           .align $1000

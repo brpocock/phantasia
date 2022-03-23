@@ -13,6 +13,8 @@ ColdStart:	.block
           dex                   ; X = $ff
           txs                   ; clear stack
 
+          ;; TODO: detect Joy2b+ / Genesis controller
+
           lda #$14
           sta CTLSWB            ; enable 7800 dual-button controllers
           lda # 0
