@@ -1,4 +1,4 @@
-;;; InitialFantasy Source/Common/Macros.s
+;;; Phantasia Source/Common/Macros.s
 ;;; Copyright © 2016,2017,2020-2022 Bruce-Robert Pocock (brpocock@star-hope.org)
 ;;;
 ;;;
@@ -99,9 +99,7 @@ SleepLoop:
 
           .bend
           .endm
-
 ;;; 
-
 Push16 .macro address
           lda \address +1
           pha
@@ -129,9 +127,7 @@ Set16 .macro target, value
           lda #>(\value)
           sta \target + 1
           .endm         
-
 ;;; 
-
 Locale .macro ThisLang, string
           .if \ThisLang == LANG
           .MiniText \string

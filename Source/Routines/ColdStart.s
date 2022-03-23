@@ -15,7 +15,7 @@ ColdStart:	.block
 
           lda #$14
           sta CTLSWB            ; enable 7800 dual-button controllers
-          lda #0
+          lda # 0
           sta SWCHB
 
 ZeroRAM:
