@@ -1171,9 +1171,10 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                          (:160b 13)
                          (:320b 4)
                          (:320c 8)))
+         (last-row (1- (array-dimension png 1)))
          (palette-strip (extract-region png
-                                        0 (1- (array-dimension png 1))
-                                        palette-size (1- (array-dimension png 1)))))
+                                        0 last-row
+                                        palette-size last-row)))
     (let ((palette (loop for i below palette-size
                          collect (aref palette-strip i 0))))
       (format t "~&Palette detected: ~{~x~^, ~}" palette)
