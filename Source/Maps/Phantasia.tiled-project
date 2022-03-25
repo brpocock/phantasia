@@ -2,11 +2,9 @@
     "automappingRulesFile": "",
     "commands": [
     ],
-    "extensionsPath": "extensions",
+    "extensionsPath": ".",
     "folders": [
         "."
     ],
-    "objectTypesFile": "",
-    "propertyTypes": [
-    ]
+    "objectTypesFile": ""
 }
