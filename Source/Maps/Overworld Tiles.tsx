@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="Overworld Tiles" tilewidth="8" tileheight="16" tilecount="128" columns="16">
+<tileset version="1.5" tiledversion="1.7.2" name="Overworld Tiles" tilewidth="8" tileheight="16" tilecount="128" columns="16">
  <image source="OverworldTiles.png" width="128" height="129"/>
  <tile id="2">
   <objectgroup draworder="index" id="2">
@@ -115,6 +115,16 @@
  <tile id="97">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="5.65705" height="13.657"/>
+  </objectgroup>
+ </tile>
+ <tile id="114">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="115">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
  </tile>
  <wangsets>

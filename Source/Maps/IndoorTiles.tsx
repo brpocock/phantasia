@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="Indoor Tiles" tilewidth="8" tileheight="16" tilecount="128" columns="16">
+<tileset version="1.5" tiledversion="1.7.2" name="Indoor Tiles" tilewidth="8" tileheight="16" tilecount="128" columns="16">
  <image source="IndoorTiles.png" width="128" height="129"/>
  <tile id="0">
   <objectgroup draworder="index" id="2">
@@ -26,6 +26,24 @@
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
  </tile>
+ <tile id="10">
+  <animation>
+   <frame tileid="10" duration="667"/>
+   <frame tileid="13" duration="667"/>
+  </animation>
+ </tile>
+ <tile id="11">
+  <animation>
+   <frame tileid="11" duration="667"/>
+   <frame tileid="14" duration="667"/>
+  </animation>
+ </tile>
+ <tile id="12">
+  <animation>
+   <frame tileid="12" duration="667"/>
+   <frame tileid="15" duration="667"/>
+  </animation>
+ </tile>
  <tile id="16">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
@@ -45,6 +63,18 @@
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
+ </tile>
+ <tile id="26">
+  <animation>
+   <frame tileid="26" duration="667"/>
+   <frame tileid="29" duration="667"/>
+  </animation>
+ </tile>
+ <tile id="28">
+  <animation>
+   <frame tileid="28" duration="667"/>
+   <frame tileid="31" duration="667"/>
+  </animation>
  </tile>
  <tile id="32">
   <objectgroup draworder="index" id="2">
@@ -67,6 +97,24 @@
   </objectgroup>
  </tile>
  <tile id="36" probability="0.1"/>
+ <tile id="42">
+  <animation>
+   <frame tileid="42" duration="667"/>
+   <frame tileid="45" duration="667"/>
+  </animation>
+ </tile>
+ <tile id="43">
+  <animation>
+   <frame tileid="43" duration="667"/>
+   <frame tileid="46" duration="667"/>
+  </animation>
+ </tile>
+ <tile id="44">
+  <animation>
+   <frame tileid="44" duration="667"/>
+   <frame tileid="47" duration="667"/>
+  </animation>
+ </tile>
  <tile id="48">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
