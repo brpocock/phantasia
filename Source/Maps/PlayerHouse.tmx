@@ -23,7 +23,7 @@
   <object id="2" name="Bed" gid="131" x="8" y="32" width="8" height="16"/>
   <object id="3" name="Fireplace" gid="132" x="40" y="16" width="8" height="16"/>
   <object id="4" name="Chair" gid="107" x="56" y="64" width="8" height="16"/>
-  <object id="7" x="36" y="120">
+  <object id="7" name="Door" x="36" y="120">
    <properties>
     <property name="Entrance" value="Door"/>
     <property name="Exit" value="Atsirav/PlayerHouse"/>

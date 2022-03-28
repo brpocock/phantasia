@@ -176,6 +176,7 @@
                     :initform (make-array (list 128 6) :element-type '(unsigned-byte 8)))))
 
 (defun load-tileset-image (pathname)
+  (format *trace-output* "~&Loading tileset image from ~a" pathname)
   (let* ((png (png-read:read-png-file (make-pathname 
                                        :name (subseq pathname 0
                                                      (position #\. pathname :from-end t))
@@ -190,8 +191,16 @@
                   α)))
 
 (defun extract-8×16-tiles (image)
-  
-  )
+  (let ((output (list)))
+    (dotimes (row (/ (1- (array-dimension image 1)) 16))
+      (dotimes (column (/ (array-dimension image 0) 8))
+        (let ((tile (extract-region image (* column 8) (* row 16) (+ (* column 8) 7) (+ (* row 16) 15))))
+          (assert (= 8 (array-dimension tile 0)))
+          (assert (= 16 (array-dimension tile 1)))
+          (push tile output))))
+    (format *trace-output* "… found ~d tile~:p in ~d×~d image" 
+            (length output) (array-dimension image 0) (array-dimension image 1))
+    output))
 
 (defun extract-palettes (image)
   (let* ((last-row (1- (array-dimension image 1)))
@@ -204,23 +213,34 @@
     palettes))
 
 (defun tile-fits-palette-p (tile palette)
-  (dotimes (y 16)
-    (dotimes (x 8)
-      (unless (member (aref tile x y) palette :test #'rgb=)
-        (return-from tile-fits-palette-p nil))))
-  t)
+  (every (lambda (c) (member c palette))
+         (remove-duplicates (loop for y below 16 
+                                  append
+                                  (loop for x below 8
+                                        collect (aref tile x y)))
+                            :test #'=)))
+
+(defun 2a-to-list (2a)
+  (loop for row from 0 below (array-dimension 2a 0)
+        collecting (loop 
+                     with output = (make-array (list (array-dimension 2a 1)))
+                     for column from 0 below (array-dimension 2a 1)
+                     do (setf (aref output column) (aref 2a row column))
+                     finally (return output))))
 
 (defun best-palette (tile palettes)
   (position-if (lambda (palette)
                  (tile-fits-palette-p tile palette))
-               palettes))
+               (mapcar (lambda (p) (coerce p 'list)) (2a-to-list palettes))))
 
 (defun split-images-to-palettes (image)
   (let ((tiles (extract-8×16-tiles image))
         (palettes (extract-palettes image))
         (output (make-array '(128) :element-type '(unsigned-byte 3))))
     (dotimes (i (length tiles))
-      (setf (aref output i) (best-palette (elt tiles i) palettes)))
+      (setf (aref output i) (or (best-palette (elt tiles i) palettes)
+                                (error "Tile ~d does not match any palette~%~s~2%~s"
+                                       i (elt tiles i) palettes))))
     output))
 
 (defun tile-property-value (key tile.xml)
@@ -254,6 +274,7 @@
                                    (make-pathname :name pathname
                                                   :defaults #p"./Source/Maps/"))))
          (tileset (make-instance 'tileset :gid gid :pathname pathname)))
+    (format *trace-output* "~&Loading tileset data from ~a" pathname)
     (assert (equal "tileset" (first xml)))
     (assert (equal "128" (assocdr "tilecount" (second xml))))
     (assert (<= 1.5 (parse-number (assocdr "version" (second xml))) 1.8))
@@ -305,112 +326,194 @@
     output))
 
 (defun rle-compress-segment (source)
-  (let ((matches (list (list source #() 0))))
+  (when (< (length source) 4)
+    (return-from rle-compress-segment (list (cons (rle-encode source #() 0) (length source)))))
+  (let ((matches (list)))
     (lparallel:pdotimes (offset (min 127 (1- (length source))))
-      (loop for length from 1 upto (min 127 (- (length source) offset))
+      (loop for length from (min 127 (- (length source) offset)) downto 1
             for first-part = (subseq source offset (+ offset length))
-            do (loop for repeats from 2 upto (min 256 (floor (/ (- (length source) offset) length)))
+            do (loop for repeats
+                     from (min 256 (floor (/ (- (length source) offset) length)))
+                     downto (if (= 1 length) 3 2)
                      do (when (every (lambda (part) (equalp first-part part))
                                      (loop for i from 0 below repeats
                                            for n = (* i length)
-                                           collect (subseq source (+ offset n) (+ offset length n))))
-                          (push (list (subseq source 0 offset)
-                                      (subseq source offset (+ offset length))
-                                      repeats)
+                                           collect (subseq source (+ offset n)
+                                                           (+ offset length n))))
+                          (push (cons (rle-encode (subseq source 0 offset)
+                                                  (subseq source offset (+ offset length))
+                                                  repeats)
+                                      (+ offset (* length repeats)))
                                 matches)))))
-    (let ((solutions
-            (lparallel:psort
-             (lparallel:psort (lparallel:pmapcar
-                               (lambda (match) (apply #'rle-encode match)) matches) 
-                              #'< :key #'length)
-             #'> :key (lambda (match) (length (rle-expanded-string match))))))
-      (subseq solutions 0 (min 64 (length solutions))))))
+    (incf *rle-options* (or (and matches (length matches))
+                            1))
+    (or matches
+        (list (cons (rle-encode source #() 0) (length source))))))
 
-(defun rle-compress-fully (source)
-  (let ((total-length (length source))
-        (options (remove-if (lambda (option) (zerop (length option)))
-                            (rle-compress-segment source)))
-        (fully (list)))
+(defun shorter (a b)
+  (if (< (length a) (length b))
+      a b))
+
+(defun only-best-options (options)
+  (let ((best-expanded-length (make-hash-table))
+        (best-rle (make-hash-table)))
     (dolist (option options)
-      (when (zerop (random 1000))
-        (format *trace-output* "…"))
-      (let ((expanded-string (rle-expanded-string option)))
-        (assert (plusp (length expanded-string)))
-        (assert (equalp (subseq source 0 (length expanded-string)) expanded-string))
-        (if (= (length expanded-string) total-length)
-            (push option fully)
-            (dolist (suffix (rle-compress-fully (subseq source (1- (length expanded-string)))))
-              (push (concatenate 'vector option suffix) fully)))))
-    fully))
+      (destructuring-bind (rle . expanded-length) option
+        (let* ((length (length rle))
+               (champion (gethash length best-expanded-length)))
+          (if (or (null champion)
+                  (> expanded-length length))
+              (setf (gethash length best-expanded-length) expanded-length
+                    (gethash length best-rle) rle)))))
+    (let ((best-options
+            (loop for length being each hash-key of best-expanded-length
+                  collecting (cons (gethash length best-rle)
+                                   (gethash length best-expanded-length)))))
+      (if *rle-fast-mode*
+          (if (> (length best-options) *rle-fast-mode*)
+              (subseq (sort best-options
+                            (lambda (a b)
+                              (< (/ (length (car a)) (cdr a))
+                                 (/ (length (car b)) (cdr b)))))
+                      0 *rle-fast-mode*)
+              best-options)
+          best-options))))
+
+(defun rle-compress-fully (source &optional recursive-p)
+  (let ((total-length (length source))
+        (options (only-best-options (rle-compress-segment source)))
+        (fully (list)))
+    (when (< 1 (length options))
+      #+ (or)
+      (format t "~& For source length ~:d, there are ~:d options with expanded-length from ~:d to ~:d bytes"
+              (length source) 
+              (length options)
+              (reduce #'min (mapcar #'cdr options))
+              (reduce #'max (mapcar #'cdr options))))
+    (dolist (option options)
+      (destructuring-bind (rle . expanded-length) option
+        (when (zerop (random 10000))
+          (format *trace-output* "~&(RLE compressor: ~:d segment options considered)" *rle-options*))
+        (cond
+          ((and (not recursive-p) (> (length rle) *rle-best-full*))
+           ;; no op, drop that option
+           )
+          ((= expanded-length total-length)
+           (push rle fully))
+          (t
+           (let ((rest (rle-compress-fully (subseq source expanded-length) t)))
+             (when rest
+               (push (concatenate 'vector rle rest) fully)))))))
+    (when fully
+      (reduce #'shorter fully))))
+
+(defparameter *rle-fast-mode* 1)
+
+(defvar *rle-options* 0)
+
+(defvar *rle-best-full* most-positive-fixnum)
 
 (defun rle-compress (source)
-  (let* ((lparallel:*kernel* (lparallel:make-kernel 4))
-         (options (rle-compress-fully source))
-         (min-length (reduce #'min (mapcar #'length options) :initial-value most-positive-fixnum)))
-    (find-if (lambda (option) (= (length option) min-length)) options)))
+  (let ((lparallel:*kernel* (lparallel:make-kernel 8))
+        (*rle-options* 0)
+        (*rle-best-full* (1+ (length source))))
+    (unwind-protect
+         (let ((rle (rle-compress-fully source nil)))
+           (format *trace-output* "~& Compressed ~:d byte~:p into ~:d byte~:p using RLE (~d%), ~
+after considering ~:d option~:p."
+                   (length source) (length rle)
+                   (round (* 100 (/ (length rle) (length source))))
+                   *rle-options*)
+           (if (> (length rle) (1+ (length source)))
+               (prog1 
+                   (concatenate 'vector #(#xff) source)
+                 (format *trace-output* "~&(Compression failed, saving uncompressed)"))
+               rle))
+      (lparallel:end-kernel))))
 
 (defun compile-map (pathname)
-  (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
-    (assert (equal "map" (car xml)))
-    (assert (equal "orthogonal" (assocdr "orientation" (second xml))))
-    (assert (equal "right-down" (assocdr "renderorder" (second xml))))
-    (assert (equal "8" (assocdr "tilewidth" (second xml))))
-    (assert (equal "16" (assocdr "tileheight" (second xml))))
-    (let ((tilesets (mapcar #'load-tileset
-                            (remove-if-not (lambda (el)
-                                             (equal "tileset" (car el)))
-                                           (subseq xml 2))))
-          (layers (remove-if-not (lambda (el)
-                                   (equal "layer" (car el)))
-                                 (subseq xml 2)))
-          (object-groups (remove-if-not (lambda (el)
-                                          (equal "objectgroup" (car el)))
-                                        (subseq xml 2))))
-      (assert (<= 1 (length layers) 2))
-      (when (= 2 (length layers))
-        (when (or (and (null (map-layer-depth (first layers)))
-                       (eql 0 (map-layer-depth (second layers))))
-                  (and (null (map-layer-depth (second layers)))
-                       (eql 1 (map-layer-depth (first layers))))
-                  (and (map-layer-depth (first layers)) (map-layer-depth (second layers))
-                       (> (map-layer-depth (first layers)) (map-layer-depth (second layers)))))
-          (setf layers (reversef layers))))
-      (assert (<= 0 (length object-groups) 1))
-      (format t ";;; This is a generated file.~%;;; Source file: ~a~2%" pathname)
-      (let ((base-tileset (first tilesets))
-            (objects (first object-groups)))
-        (multiple-value-bind (tile-grid attributes-table) (parse-tile-grid layers objects base-tileset)
-          (let ((width (array-dimension tile-grid 0))
-                (height (array-dimension tile-grid 1)))
-            (assert (<= (* width height) 1024))
-            (format t "~2%;;; Tile grid — ~d × ~d tiles~%     .byte ~d, ~d" width height width height)
-            (format t "~2%     ;; Tile art")
-            (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
-              (dotimes (y height)
-                (dotimes (x width)
-                  (setf (aref string (+ (* width y) x)) (aref tile-grid x y 0))))
-              (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
+  (with-open-file (*standard-output* 
+                   (make-pathname :defaults pathname
+                                  :directory '(:relative "Source/Generated/Maps/")
+                                  :type "s")
+                   :direction :output
+                   :if-exists :supersede)
+    (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
+      (assert (equal "map" (car xml)))
+      (assert (equal "orthogonal" (assocdr "orientation" (second xml))))
+      (assert (equal "right-down" (assocdr "renderorder" (second xml))))
+      (assert (equal "8" (assocdr "tilewidth" (second xml))))
+      (assert (equal "16" (assocdr "tileheight" (second xml))))
+      (let ((tilesets (mapcar #'load-tileset
+                              (remove-if-not (lambda (el)
+                                               (equal "tileset" (car el)))
+                                             (subseq xml 2))))
+            (layers (remove-if-not (lambda (el)
+                                     (equal "layer" (car el)))
+                                   (subseq xml 2)))
+            (object-groups (remove-if-not (lambda (el)
+                                            (equal "objectgroup" (car el)))
+                                          (subseq xml 2))))
+        (assert (<= 1 (length layers) 2))
+        (when (= 2 (length layers))
+          (when (or (and (null (map-layer-depth (first layers)))
+                         (eql 0 (map-layer-depth (second layers))))
+                    (and (null (map-layer-depth (second layers)))
+                         (eql 1 (map-layer-depth (first layers))))
+                    (and (map-layer-depth (first layers)) (map-layer-depth (second layers))
+                         (> (map-layer-depth (first layers)) (map-layer-depth (second layers)))))
+            (setf layers (reversef layers))))
+        (assert (<= 0 (length object-groups) 1))
+        (format t ";;; This is a generated file.~%;;; Source file: ~a~2%" pathname)
+        (format t "Map_~a:     .block" (pathname-base-name pathname))
+        (let ((base-tileset (first tilesets))
+              (objects (first object-groups)))
+          (multiple-value-bind (tile-grid attributes-table) (parse-tile-grid layers objects base-tileset)
+            (let ((width (array-dimension tile-grid 0))
+                  (height (array-dimension tile-grid 1)))
+              (assert (<= (* width height) 1024))
+              (format t "~2%;;; Tile grid — ~d × ~d tiles
+GridSize:     
+Width:    .byte ~d
+Height:    .byte ~d" 
+                      width height width height)
+              (format t "~2%;;; Pointers into grid data:
+     .word Art
+     .word TileAttributes
+     .word Attributes
+     .word Sprites")
+              (format t "~2%Art:     ;; Tile art")
+              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
+                (dotimes (y height)
+                  (dotimes (x width)
+                    (setf (aref string (+ (* width y) x)) (aref tile-grid x y 0))))
+                (let ((compressed (rle-compress string)))
+                  (format t "~&     .word $~4,'0x" (length compressed))
+                  (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^~&     .byte ~}" 
-                      (coerce (rle-compress string) 'list)))
-            (format t "~2%     ;; Tile attributes pointer")
-            (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
-              (dotimes (y height)
-                (dotimes (x width)
-                  (setf (aref string (+ (* width y) x)) (aref tile-grid x y 1))))
-              (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
+                          (coerce compressed 'list))))
+              (format t "~2%TileAttributes:     ;; Tile attributes indices")
+              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
+                (dotimes (y height)
+                  (dotimes (x width)
+                    (setf (aref string (+ (* width y) x)) (aref tile-grid x y 1))))
+                (let ((compressed (rle-compress string)))
+                  (format t "~&     .word $~4,'0x" (length compressed))
+                  (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^~&     .byte ~}" 
-                      (coerce (rle-compress string) 'list)))
-            (format t "~2%     ;; Tile attributes table")
-            (dolist (attr attributes-table)
-              (format t "~&     .byte ~{ $~2,'0x, $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x~}" 
-                      (loop for i below 6 collecting (aref attr i))))
-            
-            
-            ;; (format t "~2%;;; Tile animation sets — ~d animation set~:p" (length tile-animation-sets))
-            ;; (format t "~%	.byte ~d~%" (length tile-animation-sets))
-            ;; (format t "~{~{~%	.byte $~2,'0x,  ~{$~2,'0x, ~3d~^, ~}, 0~}~}" tile-animation-sets)
-            ))))
-    (fresh-line)))
+                          (coerce compressed 'list))))
+              (format t "~2%Attributes:     ;; Tile attributes table")
+              (dolist (attr attributes-table)
+                (format t "~&     .byte ~{ $~2,'0x, $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x~}" 
+                        (coerce attr 'list)))
+              
+              (format t "~2%Sprites:     ;; Sprites table")
+              
+              (format t "~%;;; TODO")
+              
+              ))))
+      (format t "~2&      .bend")
+      (fresh-line))))
 

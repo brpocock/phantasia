@@ -11,6 +11,7 @@
   
   :depends-on ( ;; broken into lines for easier sorting
                :alexandria
+               :cl-base64
                :bordeaux-threads
                :cl-6502
                :cl-ppcre 
@@ -20,6 +21,7 @@
                ;; :clouseau
                :cserial-port
                ;; :mcclim
+               :lparallel
                :midi
                :parse-number
                :png-read
