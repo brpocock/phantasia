@@ -176,6 +176,7 @@
                     :initform (make-array (list 128 6) :element-type '(unsigned-byte 8)))))
 
 (defun load-tileset-image (pathname)
+  (format *trace-output* "~&Loading tileset image from ~a" pathname)
   (let* ((png (png-read:read-png-file (make-pathname 
                                        :name (subseq pathname 0
                                                      (position #\. pathname :from-end t))
@@ -190,8 +191,16 @@
                   α)))
 
 (defun extract-8×16-tiles (image)
-  
-  )
+  (let ((output (list)))
+    (dotimes (row (/ (1- (array-dimension image 1)) 16))
+      (dotimes (column (/ (array-dimension image 0) 8))
+        (let ((tile (extract-region image (* column 8) (* row 16) (+ (* column 8) 7) (+ (* row 16) 15))))
+          (assert (= 8 (array-dimension tile 0)))
+          (assert (= 16 (array-dimension tile 1)))
+          (push tile output))))
+    (format *trace-output* "… found ~d tile~:p in ~d×~d image" 
+            (length output) (array-dimension image 0) (array-dimension image 1))
+    output))
 
 (defun extract-palettes (image)
   (let* ((last-row (1- (array-dimension image 1)))
@@ -204,23 +213,34 @@
     palettes))
 
 (defun tile-fits-palette-p (tile palette)
-  (dotimes (y 16)
-    (dotimes (x 8)
-      (unless (member (aref tile x y) palette :test #'rgb=)
-        (return-from tile-fits-palette-p nil))))
-  t)
+  (every (lambda (c) (member c palette))
+         (remove-duplicates (loop for y below 16 
+                                  append
+                                  (loop for x below 8
+                                        collect (aref tile x y)))
+                            :test #'=)))
+
+(defun 2a-to-list (2a)
+  (loop for row from 0 below (array-dimension 2a 0)
+        collecting (loop 
+                     with output = (make-array (list (array-dimension 2a 1)))
+                     for column from 0 below (array-dimension 2a 1)
+                     do (setf (aref output column) (aref 2a row column))
+                     finally (return output))))
 
 (defun best-palette (tile palettes)
   (position-if (lambda (palette)
                  (tile-fits-palette-p tile palette))
-               palettes))
+               (mapcar (lambda (p) (coerce p 'list)) (2a-to-list palettes))))
 
 (defun split-images-to-palettes (image)
   (let ((tiles (extract-8×16-tiles image))
         (palettes (extract-palettes image))
         (output (make-array '(128) :element-type '(unsigned-byte 3))))
     (dotimes (i (length tiles))
-      (setf (aref output i) (best-palette (elt tiles i) palettes)))
+      (setf (aref output i) (or (best-palette (elt tiles i) palettes)
+                                (error "Tile ~d does not match any palette~%~s~2%~s"
+                                       i (elt tiles i) palettes))))
     output))
 
 (defun tile-property-value (key tile.xml)
@@ -254,6 +274,7 @@
                                    (make-pathname :name pathname
                                                   :defaults #p"./Source/Maps/"))))
          (tileset (make-instance 'tileset :gid gid :pathname pathname)))
+    (format *trace-output* "Loading tileset data from ~a" pathname)
     (assert (equal "tileset" (first xml)))
     (assert (equal "128" (assocdr "tilecount" (second xml))))
     (assert (<= 1.5 (parse-number (assocdr "version" (second xml))) 1.8))
@@ -318,11 +339,13 @@
                                       (subseq source offset (+ offset length))
                                       repeats)
                                 matches)))))
-    (mapcar (lambda (match) (apply #'rle-encode match)) matches)))
+    (subseq (mapcar (lambda (match) (apply #'rle-encode match)) matches)
+            0 (min 20 (length matches)))))
 
 (defun rle-compress-fully (source)
   (let ((total-length (length source))
-        (options (remove-if (lambda (option) (zerop (length option)))
+        (options (remove-if (lambda (option) 
+                              (zerop (length option)))
                             (rle-compress-segment source)))
         (fully (list)))
     (dolist (option options)
@@ -331,14 +354,16 @@
         (assert (equalp (subseq source 0 (length expanded-string)) expanded-string))
         (if (= (length expanded-string) total-length)
             (push option fully)
-            (dolist (suffix (rle-compress-fully (subseq source (1- (length expanded-string)))))
-              (push (concatenate 'vector option suffix) fully)))))
+            (push (concatenate 'vector option (rle-compress (subseq source (1- (length expanded-string))))) fully))))
+    (format *trace-output* " (~:d) " (length fully)) 
     fully))
 
 (defun rle-compress (source)
-  (let* ((options (rle-compress-fully source))
-         (min-length (reduce #'min (mapcar #'length options) :initial-value most-positive-fixnum)))
-    (find-if (lambda (option) (= (length option) min-length)) options)))
+  (let* ((options (rle-compress-fully source)))
+    (reduce (lambda (a b)
+              (if (< (length a) (length b))
+                  a b))
+            options)))
 
 (defun compile-map (pathname)
   (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
