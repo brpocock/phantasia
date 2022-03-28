@@ -306,7 +306,7 @@
 
 (defun rle-compress-segment (source)
   (let ((matches (list (list source #() 0))))
-    (dotimes (offset (min 127 (1- (length source))))
+    (lparallel:pdotimes (offset (min 127 (1- (length source))))
       (loop for length from 1 upto (min 127 (- (length source) offset))
             for first-part = (subseq source offset (+ offset length))
             do (loop for repeats from 2 upto (min 256 (floor (/ (- (length source) offset) length)))
@@ -318,7 +318,13 @@
                                       (subseq source offset (+ offset length))
                                       repeats)
                                 matches)))))
-    (mapcar (lambda (match) (apply #'rle-encode match)) matches)))
+    (let ((solutions
+            (lparallel:psort
+             (lparallel:psort (lparallel:pmapcar
+                               (lambda (match) (apply #'rle-encode match)) matches) 
+                              #'< :key #'length)
+             #'> :key (lambda (match) (length (rle-expanded-string match))))))
+      (subseq solutions 0 (min 64 (length solutions))))))
 
 (defun rle-compress-fully (source)
   (let ((total-length (length source))
@@ -326,6 +332,8 @@
                             (rle-compress-segment source)))
         (fully (list)))
     (dolist (option options)
+      (when (zerop (random 1000))
+        (format *trace-output* "…"))
       (let ((expanded-string (rle-expanded-string option)))
         (assert (plusp (length expanded-string)))
         (assert (equalp (subseq source 0 (length expanded-string)) expanded-string))
@@ -336,7 +344,8 @@
     fully))
 
 (defun rle-compress (source)
-  (let* ((options (rle-compress-fully source))
+  (let* ((lparallel:*kernel* (lparallel:make-kernel 4))
+         (options (rle-compress-fully source))
          (min-length (reduce #'min (mapcar #'length options) :initial-value most-positive-fixnum)))
     (find-if (lambda (option) (= (length option) min-length)) options)))
 
@@ -383,7 +392,7 @@
               (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^~&     .byte ~}" 
-                      (rle-compress string)))
+                      (coerce (rle-compress string) 'list)))
             (format t "~2%     ;; Tile attributes pointer")
             (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
               (dotimes (y height)
@@ -392,7 +401,7 @@
               (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
 ~^~&     .byte ~}" 
-                      (rle-compress string)))
+                      (coerce (rle-compress string) 'list)))
             (format t "~2%     ;; Tile attributes table")
             (dolist (attr attributes-table)
               (format t "~&     .byte ~{ $~2,'0x, $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x~}" 

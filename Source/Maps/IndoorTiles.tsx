@@ -30,18 +30,27 @@
   </objectgroup>
  </tile>
  <tile id="10">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="10" duration="667"/>
    <frame tileid="13" duration="667"/>
   </animation>
  </tile>
  <tile id="11">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="11" duration="667"/>
    <frame tileid="14" duration="667"/>
   </animation>
  </tile>
  <tile id="12">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="12" duration="667"/>
    <frame tileid="15" duration="667"/>
@@ -68,12 +77,23 @@
   </objectgroup>
  </tile>
  <tile id="26">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="26" duration="667"/>
    <frame tileid="29" duration="667"/>
   </animation>
  </tile>
+ <tile id="27">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
+ </tile>
  <tile id="28">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="28" duration="667"/>
    <frame tileid="31" duration="667"/>
@@ -101,18 +121,27 @@
  </tile>
  <tile id="36" probability="0.1"/>
  <tile id="42">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="42" duration="667"/>
    <frame tileid="45" duration="667"/>
   </animation>
  </tile>
  <tile id="43">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="43" duration="667"/>
    <frame tileid="46" duration="667"/>
   </animation>
  </tile>
  <tile id="44">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
   <animation>
    <frame tileid="44" duration="667"/>
    <frame tileid="47" duration="667"/>
@@ -147,11 +176,17 @@
   </objectgroup>
  </tile>
  <tile id="54">
+  <properties>
+   <property name="Break" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
  </tile>
  <tile id="55">
+  <properties>
+   <property name="Break" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
@@ -176,6 +211,16 @@
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
+ </tile>
+ <tile id="70">
+  <properties>
+   <property name="Break" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="71">
+  <properties>
+   <property name="Break" type="bool" value="true"/>
+  </properties>
  </tile>
  <tile id="80">
   <objectgroup draworder="index" id="2">
@@ -249,6 +294,24 @@
    <wangtile tileid="37" wangid="0,3,0,2,0,2,0,2"/>
    <wangtile tileid="38" wangid="0,3,0,2,0,2,0,3"/>
    <wangtile tileid="39" wangid="0,2,0,2,0,2,0,3"/>
+  </wangset>
+  <wangset name="Barricades" type="edge" tile="-1">
+   <wangcolor name="Barricades" color="#ff0000" tile="-1" probability="1"/>
+   <wangtile tileid="86" wangid="0,0,0,0,1,0,0,0"/>
+   <wangtile tileid="87" wangid="0,0,1,0,0,0,1,0"/>
+   <wangtile tileid="88" wangid="1,0,0,0,1,0,0,0"/>
+   <wangtile tileid="97" wangid="1,0,1,0,1,0,0,0"/>
+   <wangtile tileid="98" wangid="1,0,0,0,1,0,1,0"/>
+   <wangtile tileid="99" wangid="0,0,1,0,1,0,0,0"/>
+   <wangtile tileid="100" wangid="0,0,0,0,1,0,1,0"/>
+   <wangtile tileid="101" wangid="0,0,1,0,0,0,0,0"/>
+   <wangtile tileid="102" wangid="1,0,1,0,1,0,1,0"/>
+   <wangtile tileid="103" wangid="0,0,0,0,0,0,1,0"/>
+   <wangtile tileid="113" wangid="1,0,1,0,0,0,1,0"/>
+   <wangtile tileid="114" wangid="0,0,1,0,1,0,1,0"/>
+   <wangtile tileid="115" wangid="1,0,1,0,0,0,0,0"/>
+   <wangtile tileid="116" wangid="1,0,0,0,0,0,1,0"/>
+   <wangtile tileid="118" wangid="1,0,0,0,0,0,0,0"/>
   </wangset>
  </wangsets>
 </tileset>
