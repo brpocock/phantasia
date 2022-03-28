@@ -54,6 +54,12 @@
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
  </tile>
+ <tile id="15">
+  <properties>
+   <property name="Door" type="bool" value="true"/>
+   <property name="Locked" type="bool" value="true"/>
+  </properties>
+ </tile>
  <tile id="16">
   <properties>
    <property name="Wade" type="bool" value="true"/>
@@ -461,7 +467,8 @@
  </tile>
  <tile id="110">
   <properties>
-   <property name="Wade" type="bool" value="true"/>
+   <property name="Signpost" type="bool" value="true"/>
+   <property name="Wade" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="111">
@@ -472,6 +479,11 @@
  <tile id="112">
   <properties>
    <property name="Pit" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="113">
+  <properties>
+   <property name="Door" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="114">
