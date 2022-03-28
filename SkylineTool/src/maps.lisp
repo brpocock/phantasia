@@ -253,8 +253,20 @@
             t
             value)))))
 
+(defun tile-collision-p (xml)
+  ;; TODO
+  nil)
+
 (defun add-attribute-values (xml bytes)
+  ;; TODO
   (when (tile-property-value "Wade" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
+  (when (tile-property-value "Swim" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
+  (when (tile-property-value "Exit" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
+  (when (tile-property-value "Door" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
+  (when (tile-property-value "Break" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
+  (when (tile-property-value "Fire" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
+  
+  (when (tile-collision-p xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
   
   )
 
@@ -438,7 +450,8 @@ after considering ~:d option~:p."
                                   :type "s")
                    :direction :output
                    :if-exists :supersede)
-    (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
+    (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname)))
+          (*map-exits* (list)))
       (assert (equal "map" (car xml)))
       (assert (equal "orthogonal" (assocdr "orientation" (second xml))))
       (assert (equal "right-down" (assocdr "renderorder" (second xml))))
@@ -481,7 +494,8 @@ Height:    .byte ~d"
      .word Art
      .word TileAttributes
      .word Attributes
-     .word Sprites")
+     .word Sprites
+     .word Exits")
               (format t "~2%Art:     ;; Tile art")
               (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
                 (dotimes (y height)
@@ -509,6 +523,7 @@ Height:    .byte ~d"
                 (format t "~&     .byte ~{ $~2,'0x, $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x~}" 
                         (coerce attr 'list)))
               
+              (format t "~2%Exits:     ;; Exit destination pointers")
               (format t "~2%Sprites:     ;; Sprites table")
               
               (format t "~%;;; TODO")
