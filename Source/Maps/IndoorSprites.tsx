@@ -14,15 +14,34 @@
    <object id="1" x="1" y="2" width="6" height="12"/>
   </objectgroup>
  </tile>
+ <tile id="2">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
+ </tile>
  <tile id="3">
+  <properties>
+   <property name="Fire" type="bool" value="true"/>
+  </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="2" width="8" height="12"/>
+  </objectgroup>
   <animation>
    <frame tileid="3" duration="667"/>
    <frame tileid="4" duration="667"/>
   </animation>
  </tile>
  <tile id="16">
+  <properties>
+   <property name="Pushable" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="18">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="9"/>
   </objectgroup>
  </tile>
 </tileset>
