@@ -152,7 +152,8 @@
                    (attribute-id (assign-attributes effective-attributes alt-tile-id attributes-table)))
               (setf (aref output x y 0) tile-id
                     (aref output x y 1) attribute-id))))))
-    (values output attributes-table)))
+    ;;TODO third returned value is the exits table
+    (values output attributes-table #())))
 
 (defun map-layer-depth (layer.xml)
   (when (and (<= 3 (length layer.xml))
@@ -481,7 +482,7 @@ after considering ~:d option~:p."
         (format t "Map_~a:     .block" (pathname-base-name pathname))
         (let ((base-tileset (first tilesets))
               (objects (first object-groups)))
-          (multiple-value-bind (tile-grid attributes-table) (parse-tile-grid layers objects base-tileset)
+          (multiple-value-bind (tile-grid attributes-table exits-table) (parse-tile-grid layers objects base-tileset)
             (let ((width (array-dimension tile-grid 0))
                   (height (array-dimension tile-grid 1)))
               (assert (<= (* width height) 1024))
@@ -491,6 +492,7 @@ Width:    .byte ~d
 Height:    .byte ~d" 
                       width height width height)
               (format t "~2%;;; Pointers into grid data:
+Pointers:
      .word Art
      .word TileAttributes
      .word Attributes
