@@ -160,7 +160,7 @@ SwitchToOverscan:
           rti
 ;;; 
           .enc "minifont"
-LocationNameString: .ptext "locale name here"
+LocationNameString: .ptext "location name here"
 
 Dialogue2Text:      .ptext "hello, world."
 Dialogue3Text:      .ptext "this is a test"
@@ -173,7 +173,7 @@ TopBarDL1:
           .DLAltHeader DrawUI + $00, 0, 4, $04
           .DLAltHeader DrawUI + $02, 0, 4, $0c
 
-          .DLStringHeader LocationNameString, 2, $60
+          .DLStringHeader LocationNameString, 2, $50
 
           .DLAltHeader DrawUI + $00, 0, 4, $18
           .DLAltHeader DrawUI + $02, 0, 4, $20
