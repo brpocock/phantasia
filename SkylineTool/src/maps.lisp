@@ -153,7 +153,7 @@
               (setf (aref output x y 0) tile-id
                     (aref output x y 1) attribute-id))))))
     ;;TODO third & fourth returned values are the sprites and exits tables
-    (values output attributes-table #() #())))
+    (values output attributes-table nil nil)))
 
 (defun map-layer-depth (layer.xml)
   (when (and (<= 3 (length layer.xml))
@@ -444,6 +444,19 @@ after considering ~:d option~:p."
                rle))
       (lparallel:end-kernel))))
 
+(defun hex-dump-comment (string)
+  (format t "~{~&     ;; ~
+~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~}" 
+          (coerce string 'list)))
+
+(defun hex-dump-bytes (string)
+  (format t "~{~&     .byte $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
+~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
+          (coerce string 'list)))
+
 (defun compile-map (pathname)
   (with-open-file (*standard-output* 
                    (make-pathname :defaults pathname
@@ -499,49 +512,40 @@ Pointers:
      .word Attributes
      .word Sprites
      .word Exits")
+              (format t "~2%;;; Display name of locale
+           .enc \"minifont\"
+Name:     .ptext \"~a\"" 
+                      (let ((name (concatenate 'string (string-downcase (cl-change-case:sentence-case (pathname-base-name pathname))))))
+                        (subseq name 0 (min 20 (length name)))))
               (format t "~2%Art:     ;; Tile art")
               (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
                 (dotimes (y height)
                   (dotimes (x width)
                     (setf (aref string (+ (* width y) x)) (aref tile-grid x y 0))))
-                (format t "~{~&     ;; ~
-~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
-~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
-~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
-~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~}" 
-                        (coerce string 'list))
+                (hex-dump-comment string)
                 (let ((compressed (rle-compress string)))
                   (format t "~&     .word $~4,'0x" (length compressed))
-                  (format t "~{~&     .byte $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
-~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
-                          (coerce compressed 'list))))
+                  (hex-dump-bytes compressed)))
               (format t "~2%TileAttributes:     ;; Tile attributes indices")
               (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
                 (dotimes (y height)
                   (dotimes (x width)
                     (setf (aref string (+ (* width y) x)) (aref tile-grid x y 1))))
-                (format t "~{~&     ;; ~
-~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
-~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
-~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
-~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~}" 
-                        (coerce string 'list))
+                (hex-dump-comment string)
                 (let ((compressed (rle-compress string)))
                   (format t "~&     .word $~4,'0x" (length compressed))
-                  (format t "~{~&     .byte $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
-~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
-                          (coerce compressed 'list))))
+                  (hex-dump-bytes compressed)))
               (format t "~2%Attributes:     ;; Tile attributes table")
               (dolist (attr attributes-table)
-                (format t "~&     .byte ~{ $~2,'0x, $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x,  $~2,'0x~}" 
-                        (coerce attr 'list)))
+                (hex-dump-bytes attr))
+              
+              (format t "~2%Sprites:     ;; Sprites table")
+              (dolist (sprite sprites-table)
+                (hex-dump-bytes sprite))
               
               (format t "~2%Exits:     ;; Exit destination pointers")
-              (format t "~2%Sprites:     ;; Sprites table")
-              
-              (format t "~%;;; TODO")
-              
-              ))))
+              (dolist (exit exits-table)
+                (hex-dump-bytes exit))))))
       (format t "~2&      .bend")
       (fresh-line))))
 

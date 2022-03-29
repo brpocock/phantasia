@@ -11,9 +11,10 @@
   
   :depends-on ( ;; broken into lines for easier sorting
                :alexandria
-               :cl-base64
                :bordeaux-threads
                :cl-6502
+               :cl-base64
+               :cl-change-case
                :cl-ppcre 
                ;; :clim-listener
                ;; :clim-debugger
