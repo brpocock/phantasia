@@ -150,6 +150,7 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
+              push @todo => "Source/Generated/Maps/$dep.s";
             } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
               if ($bank ne 'Common') {

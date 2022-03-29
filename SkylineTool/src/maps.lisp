@@ -32,9 +32,10 @@
         (push (aref tiles x y) list)))
     (nreverse list)))
 
-(defun assocdr (key alist)
+(defun assocdr (key alist &optional (errorp t))
   (or (second (assoc key alist :test #'equalp))
-      (error "Could not find ~a in ~s" key alist)))
+      (when errorp 
+        (error "Could not find ~a in ~s" key alist))))
 
 (defun pin (n min max)
   (min max (max min n)))
@@ -91,15 +92,16 @@
     output))
 
 (defun parse-layer (layer)
-  (assert (equal "properties" (car (third layer))))
-  (assert (equal "data" (car (fourth layer))))
-  (assert (equal "base64" (assocdr "encoding" (second (fourth layer)))))
-  (assert (stringp (third (fourth layer))))
-  (let* ((width (parse-integer (assocdr "width" (second layer))))
-         (height (parse-integer (assocdr "height" (second layer)))))
-    (split-grid-to-rows width height
-                        (bytes-to-32-bits
-                         (cl-base64:base64-string-to-usb8-array (third (fourth layer)))))))
+  (let ((properties (find-if (lambda (el) (equal "properties" (car el))) (subseq layer 2)))
+        (data (find-if (lambda (el) (equal "data" (car el))) (subseq layer 2))))
+    (assert data)
+    (assert (equal "base64" (assocdr "encoding" (second data))))
+    (assert (stringp (third data)))
+    (let* ((width (parse-integer (assocdr "width" (second layer))))
+           (height (parse-integer (assocdr "height" (second layer)))))
+      (split-grid-to-rows width height
+                          (bytes-to-32-bits
+                           (cl-base64:base64-string-to-usb8-array (third data)))))))
 
 (defun find-tile-by-number (number tileset)
   (let ((id (- number (tileset-gid tileset))))
@@ -109,8 +111,7 @@
                                       collect (aref (tile-attributes tileset) id b))))
         (values 0 #(0 0 0 0 0 0)))))
 
-(defun assign-attributes (attr alt-tile-id attr-table)
-  (setf (aref attr 5) (or alt-tile-id 0))
+(defun assign-attributes (attr attr-table)
   (or (position-if (lambda (attribute) (equalp attr attribute)) attr-table)
       (progn (setf (cdr (last attr-table)) (cons attr nil))
              (1- (length attr-table)))))
@@ -121,14 +122,18 @@
            (<= (* x 8) (parse-number (assocdr "x" (second object))) (1- (* (1+ x) 8)))
            (<= (* y 16) (parse-number (assocdr "y" (second object))) (1- (* (1+ y) 16))))))
 
-(defun find-effective-attributes (x y objects attributes)
+(defun find-effective-attributes (x y objects attributes exits)
   (let ((effective-objects (remove-if-not (lambda (el)
                                             (and (equal "object" (car el))
                                                  (object-covers-tile-p x y el)))
                                           (subseq objects 2))))
     (dolist (object effective-objects)
-      (add-attribute-values object attributes)))
-  attributes)
+      (add-attribute-values object attributes exits))))
+
+(defun add-alt-tile-attributes (tile-attributes alt-tile-attributes)
+  (let ((wall-bits (logand #x0f (aref alt-tile-attributes 0))))
+    (setf (aref tile-attributes 0) (logior (ash wall-bits 4) (aref tile-attributes 0))
+          (aref tile-attributes 1) (logior #x01 (aref tile-attributes 1)))))
 
 (defun parse-tile-grid (layers objects tileset)
   (let* ((ground (parse-layer (first layers)))
@@ -138,7 +143,9 @@
                                    (array-dimension ground 1)
                                    2)
                              :element-type 'integer))
-         (attributes-table (list #(0 0 0 0 0 0))))
+         (attributes-table (list #(0 0 0 0 0 0)))
+         (exits-table (list))
+         (sprites-table (list)))
     (dotimes (y (array-dimension ground 1))
       (dotimes (x (array-dimension ground 0))
         (let* ((detailp (and detail (> (aref detail x y) 0)))
@@ -146,14 +153,16 @@
                                 (aref detail x y)
                                 (aref ground x y))))
           (multiple-value-bind (tile-id tile-attributes) (find-tile-by-number tile-number tileset)
-            (let* ((alt-tile-number (when detailp (aref ground x y)))
-                   (alt-tile-id (when detailp (find-tile-by-number tile-number tileset)))
-                   (effective-attributes (find-effective-attributes x y objects tile-attributes))
-                   (attribute-id (assign-attributes effective-attributes alt-tile-id attributes-table)))
-              (setf (aref output x y 0) tile-id
-                    (aref output x y 1) attribute-id))))))
-    ;;TODO third & fourth returned values are the sprites and exits tables
-    (values output attributes-table nil nil)))
+            (when detailp
+              (multiple-value-bind (alt-tile-id alt-tile-attributes)
+                  (find-tile-by-number (aref ground x y) tileset)
+                (setf (aref tile-attributes 5) alt-tile-id)
+                (add-alt-tile-attributes tile-attributes alt-tile-attributes)))
+            (find-effective-attributes x y objects tile-attributes exits-table)
+            (setf (aref output x y 0) tile-id
+                  (aref output x y 1) (assign-attributes tile-attributes
+                                                         attributes-table))))))
+    (values output attributes-table sprites-table exits-table)))
 
 (defun map-layer-depth (layer.xml)
   (when (and (<= 3 (length layer.xml))
@@ -178,11 +187,12 @@
 
 (defun load-tileset-image (pathname)
   (format *trace-output* "~&Loading tileset image from ~a" pathname)
-  (let* ((png (png-read:read-png-file (make-pathname 
-                                       :name (subseq pathname 0
-                                                     (position #\. pathname :from-end t))
-                                       :type (subseq pathname (1+ (position #\. pathname :from-end t)))
-                                       :defaults #p"./Source/Maps/")))
+  (let* ((png (png-read:read-png-file 
+               (make-pathname 
+                :name (subseq pathname 0
+                              (position #\. pathname :from-end t))
+                :type (subseq pathname (1+ (position #\. pathname :from-end t)))
+                :defaults #p"./Source/Maps/")))
          (height (png-read:height png))
          (width (png-read:width png))
          (α (png-read:transparency png))
@@ -248,28 +258,105 @@
   (let ((prop (third tile.xml)))
     (when (and (equal "property" (car prop))
                (equalp key (assocdr "name" (second prop))))
-      (let ((value (assocdr "value" (second prop))))
-        (if (or (equalp "true" value)
-                (equalp "t" value))
-            t
-            value)))))
+      (when-let (value (assocdr "value" (second prop)))
+        (let ((value (string-trim #(#\Space) value)))
+          (cond ((or (equalp "true" value)
+                     (equalp "t" value)
+                     (equalp "on" value))
+                 t)
+                ((or (equalp "false" value)
+                     (equalp "f" value)
+                     (equalp "off" value))
+                 :off)
+                (t value)))))))
 
-(defun tile-collision-p (xml)
-  ;; TODO
+(defun tile-collision-p (tile.xml test-x test-y)
+  (let* ((object-group (when (and tile.xml (< 1 (length tile.xml)))
+                         (find-if (lambda (el) (equal "objectgroup" (car el))) 
+                                  (subseq tile.xml 2))))
+         (objects (when (and object-group (< 1 (length object-group)))
+                    (remove-if (lambda (el)
+                                 (or (not (equal "object" (car el)))
+                                     (when-let (type-name (assocdr "type" (second el) nil))
+                                       (not (equalp "Wall" type-name)))))
+                               (subseq object-group 2)))))
+    (dolist (object objects) 
+      (let ((height (parse-number (assocdr "height" (second object))))
+            (width (parse-number (assocdr "width" (second object))))
+            (object-x (parse-number (assocdr "x" (second object))))
+            (object-y (parse-number (assocdr "y" (second object)))))
+        (when (and (<= object-x test-x (+ object-x width))
+                   (<= object-y test-y (+ object-y height)))
+          (return-from tile-collision-p t)))))
   nil)
 
-(defun add-attribute-values (xml bytes)
-  ;; TODO
-  (when (tile-property-value "Wade" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  (when (tile-property-value "Swim" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  (when (tile-property-value "Exit" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  (when (tile-property-value "Door" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  (when (tile-property-value "Break" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  (when (tile-property-value "Fire" xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  
-  (when (tile-collision-p xml) (setf (elt bytes 0) (logior (elt bytes 0) #x00)))
-  
-  )
+(defun load-other-map (locale)
+  (xmls:parse-to-list (alexandria:read-file-into-string 
+                       (make-pathname :name locale
+                                      :type "tmx"
+                                      :defaults #p"./Source/Maps/"))))
+
+(defun assign-exit (locale point exits)
+  (let ((locale.xml (load-other-map locale)))
+    (warn "Not finding point ~s in locale ~s" point locale)))
+
+(defun add-attribute-values (xml bytes &optional (exits nil exits-provided-p))
+  (labels ((set-bit (byte bit)
+             (setf (elt bytes byte) (logior (elt bytes byte) bit)))
+           (clear-bit (byte bit)
+             (setf (elt bytes byte) (logand (elt bytes byte) bit)))
+           (map-boolean (property byte bit)
+             (when-let (value (tile-property-value property xml))
+               (cond ((eql t value) (set-bit byte bit))
+                     ((eql :off value) (clear-bit byte bit))
+                     (t (warn "Unrecognized value ~s for property ~s" value property))))))
+    
+    (when (tile-collision-p xml 4 0) (set-bit 0 #x01))
+    (when (tile-collision-p xml 4 15) (set-bit 0 #x02))
+    (when (tile-collision-p xml 0 7) (set-bit 0 #x04))
+    (when (tile-collision-p xml 7 7) (set-bit 0 #x08))
+    (map-boolean "Wall" 0 #x0f)
+    (map-boolean "WallNorth" 0 #x01)
+    (map-boolean "WallSouth" 0 #x02)
+    (map-boolean "WallWest" 0 #x04)
+    (map-boolean "WallEast" 0 #x08)
+    ;; Ceiling → #x01 set by details layer
+    (map-boolean "Wade" 1 #x02)
+    (map-boolean "Swim" 1 #x04)
+    (map-boolean "Ladder" 1 #x08)
+    (map-boolean "Climb" 1 #x08)
+    (map-boolean "Pit" 1 #x10)
+    (map-boolean "Door" 1 #x20)
+    (map-boolean "Flammable" 1 #x40)
+    (map-boolean "StairsDown" 1 #x80)
+    (map-boolean "Ice" 2 #x01)
+    (map-boolean "Fire" 2 #x02)
+    (when-let (switch (tile-property-value "Trigger" xml))
+      (cond
+        ((equalp switch "Step") (set-bit 2 #x04))
+        ((equalp switch "Pull") (set-bit 2 #x08))
+        ((equalp switch "Push") (set-bit 2 #x0c))
+        (t (warn "Unknown value for switch Trigger property: ~s" switch))))
+    (map-boolean "Iron" 2 #x10)
+    (when-let (push (tile-property-value "Push" xml))
+      (cond
+        ((equalp push "Heavy") (set-bit 2 #x40))
+        ((equalp push "VeryHeavy") (set-bit 2 #x60))
+        (t (set-bit 2 #x20))))
+    (when-let (destination (tile-property-value "Exit" xml))
+      (set-bit 2 #x80)
+      (destructuring-bind (locale point) (split-sequence #\/ destination)
+        (if exits-provided-p
+            (set-bit 4 (assign-exit locale point exits))
+            (warn "Exit in tileset data is not supported (to ~s in ~s)" point locale))))
+    (when-let (lock (tile-property-value "Lock" xml))
+      (set-bit 3 (logand #x3f (parse-integer lock :radix 16))))
+    (if-let (switch (tile-property-value "Switch" xml))
+      (let ((switch-code (logand #x0f (parse-integer switch :radix 16))))
+        (set-bit 3 (ash (logand #x03 switch-code) 6))
+        (set-bit 4 (ash (logand #x0c switch-code) 3)))
+      (when (tile-property-value "Locked" xml)
+        (warn "Locked tile without Lock code")))))
 
 (defun parse-tile-attributes (xml i)
   (let ((bytes (make-array '(6) :element-type '(unsigned-byte 8)))
@@ -290,7 +377,7 @@
     (format *trace-output* "~&Loading tileset data from ~a" pathname)
     (assert (equal "tileset" (first xml)))
     (assert (equal "128" (assocdr "tilecount" (second xml))))
-    (assert (<= 1.5 (parse-number (assocdr "version" (second xml))) 1.8))
+    (assert (<= 1.4 (parse-number (assocdr "version" (second xml))) 1.8))
     (let* ((properties (find-if (lambda (el) (equal "properties" (car el))) (subseq xml 2)))
            (image (find-if (lambda (el) (equal "image" (car el))) (subseq xml 2)))
            (image-data (load-tileset-image (assocdr "source" (second image))))
@@ -308,8 +395,10 @@
               (append (mapcar (lambda (segment) (rle-encode segment #() 0))
                               (loop for start from 0 by 127
                                     while (< start (length non-repeated))
-                                    collecting (subseq non-repeated start (min (+ 127 start)
-                                                                               (length non-repeated)))))
+                                    collecting (subseq non-repeated
+                                                       start
+                                                       (min (+ 127 start)
+                                                            (length non-repeated)))))
                       (list (rle-encode #() repeated repeated-times))))))
   (let ((output (make-array (list 0) :adjustable t :element-type '(unsigned-byte 8))))
     (when (plusp (length non-repeated))
@@ -464,8 +553,7 @@ after considering ~:d option~:p."
                                   :type "s")
                    :direction :output
                    :if-exists :supersede)
-    (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname)))
-          (*map-exits* (list)))
+    (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
       (assert (equal "map" (car xml)))
       (assert (equal "orthogonal" (assocdr "orientation" (second xml))))
       (assert (equal "right-down" (assocdr "renderorder" (second xml))))
@@ -495,11 +583,17 @@ after considering ~:d option~:p."
         (format t "Map_~a:     .block" (pathname-base-name pathname))
         (let ((base-tileset (first tilesets))
               (objects (first object-groups)))
+          (format *trace-output* "~&Parsing map layers…")
           (multiple-value-bind (tile-grid attributes-table sprites-table exits-table)
               (parse-tile-grid layers objects base-tileset)
             (let ((width (array-dimension tile-grid 0))
                   (height (array-dimension tile-grid 1)))
               (assert (<= (* width height) 1024))
+              (format *trace-output* "~&Found grid ~d×~d tiles, ~
+~d unique attribute~:p, ~d sprite~:p, ~d unique exit~:p"
+                      width height
+                      (length attributes-table) (length sprites-table)
+                      (length exits-table))
               (format t "~2%;;; Tile grid — ~d × ~d tiles
 GridSize:     
 Width:    .byte ~d
