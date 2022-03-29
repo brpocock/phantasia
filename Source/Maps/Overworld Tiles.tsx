@@ -7,7 +7,7 @@
  <tile id="1" probability="0.25"/>
  <tile id="2">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="0" y="0" width="8" height="16"/>
+   <object id="1" name="BoundingBox" type="Wall" x="0" y="0" width="8" height="16"/>
   </objectgroup>
  </tile>
  <tile id="3">
@@ -225,6 +225,9 @@
   <properties>
    <property name="Doorway" type="bool" value="true"/>
   </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="4"/>
+  </objectgroup>
  </tile>
  <tile id="54">
   <objectgroup draworder="index" id="2">
@@ -395,7 +398,7 @@
  </tile>
  <tile id="101">
   <objectgroup draworder="index" id="2">
-   <object id="2" x="0" y="0" width="8" height="16"/>
+   <object id="2" x="0" y="4" width="8" height="12"/>
   </objectgroup>
  </tile>
  <tile id="102">
@@ -533,7 +536,7 @@
  </tile>
  <tile id="123">
   <properties>
-   <property name="Wade" type="bool" value="false"/>
+   <property name="Wade" type="bool" value="true"/>
   </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
@@ -545,7 +548,7 @@
  </tile>
  <tile id="124">
   <properties>
-   <property name="Wade" type="bool" value="false"/>
+   <property name="Wade" type="bool" value="true"/>
   </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
