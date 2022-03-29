@@ -10,6 +10,9 @@ Temp:
 Pointer:
           .word ?
 
+Pointer2:
+          .word ?
+
 ;;; Vector to the next NMI (presumably, DLI) handler
 NMINext:
           .word ?

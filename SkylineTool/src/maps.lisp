@@ -497,26 +497,36 @@ Height:    .byte ~d"
      .word Sprites
      .word Exits")
               (format t "~2%Art:     ;; Tile art")
-              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
+              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
                 (dotimes (y height)
                   (dotimes (x width)
                     (setf (aref string (+ (* width y) x)) (aref tile-grid x y 0))))
+                (format t "~{~&     ;; ~
+~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~}" 
+                        (coerce string 'list))
                 (let ((compressed (rle-compress string)))
                   (format t "~&     .word $~4,'0x" (length compressed))
-                  (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
-~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
-~^~&     .byte ~}" 
+                  (format t "~{~&     .byte $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
+~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
                           (coerce compressed 'list))))
               (format t "~2%TileAttributes:     ;; Tile attributes indices")
-              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))  
+              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
                 (dotimes (y height)
                   (dotimes (x width)
                     (setf (aref string (+ (* width y) x)) (aref tile-grid x y 1))))
+                (format t "~{~&     ;; ~
+~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~
+~^  ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~}" 
+                        (coerce string 'list))
                 (let ((compressed (rle-compress string)))
                   (format t "~&     .word $~4,'0x" (length compressed))
-                  (format t "~&     .byte ~{$~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
-~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
-~^~&     .byte ~}" 
+                  (format t "~{~&     .byte $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~
+~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
                           (coerce compressed 'list))))
               (format t "~2%Attributes:     ;; Tile attributes table")
               (dolist (attr attributes-table)

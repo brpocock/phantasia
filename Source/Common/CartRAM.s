@@ -45,6 +45,18 @@ NewSWCHB:      .byte ?
 NewINPT0:      .byte ?
 NewINPT1:      .byte ?
 ;;; 
+
+Counter:          .word ?
+Counter2:         .word ?
+
+          .align $100
+MapArt:
+          .fill $400, ?
+MapTileAttributes:
+          .fill $400, ?
+MapAttributes:
+          .fill $600, ?
+          
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)
           .fi

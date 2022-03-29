@@ -10,6 +10,15 @@ BankEntry:
           .mva NMINext, 0
           .WaitForVBlank
           .mva CTRL, #CTRLDMADisable
+
+          .mvaw Pointer, Map_Atsirav.Art
+          .mvaw Pointer2, MapArt
+          jsr RLE
+
+          .mvaw Pointer, Map_Atsirav.TileAttributes
+          .mvaw Pointer2, MapTileAttributes
+          jsr RLE
+
           .mvaw NMINext, BeginTopBar
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
@@ -279,5 +288,8 @@ Items:
           .align $1000
 Tileset:
           .binary "Tileset.art.bin"
+
+          .include "RLE.s"
+          .include "../Generated/Maps/Atsirav.s"
 
           .include "EndBank.s"
