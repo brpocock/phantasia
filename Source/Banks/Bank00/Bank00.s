@@ -6,12 +6,12 @@
           .include "StartBank.s"
 
 BankEntry:
-          .mva StatsLines, $20  ; 4 × 8
-          .mva DialogueLines, $28 ; 5 × 8
+          .mva StatsLines, #$20  ; 4 × 8
+          .mva DialogueLines, #$28 ; 5 × 8
 
-          .mva NMINext, 0
-          .WaitForVBlank
+          .mva NMINext, # 0
           .mva CTRL, #CTRLDMADisable
+          .WaitForVBlank
           .mvaw NMINext, IBeginStats
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
@@ -97,6 +97,7 @@ CopyDialogueMidDL:
           sbc # 1
           eor #$1f              ; encode width
           ora #$20              ; palette 2
+          sta DialogueDL, y
           iny
           lda #>Dialogue2Text + 1
           sta DialogueDL, y
@@ -115,6 +116,7 @@ CopyDialogueMidDL:
           bcc +
           inc Pointer + 1
 +
+          sta Pointer
 
           lda Counter
           sec
@@ -123,14 +125,14 @@ CopyDialogueMidDL:
           beq DoneDialogueMid
           bpl NextDialogueZone
 
-          ;; partial zone only
-          lda Temp              ; DLL index
-          sec
-          sbc # 2
-          tax
-          lda DLL, x
-          adc Counter           ; negative
-          sta DLL, x
+          ;; ;; partial zone only
+          ;; lda Temp              ; DLL index
+          ;; sec
+          ;; sbc # 2
+          ;; tax
+          ;; lda DLL, x
+          ;; adc Counter           ; negative
+          ;; sta DLL, x
 
 DoneDialogueMid:
           .mvayi DLL, # 7 | DLLHoley8
