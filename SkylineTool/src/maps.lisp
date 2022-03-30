@@ -377,7 +377,7 @@
     (format *trace-output* "~&Loading tileset data from ~a" pathname)
     (assert (equal "tileset" (first xml)))
     (assert (equal "128" (assocdr "tilecount" (second xml))))
-    (assert (<= 1.4 (parse-number (assocdr "version" (second xml))) 1.8))
+    (assert (<= 1.7 (parse-number (assocdr "version" (second xml))) 1.8))
     (let* ((properties (find-if (lambda (el) (equal "properties" (car el))) (subseq xml 2)))
            (image (find-if (lambda (el) (equal "image" (car el))) (subseq xml 2)))
            (image-data (load-tileset-image (assocdr "source" (second image))))
