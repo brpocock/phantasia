@@ -19,3 +19,4 @@ bin/buildapp
 cfg
 *.log
 snap/
+*.tiled-session

@@ -138,6 +138,12 @@
 
 (define-constant +unicode->ascii-ish+ nil)
 
+(defun double-up (list)
+  (loop for item in list
+        appending (list item item)))
+
+(assert (equalp '(a a b b c c) (double-up '(a b c))))
+
 (defun machine-palette ()
   (copy-list (ecase *machine*
                (20 (subseq +c64-palette+ 0 7))
@@ -148,10 +154,9 @@
                        (:ntsc +vcs-ntsc-palette+)
                        (:pal +vcs-pal-palette+)
                        (:secam +vcs-secam-palette+)))
-               (7800 (ecase *region* ;;; Not techically accurate, there are 256 colors
-                       (:ntsc +vcs-ntsc-palette+)
-                       (:pal +vcs-pal-palette+)
-                       (:secam +vcs-secam-palette+)))
+               (7800 (ecase *region* ;;; Not techically accurate, there are 256 colors XXX
+                       (:ntsc (double-up +vcs-ntsc-palette+))
+                       (:pal (double-up +vcs-pal-palette+))))
                (264 +ted-palette+)
                (16 +tg16-palette+))))
 
@@ -981,7 +986,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
         (setf (aref output x) index)))
     output))
 
-(defmethod parse-7800-object ((mode (eql :160a)) pixels &key width height palette)
+(defmethod parse-7800-obect ((mode (eql :160a)) pixels &key width height palette)
   (assert (>= 4 (length palette)))
   (let ((total-width (array-dimension pixels 0))
         (total-height (1- (array-dimension pixels 1))))
@@ -1171,9 +1176,10 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                          (:160b 13)
                          (:320b 4)
                          (:320c 8)))
+         (last-row (1- (array-dimension png 1)))
          (palette-strip (extract-region png
-                                        0 (1- (array-dimension png 1))
-                                        palette-size (1- (array-dimension png 1)))))
+                                        0 last-row
+                                        palette-size last-row)))
     (let ((palette (loop for i below palette-size
                          collect (aref palette-strip i 0))))
       (format t "~&Palette detected: ~{~x~^, ~}" palette)

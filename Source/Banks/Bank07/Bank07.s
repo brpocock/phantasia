@@ -47,7 +47,7 @@ ReturnFromInterrupt:
           .include "FarCall.s"
           .include "FarJump.s"
           .include "FrameService.s"
-
+          
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)
           .fi

@@ -173,3 +173,8 @@ publish-release:	release
 		star-hope.org:star-hope.org/games/Phantasia ; do \
 		sleep 1 ; done
 	rsync -essh -rv Dist/$(RELEASE) Krishna.local:Projects/Phantasia/Dist/
+
+Source/Generated/Maps/%.s:	Source/Maps/%.tmx bin/skyline-tool
+	mkdir -p Source/Generated/Maps
+	bin/skyline-tool compile-map $<
+

@@ -19,7 +19,7 @@ DATE=$(shell date +%d)
 JULIAN=$(shell date +%j)
 BUILD=$(shell date +%y.%j)
 ASFLAGS=--nostart --long-branch --case-sensitive \
-	--ascii -I. -I Source/Common -I Source/Routines -I Source/Generated/Common \
+	--ascii -I. -I Source/Common -I Source/Routines -I Source/Generated/Common -I Source/Generated/Maps \
 	-D YEARNOW=${YEAR} -D MONTHNOW=${MONTH} \
 	-D DATENOW=${DATE} -D JULIANDATENOW=${JULIAN} \
 	-D BUILD=${BUILD} \
@@ -54,6 +54,7 @@ for my $tv (qw(NTSC PAL)) {
 
   my @places = @banks;
   unshift @places => 'Common';
+  unshift @places => 'Maps';
 
   for my $bank (@places) {
     my $bankdir = "Source/Banks/Bank$bank";
@@ -63,6 +64,12 @@ for my $tv (qw(NTSC PAL)) {
     if ('Common' eq $bank) {
       $bankdir = "Source/Common";
       $genrdir = "Source/Generated/Common";
+      $bankfile = undef;
+    }
+
+    if ('Maps' eq $bank) {
+      $bankdir = "Source/Maps";
+      $genrdir = "Source/Generated/Maps";
       $bankfile = undef;
     }
 
@@ -78,7 +85,7 @@ for my $tv (qw(NTSC PAL)) {
       {
         opendir my $src, "$bankdir/";
         while (my $file = readdir $src) {
-          next unless $file =~ /\.(s|txt|art|midi)$/;
+          next unless $file =~ /\.(s|txt|art|midi|tmx|tsx)$/;
           push @todo => "$bankdir/$file";
         }
         closedir $src;
@@ -89,10 +96,12 @@ for my $tv (qw(NTSC PAL)) {
         if ($path =~ m(^Source/Generated)) {
           my $orig_path = $path;
           $orig_path =~ s(Generated/Common) (Common);
+          $orig_path =~ s(Generated/Maps) (Maps);
           $orig_path =~ s(Generated/Bank) (Banks/Bank);
           $orig_path =~ s(\.s$) ();
           $orig_path =~ s(\.bin$) ();
-          if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt") {
+          if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt" or
+             -f "$orig_path.tmx" or -f "$orig_path.tsx") {
             unless ($seen{ $path }) {
               ++$seen{ $path };
               push @files => $path;
@@ -137,22 +146,37 @@ for my $tv (qw(NTSC PAL)) {
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-art-7800 \$\@ \$<\n\n";
           push @files => "$genrdir/$base.art.bin";
+        } elsif ('tmx' eq $ext) {
+          next if $rules{ $path };
+          ++ $rules{ $path };
+          print "$genrdir/$base.s:\t$bankdir/$base.tmx bin/skyline-tool
+\tmkdir -p $genrdir
+\tbin/skyline-tool compile-map \$<\n\n";
+          push @files => "$genrdir/$base.s";
+        } elsif ('tsx' eq $ext) {
+          next if $rules{ $path };
+          ++ $rules{ $path };
+          print "$genrdir/$base.s:\t$bankdir/$base.tsx bin/skyline-tool
+\tmkdir -p $genrdir
+\tbin/skyline-tool compile-tileset \$<\n\n";
+          push @files => "$genrdir/$base.s";
         } elsif ('s' eq $ext) {
           push @files => $path;
           open my $text, '<', $path;
           while (my $line = <$text>) {
             if ($line =~ /\.include "(.+)\.s"/) {
               my $dep = $1;
-              if ($bank ne 'Common') {
+              if ($bank ne 'Common' and $bank ne 'Maps') {
                 push @todo => "$bankdir/$dep.s";
                 push @todo => "$genrdir/$dep.s";
               }
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
+              push @todo => "Source/Generated/Maps/$dep.s";
             } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
-              if ($bank ne 'Common') {
+              if ($bank ne 'Common' and $bank ne 'Maps') {
                 push @todo => "$bankdir/$dep";
                 push @todo => "$genrdir/$dep";
               }
@@ -168,7 +192,7 @@ for my $tv (qw(NTSC PAL)) {
       }
     }
 
-    if ($bank eq 'Common') {
+    if ($bank eq 'Common' or $bank eq 'Maps') {
       next;
     }
 

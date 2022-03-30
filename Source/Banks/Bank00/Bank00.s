@@ -148,9 +148,9 @@ DoneDialogue:
           .mvayi DLL, #>MapFillDL
           .mvayi DLL, #<MapFillDL
 
-          ldx # 8
+          ldx # 10
 MapFillDLL:
-          .mvayi DLL, # 15
+          .mvayi DLL, # 7
           .mvayi DLL, #>MapFillDL
           .mvayi DLL, #<MapFillDL
 
@@ -235,10 +235,10 @@ IEndStats:
 
 BeginMap:
           stx WSYNC
-          .mva BACKGRND, #CoLu(COLGREEN, $8)
+          .mva BACKGRND, #CoLu(COLGREEN, $8) ; MapBackground FIXME
           stx WSYNC
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
-          .mva CHARBASE, #>Tileset
+          .mva CHARBASE, #$ff ; FIXME
           rts
 
 IEndDialogue:
@@ -269,7 +269,7 @@ StatsDL1:
           .DLAltHeader DrawUI + $00, 0, 4, $04
           .DLAltHeader DrawUI + $02, 0, 4, $0c
 
-          .DLStringHeader LocationNameString, 2, $60
+          .DLStringHeader LocationNameString, 2, $50
 
           .DLAltHeader DrawUI + $00, 0, 4, $18
           .DLAltHeader DrawUI + $02, 0, 4, $20
@@ -371,9 +371,5 @@ Font:
           .align $1000
 Items:
           .binary "Items.art.bin"
-          
-          .align $1000
-Tileset:
-          .binary "Tileset.art.bin"
-
+           
           .include "EndBank.s"
