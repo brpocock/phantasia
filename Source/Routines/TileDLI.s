@@ -14,6 +14,8 @@ TileDLI:  .block
             .next
           .next
 
+          .mva CHARBASE, $9000
+
           .BankSwitch CurrentBank
 
           rts

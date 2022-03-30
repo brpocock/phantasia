@@ -6,9 +6,6 @@
           .include "StartBank.s"
 ;;; 
 BankEntry:
-          .mva StatsLines, #$20  ; 4 × 8
-          .mva DialogueLines, #$28 ; 5 × 8
-
           .mva NMINext, # 0
           .mva CTRL, #CTRLDMADisable
 

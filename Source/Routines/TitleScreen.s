@@ -96,6 +96,9 @@ Loop:
 
           ;; FIXME clear the DLL before leaving the ROM bank
 
+          .mva StatsLines, #$20  ; 4 × 8
+          .mva DialogueLines, #$28 ; 5 × 8
+
           ldx # 0
           jmp JFarJump
 ;;; 
