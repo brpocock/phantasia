@@ -17,6 +17,7 @@
         :compile-code 'compile-skylisp
         :collect-strings 'collect-strings
         :compile-music 'compile-music
+        :compile-tileset 'compile-tileset
         :collect-assets 'collect-assets
         :compile-critters 'compile-critters
         :compile-art-7800 'compile-art-7800))

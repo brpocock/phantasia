@@ -92,8 +92,7 @@
     output))
 
 (defun parse-layer (layer)
-  (let ((properties (find-if (lambda (el) (equal "properties" (car el))) (subseq layer 2)))
-        (data (find-if (lambda (el) (equal "data" (car el))) (subseq layer 2))))
+  (let ((data (xml-match "data" layer)))
     (assert data)
     (assert (equal "base64" (assocdr "encoding" (second data))))
     (assert (stringp (third data)))
@@ -122,13 +121,13 @@
            (<= (* x 8) (parse-number (assocdr "x" (second object))) (1- (* (1+ x) 8)))
            (<= (* y 16) (parse-number (assocdr "y" (second object))) (1- (* (1+ y) 16))))))
 
-(defun find-effective-attributes (x y objects attributes exits)
+(defun find-effective-attributes (tileset x y objects attributes exits)
   (let ((effective-objects (remove-if-not (lambda (el)
                                             (and (equal "object" (car el))
                                                  (object-covers-tile-p x y el)))
                                           (subseq objects 2))))
     (dolist (object effective-objects)
-      (add-attribute-values object attributes exits))))
+      (add-attribute-values nil object attributes exits))))
 
 (defun add-alt-tile-attributes (tile-attributes alt-tile-attributes)
   (let ((wall-bits (logand #x0f (aref alt-tile-attributes 0))))
@@ -158,7 +157,7 @@
                   (find-tile-by-number (aref ground x y) tileset)
                 (setf (aref tile-attributes 5) alt-tile-id)
                 (add-alt-tile-attributes tile-attributes alt-tile-attributes)))
-            (find-effective-attributes x y objects tile-attributes exits-table)
+            (find-effective-attributes tileset x y objects tile-attributes exits-table)
             (setf (aref output x y 0) tile-id
                   (aref output x y 1) (assign-attributes tile-attributes
                                                          attributes-table))))))
@@ -182,6 +181,7 @@
 (defclass tileset ()
   ((gid :initarg :gid :reader tileset-gid)
    (pathname :initarg :pathname :reader tileset-pathname)
+   (image :initarg :image :reader tileset-image)
    (tile-attributes :accessor tile-attributes
                     :initform (make-array (list 128 6) :element-type '(unsigned-byte 8)))))
 
@@ -300,7 +300,7 @@
   (let ((locale.xml (load-other-map locale)))
     (warn "Not finding point ~s in locale ~s" point locale)))
 
-(defun add-attribute-values (xml bytes &optional (exits nil exits-provided-p))
+(defun add-attribute-values (palettes xml bytes &optional (exits nil exits-provided-p))
   (labels ((set-bit (byte bit)
              (setf (elt bytes byte) (logior (elt bytes byte) bit)))
            (clear-bit (byte bit)
@@ -350,40 +350,44 @@
             (set-bit 4 (assign-exit locale point exits))
             (warn "Exit in tileset data is not supported (to ~s in ~s)" point locale))))
     (when-let (lock (tile-property-value "Lock" xml))
-      (set-bit 3 (logand #x3f (parse-integer lock :radix 16))))
+      (set-bit 3 (logand #x1f (parse-integer lock :radix 16))))
     (if-let (switch (tile-property-value "Switch" xml))
-      (let ((switch-code (logand #x0f (parse-integer switch :radix 16))))
-        (set-bit 3 (ash (logand #x03 switch-code) 6))
-        (set-bit 4 (ash (logand #x0c switch-code) 3)))
+      (let ((switch-code (logand #x0c (parse-integer switch :radix 16))))
+        (set-bit 4 (ash switch-code 3)))
       (when (tile-property-value "Locked" xml)
-        (warn "Locked tile without Lock code")))))
+        (warn "Locked tile without Lock code")))
+    (when-let (tile-id (assocdr "id" (second xml) nil))
+      (when (and palettes tile-id)
+        (set-bit 4 (aref palettes (parse-integer tile-id)))))))
 
-(defun parse-tile-attributes (xml i)
+(defun parse-tile-attributes (palettes xml i)
   (let ((bytes (make-array '(6) :element-type '(unsigned-byte 8)))
         (tile.xml (find-if (lambda (el)
                              (and (equal "tile" (car el))
                                   (= i (parse-integer (assocdr "id" (second el))))))
                            (subseq xml 2))))
-    (add-attribute-values tile.xml bytes)
+    (add-attribute-values palettes tile.xml bytes)
     bytes))
 
 (defun load-tileset (xml-reference)
-  (let* ((pathname (assocdr "source" (second xml-reference)))
-         (gid (parse-integer (assocdr "firstgid" (second xml-reference))))
-         (xml (xmls:parse-to-list (alexandria:read-file-into-string 
-                                   (make-pathname :name pathname
-                                                  :defaults #p"./Source/Maps/"))))
+  (let* ((pathname (if (consp xml-reference)
+                       (make-pathname :name (assocdr "source" (second xml-reference))
+                                      :defaults #p"./Source/Maps/")
+                       xml-reference))
+         (gid (if (consp xml-reference)
+                  (parse-integer (assocdr "firstgid" (second xml-reference)))
+                  0))
+         (xml (xmls:parse-to-list (alexandria:read-file-into-string pathname)))
          (tileset (make-instance 'tileset :gid gid :pathname pathname)))
     (format *trace-output* "~&Loading tileset data from ~a" pathname)
     (assert (equal "tileset" (first xml)))
     (assert (equal "128" (assocdr "tilecount" (second xml))))
     (assert (<= 1.7 (parse-number (assocdr "version" (second xml))) 1.8))
-    (let* ((properties (find-if (lambda (el) (equal "properties" (car el))) (subseq xml 2)))
-           (image (find-if (lambda (el) (equal "image" (car el))) (subseq xml 2)))
+    (let* ((image (xml-match "image" xml))
            (image-data (load-tileset-image (assocdr "source" (second image))))
            (palette-data (split-images-to-palettes image-data)))
       (dotimes (i 128)
-        (let ((bytes (parse-tile-attributes xml i)))
+        (let ((bytes (parse-tile-attributes palette-data xml i)))
           (dotimes (b 6)
             (setf (aref (tile-attributes tileset) i b) (elt bytes b))))))
     tileset))
@@ -546,6 +550,14 @@ after considering ~:d option~:p."
 ~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
           (coerce string 'list)))
 
+(defun xml-match (element xml)
+  (find-if (lambda (el) (equal element (car el)))
+           (subseq xml 2)))
+
+(defun xml-matches (element xml)
+  (remove-if-not (lambda (el) (equal element (car el)))
+                 (subseq xml 2)))
+
 (defun compile-map (pathname)
   (with-open-file (*standard-output* 
                    (make-pathname :defaults pathname
@@ -560,16 +572,12 @@ after considering ~:d option~:p."
       (assert (equal "8" (assocdr "tilewidth" (second xml))))
       (assert (equal "16" (assocdr "tileheight" (second xml))))
       (let ((tilesets (mapcar #'load-tileset
-                              (remove-if-not (lambda (el)
-                                               (equal "tileset" (car el)))
-                                             (subseq xml 2))))
-            (layers (remove-if-not (lambda (el)
-                                     (equal "layer" (car el)))
-                                   (subseq xml 2)))
-            (object-groups (remove-if-not (lambda (el)
-                                            (equal "objectgroup" (car el)))
-                                          (subseq xml 2))))
-        (assert (<= 1 (length layers) 2))
+                              (xml-matches "tileset" xml)))
+            (layers (xml-matches "layer" xml))
+            (object-groups (xml-matches "objectgroup" xml)))
+        (assert (<= 1 (length layers) 2) ()
+                "This tool requires 1-2 layers, found ~:d tile map layer~:p in ~a"
+                (length layers) pathname)
         (when (= 2 (length layers))
           (when (or (and (null (map-layer-depth (first layers)))
                          (eql 0 (map-layer-depth (second layers))))
@@ -640,6 +648,20 @@ Name:     .ptext \"~a\""
               (format t "~2%Exits:     ;; Exit destination pointers")
               (dolist (exit exits-table)
                 (hex-dump-bytes exit))))))
+      (format t "~2&      .bend")
+      (fresh-line))))
+
+(defun compile-tileset (pathname)
+  (with-open-file (*standard-output* 
+                   (make-pathname :defaults pathname
+                                  :directory '(:relative "Source/Generated/Maps/")
+                                  :type "s")
+                   :direction :output
+                   :if-exists :supersede)
+    (let ((tileset (load-tileset pathname)))
+      (format t ";;; This is a generated file~%;;; Source file ~a" pathname)
+      (format t "~2&~a:      .block" (pathname-name pathname))
+      
       (format t "~2&      .bend")
       (fresh-line))))
 
