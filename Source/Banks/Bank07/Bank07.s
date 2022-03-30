@@ -19,9 +19,8 @@ JumpTable:
           jmp FarCall
           jmp FarJump
           jmp FrameService
-          brk
-          brk
-          brk
+          jmp TileDisplay
+          jmp TileDLI
           jmp ReturnFromInterrupt
 
 
@@ -42,6 +41,8 @@ ReturnFromInterrupt:
           .include "FarCall.s"
           .include "FarJump.s"
           .include "FrameService.s"
+          .include "TileDLI.s"
+          .include "TileDisplay.s"
 
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)

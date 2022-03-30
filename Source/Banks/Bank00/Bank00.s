@@ -247,18 +247,10 @@ IEndStats:
           .mvaw NMINext, IEndDialogue
           jmp JReturnFromInterrupt
 
-BeginMap:
-          stx WSYNC
-          .mva BACKGRND, #CoLu(COLGREEN, $8) ; MapBackground FIXME
-          stx WSYNC
-          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
-          .mva CHARBASE, #$ff ; FIXME
-          rts
-
 IEndDialogue:
           .SaveRegs
 DoBeginMap:
-          jsr BeginMap
+          jsr JTileDLI
           .mvaw NMINext, ISwitchToOverscan
           jmp JReturnFromInterrupt
 
