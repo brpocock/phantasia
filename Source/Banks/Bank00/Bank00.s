@@ -11,7 +11,7 @@ BankEntry:
 
           .mva NMINext, # 0
           .mva CTRL, #CTRLDMADisable
-          .WaitForVBlank
+
           .mvaw NMINext, IBeginStats
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
@@ -78,29 +78,35 @@ DialogueDLL:
           ldy # 0
           .mvaw Pointer, DialogueDL ; end of DialogueDLs
 NextDialogueZone:
-          ldx # DialogueBottomDL - DialogueMidDL + 1
+          ldx # 0
 CopyDialogueMidDL:
           lda DialogueMidDL, x
           sta (Pointer), y
           iny
-          dex
+          inx
+          cpx #DialogueBottomDL - DialogueMidDL + 1
           bne CopyDialogueMidDL
 
           sty Swap              ; DialogueDL index
 
-          ldy # 4               ; index of string header padding
+          tya
+          sec
+          sbc # 13
+          tay                   ; go back to string header padding
+          
           lda #<Dialogue2Text + 1
-          sta DialogueDL, y
+          sta (Pointer), y
+          iny
+          iny                   ; skip over mode byte
+          lda #>Dialogue2Text + 1
+          sta (Pointer), y
           iny
           lda Dialogue2Text
           sec
           sbc # 1
           eor #$1f              ; encode width
           ora #$20              ; palette 2
-          sta DialogueDL, y
-          iny
-          lda #>Dialogue2Text + 1
-          sta DialogueDL, y
+          sta (Pointer), y
 
           ldy Temp              ; DLL index
 
@@ -133,6 +139,8 @@ CopyDialogueMidDL:
           ;; lda DLL, x
           ;; adc Counter           ; negative
           ;; sta DLL, x
+
+          ldy Temp              ; DLL index
 
 DoneDialogueMid:
           .mvayi DLL, # 7 | DLLHoley8
@@ -209,7 +217,7 @@ BeginStats:
           rts
 
 IBeginStats:
-          jsr JSaveRegs
+          .SaveRegs
           jsr BeginStats
           .mvaw NMINext, IEndStats
           jmp JReturnFromInterrupt
@@ -225,7 +233,7 @@ BeginDialogue:
           rts
 
 IEndStats:
-          jsr JSaveRegs
+          .SaveRegs
           lda DialogueLines
           beq DoBeginMap
 
@@ -242,14 +250,14 @@ BeginMap:
           rts
 
 IEndDialogue:
-          jsr JSaveRegs
+          .SaveRegs
 DoBeginMap:
           jsr BeginMap
           .mvaw NMINext, ISwitchToOverscan
           jmp JReturnFromInterrupt
 
 ISwitchToOverscan:
-          jsr JSaveRegs
+          .SaveRegs
           stx WSYNC
           .mva BACKGRND, #CoLu(COLGRAY, $0)
           .mvaw NMINext, IBeginStats
@@ -343,7 +351,8 @@ DialogueTopDL:
 
 DialogueMidDL:
           .DLAltHeader DrawUI + $0b * 2, 0, 2, $00
-          .fill 5, 0            ; placeholder for string header
+          ;; placeholder values $ff are overwritten when the DL is constructed
+          .byte $ff, DLExtMode(false, true), $ff, $ff, $10
           .DLAltHeader DrawUI + $0f * 2, 0, 2, $9c
 
           .DLEnd

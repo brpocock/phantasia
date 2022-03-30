@@ -19,16 +19,11 @@ JumpTable:
           jmp FarCall
           jmp FarJump
           jmp FrameService
-          jmp SaveRegs
+          brk
+          brk
+          brk
           jmp ReturnFromInterrupt
 
-SaveRegs:
-          pha
-          txa
-          pha
-          tya
-          pha
-          rts
 
 ReturnFromInterrupt:
           pla
