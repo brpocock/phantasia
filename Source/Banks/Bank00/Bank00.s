@@ -20,6 +20,8 @@ BankEntry:
 
           DLL = SysRAMHigh
           DialogueDL = DLL + $200
+          MapDL = DLL + $300
+          MapStrings = DLL + $500
 
 BuildDLL:
           lda # 192
@@ -30,11 +32,7 @@ BuildDLL:
           
           ldy # 0
 
-          .mvayi DLL, # 11
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
-
-          .mvayi DLL, # 0 | DLLDLI
+          .mvayi DLL, # 11 | DLLDLI
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
 
@@ -155,19 +153,81 @@ DoneDialogue:
           cmp #$10
           blt DoneMap
 
-          .mvayi DLL, # 15 | DLLHoley16 | DLLDLI
-          .mvayi DLL, #>MapFillDL
-          .mvayi DLL, #<MapFillDL
+          lda # 0               ; XXX scrolling
+          sta Counter           ; current map tile row
 
-          ldx # 10
-MapFillDLL:
-          .mvayi DLL, # 15
-          .mvayi DLL, #>MapFillDL
-          .mvayi DLL, #<MapFillDL
+          lda # 0
+          sta Counter + 1       ; current screen tile row
 
-          dex
-          bne MapFillDLL
+          .mvaw Pointer, MapDL
+          .mvaw Dest, MapStrings
 
+          sty Swap              ; Index into the DLL
+
+MoreMapRows:
+          ldy Swap              ; Index into the DLL
+          lda # 15 | DLLHoley16
+          ldx Counter + 1
+          bne +
+          ora # DLLDLI
++
+          sta DLL, y
+          iny
+
+          .mvayi DLL, MapDL + 1
+          .mvayi DLL, MapDL
+
+          sty Swap              ; Index into the DLL
+
+          lda #<MapArt
+          sta Source
+          lda #>MapArt
+          sta Source + 1
+
+          lda Counter           ; map tile row 0 - 31
+          asl a
+          asl a
+          asl a
+          bcc +
+          inc Source + 1
++
+          asl a
+          bcc +
+          inc Source + 1
+          clc
++
+          adc Source
+          sta Source
+
+          ldy # 0               ; horizontal scroll gross position XXX
+          ldx # 0               ; screen column 0 - 16
+CopyTiles:
+          lda (Source), y
+          sta (Dest), y         ; XXX
+
+          inx
+          cpx #$11              ; because of fine scrolling
+          blt CopyTiles
+
+          ldy # 0               ; drawing list index
+          .mvayi Pointer, Dest + 1
+          .mvayi Pointer, #DLExtMode(false, true)
+          .mvayi Pointer, Dest
+          .mvayi Pointer, DLPalWidth(2, 16) ; XXX palette
+          .mvay Pointer, # 0               ; XXX fine scroll
+
+          .Add16 Dest, #$11
+          .Add16 Pointer, 5 
+
+          lda Counter + 1
+          asl a
+          asl a
+          asl a
+          asl a
+          cmp MapLines
+          blt MoreMapRows
+
+DoneMap:
           .mvayi DLL, # 0 | DLLDLI
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
@@ -180,22 +240,19 @@ MapFillDLL:
           .mvayi DLL, #>BlankDL
           .mvayi DLL, #<BlankDL
 
-DoneMap:
+          ;; These should not be necessary? XXX
 
-          ldx # 8 * 4
-          lda #CoLu(COLGRAY, $0)
-          sta BACKGRND
+          .mvayi DLL, # 15
+          .mvayi DLL, #>BlankDL
+          .mvayi DLL, #<BlankDL
 
-ZeroPalettes:
-          sta P0C1, x
-          sta P0C2, x
-          sta P0C3, x
+          .mvayi DLL, # 15
+          .mvayi DLL, #>BlankDL
+          .mvayi DLL, #<BlankDL
 
-          dex
-          dex
-          dex
-          dex
-          bpl ZeroPalettes
+          .mvayi DLL, # 15
+          .mvayi DLL, #>BlankDL
+          .mvayi DLL, #<BlankDL
 
           .WaitForVBlank
           .mva CTRL, #CTRLDMAEnable
@@ -226,13 +283,14 @@ IBeginStats:
           jmp JReturnFromInterrupt
 
 BeginDialogue:
-          stx WSYNC
-          stx WSYNC
-          .mva P2C2, #CoLu(COLGRAY, $0)
+          .mva BACKGRND, #CoLu(COLGRAY, $0)
+          .mva P0C2, #CoLu(COLGRAY, $9)
+          .mva P1C2, #CoLu(COLGRAY, $b)
+          .mva P2C2, #CoLu(COLGRAY, $f)
+          .mva P3C2, #CoLu(COLGRAY, $d)
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC
           .mva CHARBASE, #>Font
           stx WSYNC
-          .mva BACKGRND, #CoLu(COLGRAY, $c)
           rts
 
 IEndStats:
@@ -247,16 +305,8 @@ IEndStats:
 IEndDialogue:
           .SaveRegs
 DoBeginMap:
-          jsr JTileDLI
-          .mvaw NMINext, ISwitchToOverscan
-          jmp JReturnFromInterrupt
+          jmp JTileDLI
 
-ISwitchToOverscan:
-          .SaveRegs
-          stx WSYNC
-          .mva BACKGRND, #CoLu(COLGRAY, $0)
-          .mvaw NMINext, IBeginStats
-          jmp JReturnFromInterrupt
 ;;; 
           .enc "minifont"
 LocationNameString: .ptext "locale name here"
@@ -264,9 +314,6 @@ LocationNameString: .ptext "locale name here"
 Dialogue2Text:      .ptext "hello, world."
 Dialogue3Text:      .ptext "this is a test"
 Dialogue4Text:      .ptext "this is only a test"
-
-MapFillDL:
-          .DLEnd
 
 StatsDL1:
           .DLAltHeader DrawUI + $00, 0, 4, $04
@@ -365,6 +412,9 @@ DialogueBottomDL:
 
           .DLEnd
 
+;;; 
+          * = $9000
+          jmp IBeginStats
 
 ;;; 
           .align $1000

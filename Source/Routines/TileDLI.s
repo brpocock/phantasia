@@ -10,14 +10,24 @@ TileDLI:  .block
 
           .for p := 0, p < 8, p := p + 1
             .for c := 0, c < 3, c := c + 1
-              .mva P0C1 + p * 4 + c, $9000 + p * 3 + c
+              .mva P0C1 + p * 4 + c, $9001 + p * 3 + c
             .next
           .next
 
-          .mva CHARBASE, $9000
+          .mva CHARBASE, #>$8000
+          .mvaw NMINext, TileDLIDone
+
+          jmp ReturnFromInterrupt
+
+TileDLIDone:
+          .SaveRegs
 
           .BankSwitch CurrentBank
 
-          rts
+          stx WSYNC
+          .mva BACKGRND, # 0
+
+          .mvaw NMINext, $9000
+          jmp JReturnFromInterrupt
           
           .bend

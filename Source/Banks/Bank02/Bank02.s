@@ -64,13 +64,15 @@ CopyExitsLoop:
           .mvaw Pointer, Map_Atsirav.Art
           .mvaw Pointer2, MapArt
           jsr RLE
+          ;; jsr Span32 ; expand to 32×32 size
 
           ;; Decompress pointers to map attribute data
           ;; TODO the source pointer should come from Map_Atsirav + 4, 5
           .mvaw Pointer, Map_Atsirav.TileAttributes
           .mvaw Pointer2, MapTileAttributes
+          jsr RLE
+          ;; jsr Span32 ; expand to 32×32 size
 
-          ;; fall through into RLE to decompress the attributes then return (tail call)
           .include "RLE.s"
           .include "Atsirav.s"
           .include "PlayerHouse.s"
