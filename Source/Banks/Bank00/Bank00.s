@@ -11,20 +11,6 @@ BankEntry:
           .WaitForVBlank
           .mva CTRL, #CTRLDMADisable
 
-          ;; Decompress map tile data
-          ;; TODO the source pointer should come from Map_Atsirav + 2, 3
-          .mvaw Pointer, Map_Atsirav.Art
-          .mvaw Pointer2, MapArt
-          jsr RLE
-
-          ;; Decompress pointers to map attribute data
-          ;; TODO the source pointer should come from Map_Atsirav + 4, 5
-          .mvaw Pointer, Map_Atsirav.TileAttributes
-          .mvaw Pointer2, MapTileAttributes
-          jsr RLE
-
-          ;; Back to setting up the screen
-
           .mvaw NMINext, BeginTopBar
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
@@ -149,7 +135,7 @@ EndDialogue:
           stx WSYNC
           .mva BACKGRND, #CoLu(COLGREEN, $8)
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
-          .mva CHARBASE, #>Tileset
+          .mva CHARBASE, #$ff   ; XXX
           .mvaw NMINext, SwitchToOverscan
           rti
 
@@ -282,8 +268,6 @@ DialogueDL6:
           .DLEnd
 
 ;;; 
-          .include "Atsirav.s"
-
           .align $1000
 Font:
           .binary "UI.art.bin"
@@ -293,14 +277,4 @@ Font:
 Items:
           .binary "Items.art.bin"
            
-          .include "RLE.s"
-
-          .align $1000
-Tileset:
-          .include "OverworldTiles.s"
-
-          .align $1000
-Sprites:
-          .include "OverworldSprites.s"
-
           .include "EndBank.s"
