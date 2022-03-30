@@ -89,9 +89,9 @@ TopBarDLL:
           .mvayi DLL, #>MapFillDL
           .mvayi DLL, #<MapFillDL
 
-          ldx # 8
+          ldx # 16
 MapFillDLL:
-          .mvayi DLL, # 15
+          .mvayi DLL, # 7
           .mvayi DLL, #>MapFillDL
           .mvayi DLL, #<MapFillDL
 
@@ -282,6 +282,8 @@ DialogueDL6:
           .DLEnd
 
 ;;; 
+          .include "Atsirav.s"
+
           .align $1000
 Font:
           .binary "UI.art.bin"
@@ -290,12 +292,15 @@ Font:
           .align $1000
 Items:
           .binary "Items.art.bin"
-          
+           
+          .include "RLE.s"
+
           .align $1000
 Tileset:
-          .binary "Tileset.art.bin"
+          .include "OverworldTiles.s"
 
-          .include "RLE.s"
-          .include "../Generated/Maps/Atsirav.s"
+          .align $1000
+Sprites:
+          .include "OverworldSprites.s"
 
           .include "EndBank.s"
