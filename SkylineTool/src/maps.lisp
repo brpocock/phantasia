@@ -181,7 +181,7 @@
 (defclass tileset ()
   ((gid :initarg :gid :reader tileset-gid)
    (pathname :initarg :pathname :reader tileset-pathname)
-   (image :initarg :image :reader tileset-image)
+   (image :initarg :image :accessor tileset-image)
    (tile-attributes :accessor tile-attributes
                     :initform (make-array (list 128 6) :element-type '(unsigned-byte 8)))))
 
@@ -386,6 +386,7 @@
     (let* ((image (xml-match "image" xml))
            (image-data (load-tileset-image (assocdr "source" (second image))))
            (palette-data (split-images-to-palettes image-data)))
+      (setf (tileset-image tileset) image-data)
       (dotimes (i 128)
         (let ((bytes (parse-tile-attributes palette-data xml i)))
           (dotimes (b 6)
@@ -651,6 +652,28 @@ Name:     .ptext \"~a\""
       (format t "~2&      .bend")
       (fresh-line))))
 
+(defun rip-tiles-from-tileset (tileset images)
+  (let ((i 0))
+    (dotimes (y (floor (array-dimension (tileset-image tileset) 1) 16))
+      (dotimes (x (floor (array-dimension (tileset-image tileset) 0) 8))
+        (setf (aref images i) (extract-region (tileset-image tileset)
+                                              (* x 8) (* y 16) 
+                                              (1- (* (1+ x) 8)) (1- (* (1+ y) 16))))
+        (incf i)))))
+
+(defun palette-index (pixel palette)
+  (position pixel (coerce palette 'list)))
+
+(defun rip-bytes-from-image (image palettes bytes index)
+  (let ((palette (elt (2a-to-list palettes) (best-palette image palettes))))
+    (dotimes (y 16)
+      (dotimes (half 2)
+        (let ((byte-index (+ (+ half (* 2 index)) (* y #x100))))
+          (check-type byte-index (integer 0 (4096)))
+          (dotimes (x 4)
+            (setf (ldb (byte 2 (* 2 x)) (aref bytes byte-index))
+                  (palette-index (aref image (+ x (* 4 half)) y) palette))))))))
+
 (defun compile-tileset (pathname)
   (with-open-file (*standard-output* 
                    (make-pathname :defaults pathname
@@ -658,10 +681,24 @@ Name:     .ptext \"~a\""
                                   :type "s")
                    :direction :output
                    :if-exists :supersede)
-    (let ((tileset (load-tileset pathname)))
+    (let* ((tileset (load-tileset pathname))
+           (palettes (extract-palettes (tileset-image tileset)))
+           (images (make-array (list 128)))
+           (bytes (make-array (list (* 256 16)) :element-type '(unsigned-byte))))
       (format t ";;; This is a generated file~%;;; Source file ~a" pathname)
       (format t "~2&~a:      .block" (pathname-name pathname))
-      
+      (rip-tiles-from-tileset tileset images)
+      (dotimes (i 128)
+        (rip-bytes-from-image (aref images i) palettes bytes i))
+      (format t "~2&Images:")
+      (hex-dump-bytes bytes)
+      (format t "~2&BackgroundColor:    .byte $~2,'0x" (aref palettes 0 0))
+      (format t "~2&Palettes:")
+      (dotimes (palette-index 8)
+        (format t "~&     .byte $~2,'0x, $~2,'0x, $~2,'0x" 
+                (aref palettes palette-index 1)
+                (aref palettes palette-index 2)
+                (aref palettes palette-index 3)))
       (format t "~2&      .bend")
       (fresh-line))))
 
