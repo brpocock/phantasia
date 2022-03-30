@@ -44,6 +44,10 @@ NewSWCHA:      .byte ?
 NewSWCHB:      .byte ?
 NewINPT0:      .byte ?
 NewINPT1:      .byte ?
+;;;
+StatsLines:         .byte ?
+DialogueLines:     .byte ?
+MapLines:           .byte ?
 ;;; 
 
 Counter:          .word ?

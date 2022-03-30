@@ -3,10 +3,13 @@
 
 NMI:      .block
 
-          lda NMINext
+          pha
+          lda NMINext + 1
           beq +
+          pla
           jmp (NMINext)
 +
+          pla
           rti
 
           .bend

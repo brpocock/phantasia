@@ -18,3 +18,5 @@
           JFarCall = $c00f
           JFarJump = $c012
           JFrameService = $c015
+          JSaveRegs = $c018
+          JReturnFromInterrupt = $c01b

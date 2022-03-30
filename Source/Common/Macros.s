@@ -386,3 +386,11 @@ Wait1:
           .bend
 
           .endm
+
+SaveRegs: .macro
+          pha
+          txa
+          pha
+          tya
+          pha
+          .endm

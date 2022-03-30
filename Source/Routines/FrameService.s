@@ -68,6 +68,8 @@ AlarmDone:
 AlarmNow:
           lda # 0
           sta AlarmEnabledP
+          lda AlarmV + 1
+          beq AlarmDone
           jmp (AlarmV)          ; tail call
 ;;; 
 ReadInputs:
