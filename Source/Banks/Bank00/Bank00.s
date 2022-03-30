@@ -4,13 +4,18 @@
           BANK = 00
 
           .include "StartBank.s"
-
+;;; 
 BankEntry:
-
           .mva NMINext, 0
           .WaitForVBlank
           .mva CTRL, #CTRLDMADisable
 
+          .mva CurrentMap, # 0
+          ldy # 0
+          ldx # 2
+          jsr JFarCall
+
+          .WaitForVBlank
           .mvaw NMINext, BeginTopBar
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
@@ -131,11 +136,8 @@ EndTopBar:
           rti
 
 EndDialogue:
-          stx WSYNC
-          stx WSYNC
-          .mva BACKGRND, #CoLu(COLGREEN, $8)
-          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
-          .mva CHARBASE, #$ff   ; XXX
+          ldx # 1
+          jsr JFarCall
           .mvaw NMINext, SwitchToOverscan
           rti
 
@@ -266,15 +268,14 @@ DialogueDL6:
           .DLAltHeader DrawUI + $1e * 2, 0, 2, $60
 
           .DLEnd
-
-;;; 
+;;;
           .align $1000
 Font:
           .binary "UI.art.bin"
           DrawUI = Font + 64
-
+;;; 
           .align $1000
 Items:
           .binary "Items.art.bin"
-           
+;;; 
           .include "EndBank.s"

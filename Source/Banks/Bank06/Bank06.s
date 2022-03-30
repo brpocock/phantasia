@@ -15,9 +15,9 @@ BankEntry:
           brk
 
           
-          .include "PublisherPrelude.s"  ; XXX belongs in bank 6
-          .include "AuthorPrelude.s"  ; XXX belongs in bank 6
-          .include "TitleScreen.s"  ; XXX belongs in bank 6
+          .include "PublisherPrelude.s"
+          .include "AuthorPrelude.s"
+          .include "TitleScreen.s"
 
           .align $800, 0
 Font:

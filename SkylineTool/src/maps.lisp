@@ -638,15 +638,13 @@ Name:     .ptext \"~a\""
                 (let ((compressed (rle-compress string)))
                   (format t "~&     .word $~4,'0x" (length compressed))
                   (hex-dump-bytes compressed)))
-              (format t "~2%Attributes:     ;; Tile attributes table")
+              (format t "~2%Attributes:     ;; Tile attributes table~&     .byte ~d" (length attributes-table))
               (dolist (attr attributes-table)
                 (hex-dump-bytes attr))
-              
-              (format t "~2%Sprites:     ;; Sprites table")
+              (format t "~2%Sprites:     ;; Sprites table~&     .byte ~d" (length sprites-table))
               (dolist (sprite sprites-table)
                 (hex-dump-bytes sprite))
-              
-              (format t "~2%Exits:     ;; Exit destination pointers")
+              (format t "~2%Exits:     ;; Exit destination pointers~&     .byte ~d" (length exits-table))
               (dolist (exit exits-table)
                 (hex-dump-bytes exit))))))
       (format t "~2&      .bend")

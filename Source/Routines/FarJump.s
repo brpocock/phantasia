@@ -3,6 +3,7 @@
 
 FarJump:      .block
 
+          stx CurrentBank
           stx $8001
           jmp $8000
 

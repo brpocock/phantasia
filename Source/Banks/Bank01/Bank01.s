@@ -9,23 +9,33 @@ Tileset:
           .include "OverworldTiles.s"
 
 BankEntry:
-          ;; Decompress map tile data
-          ;; TODO the source pointer should come from Map_Atsirav + 2, 3
-          .mvaw Pointer, Map_Atsirav.Art
-          .mvaw Pointer2, MapArt
-          jsr RLE
+          cpy # 0
+          bne SetUp
 
-          ;; Decompress pointers to map attribute data
-          ;; TODO the source pointer should come from Map_Atsirav + 4, 5
-          .mvaw Pointer, Map_Atsirav.TileAttributes
-          .mvaw Pointer2, MapTileAttributes
-          jmp RLE               ; tail call
+          stx WSYNC
+          stx WSYNC
+          .mva BACKGRND, MapBackground
 
-          .include "RLE.s"
-          .include "Atsirav.s"
+          .for i := 0, i < 24, i := i + 1
+          .mva P0C1 + (i % 3) * 4 + (i - ((i % 3) * 3)), MapPalettes + i
+          .next
 
+          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
+          .mva CHARBASE, #>OverworldTiles
+          rts
 
-          
+SetUp:
+          .mva MapBackground, Tileset + $1000
+
+          ldx # 24
+-
+          lda Tileset + $1000, x
+          sta MapPalettes, x
+          dex
+          bne -
+
+          rts
+
           .align $2000
 Sprites:
           .include "OverworldSprites.s"

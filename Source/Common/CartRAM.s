@@ -49,6 +49,13 @@ NewINPT1:      .byte ?
 Counter:          .word ?
 Counter2:         .word ?
 
+CurrentBank:        .byte ?
+          
+CurrentMap:         .byte ?
+
+MapBackground:      .byte ?
+MapPalettes:        .fill (8 * 3), ?
+          
           .align $100
 MapArt:
           .fill $400, ?
@@ -56,7 +63,11 @@ MapTileAttributes:
           .fill $400, ?
 MapAttributes:
           .fill $600, ?
-          
+MapSprites:
+          .fill $800, ?
+MapExits:
+          .fill $300, ?
+
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)
           .fi
