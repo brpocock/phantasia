@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="8" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="23">
- <tileset firstgid="1" source="Overworld Tiles.tsx"/>
- <tileset firstgid="129" source="Overworld Sprites.tsx"/>
+ <tileset firstgid="1" source="OverworldTiles.tsx"/>
+ <tileset firstgid="129" source="OverworldSprites.tsx"/>
  <layer id="2" name="Ground Layer" width="32" height="32">
   <properties>
    <property name="Ground" type="bool" value="true"/>
