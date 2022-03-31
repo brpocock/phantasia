@@ -16,6 +16,8 @@ TileDLI:  .block
 
           .mva CHARBASE, #>$8000
 
+          ;; XXX do useful work while Maria is busy
+
           .WaitForVBlank
 
           .BankSwitch CurrentBank

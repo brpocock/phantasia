@@ -71,6 +71,8 @@ MapNextX:        .byte ?
 ScreenNextY:        .byte ?
 ScreenNextX:        .byte ?
 
+SelectedPalette:    .byte ?
+
           .align $100
 MapArt:
           .fill $400, ?

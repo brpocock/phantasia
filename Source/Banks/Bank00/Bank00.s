@@ -171,6 +171,8 @@ DrawMapSection:
           adc Source
           sta Source
 
+          .mva SelectedPalette, # $ff
+
 MoreMapRows:
           ldy # 0
           lda # 15 | DLLHoley16
@@ -187,13 +189,57 @@ MoreMapRows:
           tya
           .Add16a DLLTail
 
-          ldy MapLeftColumn
-          sty Swap
-          ldx # 0               ; horizontal tile screen position index
-CopyTiles:
+          .mvy Swap, MapLeftColumn
+          .mvx Temp, # 0        ; current span width in Temp, current output h pos in x
+          .mvap Pointer, StringsTail
+          .mva MapNextX, MapLeftPixel
+CopyTileSpan:
+          ldy Swap
           lda (Source), y
           bpl PaletteOK
-          ;; XXX handle palette swap
+
+          lda Temp
+          beq DoneEmittingSpan
+
+EmitSpanMidLine:
+          ;; Palette changed, what was it, what will it be? XXX
+          ldy # 0
+          .mvapyi DLTail, Pointer
+          .mvapyi DLTail, #DLExtMode(false, true)
+          .mvapyi DLTail, Pointer + 1
+          ;; calculate palette + width value
+          lda SelectedPalette
+          .rept 5
+            asl a
+          .next
+          sta SelectedPalette   ; × 32
+          dec Temp              ; span width - 1
+          lda Temp              ; span width - 1
+          eor #$1f              ; encode span width
+          ora SelectedPalette   ; × 32
+          sta (DLTail), y
+          iny
+          .mvapyi DLTail, MapNextX
+          .mvap Pointer, StringsTail
+
+          ;; update left of next span
+          lda Temp
+          asl a
+          asl a
+          asl a
+          clc
+          adc MapNextX
+          sta MapNextX
+
+          .mva Temp, # 0
+
+          .Add16 DLTail, # 5
+DoneEmittingSpan:
+          ;; XXX set palette properly
+          .mva SelectedPalette, # 2
+
+          ldy Swap
+          lda (Source), y
 PaletteOK:
           asl a                 ; tile byte address
           ldy # 0
@@ -202,25 +248,37 @@ PaletteOK:
           clc
           adc # 1
           sta (StringsTail), y
-          inc Swap
-          inc Swap
+          inc Swap              ; map column
+          inc Swap              ; map column
+          inc Temp              ; current span width
 
           .Add16 StringsTail, # 2
           inx
           cpx #$11              ; because of fine scrolling
-          blt CopyTiles
+          blt CopyTileSpan
 
+EmitFinalSpan:
           ldy # 0               ; drawing list index
-          .mvapyi DLTail, StringsTail + 1
+          .mvapyi DLTail, Pointer
           .mvapyi DLTail, #DLExtMode(false, true)
-          .mvapyi DLTail, StringsTail
-          .mvapyi DLTail, DLPalWidth(2, 16) ; XXX palette
+          .mvapyi DLTail, Pointer + 1
+          dec Temp              ; span width - 1
+          lda Temp              ; span width - 1
+          eor #$1f              ; encode span width
+          ora #(2 << 5)         ; XXX palette selection
+          sta (DLTail), y
+          iny
           .mvapyi DLTail, MapLeftPixel
+          .mvap Pointer, StringsTail
+
+          .Add16 DLTail, # 5
+
+          ;; XXX leave space for additional stamps
 
           .mvapyi DLTail, # 0
           .mvapy DLTail, # 0
 
-          .Add16 DLTail, # 7
+          .Add16 DLTail, # 2
 
           .Add16 Source, #$20   ; next row in map data too
           inc ScreenNextY
@@ -231,7 +289,6 @@ PaletteOK:
           asl a
           cmp MapLines
           blt MoreMapRows
-
 DoneMap:
 ;;; 
           .mvapyi DLLTail, # 0 | DLLDLI
