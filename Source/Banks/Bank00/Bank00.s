@@ -194,6 +194,10 @@ MoreMapRows:
           .mvap Pointer, StringsTail
           .mva MapNextX, MapLeftPixel
 CopyTileSpan:
+          lda Temp              ; current span width
+          cmp #$0f
+          bge EmitSpanMidLine
+          
           ldy Swap              ; current column of source
           lda (Source), y
           bpl PaletteOK
@@ -213,8 +217,10 @@ EmitSpanMidLine:
             asl a
           .next
           sta SelectedPalette   ; × 32
-          dec Temp              ; span width - 1
-          lda Temp              ; span width - 1
+          lda Temp              ; span width
+          asl a
+          sec
+          sbc # 1
           eor #$1f              ; encode span width
           ora SelectedPalette   ; × 32
           sta (DLTail), y
@@ -235,8 +241,27 @@ EmitSpanMidLine:
 
           .Add16 DLTail, # 5
 DoneEmittingSpan:
-          ;; XXX set palette properly
-          .mva SelectedPalette, # 2
+
+          ;; Look up the palette
+          ;; Source is exactly 1kiB below the place we want
+          .mva Dest + 1, Source + 1
+          lda Source
+          clc
+          adc # 4
+          sta Dest
+
+          ldy Swap
+          lda (Dest), y
+
+          asl a
+          sta Dest              ; XXX
+          asl a
+          adc Dest
+
+          tay
+          lda MapAttributes + 4, y
+          and #$07
+          sta SelectedPalette
 
           ldy Swap              ; column in source
           lda (Source), y
@@ -261,13 +286,21 @@ EmitFinalSpan:
           .mvapyi DLTail, Pointer
           .mvapyi DLTail, #DLExtMode(false, true)
           .mvapyi DLTail, Pointer + 1
-          dec Temp              ; span width - 1
-          lda Temp              ; span width - 1
+          ;; calculate palette + width value
+          lda SelectedPalette
+          .rept 5
+            asl a
+          .next
+          sta SelectedPalette   ; × 32
+          lda Temp              ; span width
+          asl a
+          sec
+          sbc # 1
           eor #$1f              ; encode span width
-          ora #(2 << 5)         ; XXX palette selection
+          ora SelectedPalette
           sta (DLTail), y
           iny
-          .mvapyi DLTail, MapLeftPixel
+          .mvapyi DLTail, MapNextX
           .mvap Pointer, StringsTail
 
           .Add16 DLTail, # 5
