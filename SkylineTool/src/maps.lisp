@@ -670,7 +670,7 @@ Name:     .ptext \"~a\""
           (check-type byte-index (integer 0 (4096)))
           (dotimes (x 4)
             (setf (ldb (byte 2 (* 2 x)) (aref bytes byte-index))
-                  (palette-index (aref image (+ x (* 4 half)) (- 15 y)) palette))))))))
+                  (palette-index (aref image (+ (- 3 x) (* 4 half)) (- 15 y)) palette))))))))
 
 (defun compile-tileset (pathname)
   (with-open-file (*standard-output* 

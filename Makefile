@@ -117,16 +117,16 @@ Dist/Phantasia.Demo.PAL.pdf: Manual/Phantasia.tex
 AS=error
 
 emu:	Dist/Phantasia.NTSC.a78
-	a7800 a7800 -debug -cart $<
+	a7800 a7800dev -debug -cart $$(pwd)/$<
 
 emu-pal:	Dist/Phantasia.PAL.a78
-	a7800 a7800 -debug -cart  $<
+	a7800 a7800pdev -debug -cart  $$(pwd)/$<
 
 emu-demo:	Dist/Phantasia.Demo.NTSC.a78
-	a7800 a7800 -debug -cart  $<
+	a7800 a7800dev -debug -cart  $$(pwd)/$<
 
 emu-demo-pal:	Dist/Phantasia.Demo.PAL.a78
-	a7800 a7800 -debug -cart  $<
+	a7800 a7800pdev -debug -cart  $$(pwd)/$<
 
 quickclean:
 	rm -rf Object Dist Source/Generated

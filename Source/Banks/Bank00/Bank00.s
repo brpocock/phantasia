@@ -180,7 +180,7 @@ MoreMapRows:
           bne +
           ora # DLLDLI
 +
-          sta DLLTail, y
+          sta (DLLTail), y
           iny
 
           .mvapyi DLLTail, DLTail + 1
@@ -194,11 +194,11 @@ MoreMapRows:
           .mvap Pointer, StringsTail
           .mva MapNextX, MapLeftPixel
 CopyTileSpan:
-          ldy Swap
+          ldy Swap              ; current column of source
           lda (Source), y
           bpl PaletteOK
 
-          lda Temp
+          lda Temp              ; width of current span string
           beq DoneEmittingSpan
 
 EmitSpanMidLine:
@@ -238,7 +238,7 @@ DoneEmittingSpan:
           ;; XXX set palette properly
           .mva SelectedPalette, # 2
 
-          ldy Swap
+          ldy Swap              ; column in source
           lda (Source), y
 PaletteOK:
           asl a                 ; tile byte address
@@ -248,7 +248,6 @@ PaletteOK:
           clc
           adc # 1
           sta (StringsTail), y
-          inc Swap              ; map column
           inc Swap              ; map column
           inc Temp              ; current span width
 
@@ -272,13 +271,21 @@ EmitFinalSpan:
           .mvap Pointer, StringsTail
 
           .Add16 DLTail, # 5
+          ldy # 0
 
-          ;; XXX leave space for additional stamps
-
+          lda # 0
+          ldx #$10              ; XXX room for stamps
+-
+          sta (DLTail), y
+          iny
+          dex
+          bne -
+          
           .mvapyi DLTail, # 0
-          .mvapy DLTail, # 0
+          .mvapyi DLTail, # 0
 
-          .Add16 DLTail, # 2
+          tya
+          .Add16a DLTail
 
           .Add16 Source, #$20   ; next row in map data too
           inc ScreenNextY
