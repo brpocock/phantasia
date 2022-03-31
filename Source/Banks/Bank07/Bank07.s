@@ -23,7 +23,6 @@ JumpTable:
           jmp TileDLI
           jmp ReturnFromInterrupt
 
-
 ReturnFromInterrupt:
           pla
           tay

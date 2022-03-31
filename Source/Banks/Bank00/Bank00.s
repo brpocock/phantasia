@@ -19,11 +19,12 @@ BankEntry:
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
           DLL = SysRAMHigh
-          DialogueDL = DLL + $200
-          MapDL = DLL + $300
-          MapStrings = DLL + $500
+          DialogueDL = DLL + $100
+          MapDLStart = DLL + $200
+          MapStringsStart = DLL + $300
 
 BuildDLL:
+          .mvaw DLLTail, DLL
           lda # 192
           sec
           sbc StatsLines
@@ -32,27 +33,27 @@ BuildDLL:
           
           ldy # 0
 
-          .mvayi DLL, # 11 | DLLDLI
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvapyi DLLTail, # 11 | DLLDLI
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
 StatsDLL:
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>StatsDL1
-          .mvayi DLL, #<StatsDL1
+          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, #>StatsDL1
+          .mvapyi DLLTail, #<StatsDL1
 
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>StatsDL2
-          .mvayi DLL, #<StatsDL2
+          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, #>StatsDL2
+          .mvapyi DLLTail, #<StatsDL2
 
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>StatsDL3
-          .mvayi DLL, #<StatsDL3
+          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, #>StatsDL3
+          .mvapyi DLLTail, #<StatsDL3
 
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>StatsDL4
-          .mvayi DLL, #<StatsDL4
-
+          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, #>StatsDL4
+          .mvapyi DLLTail, #<StatsDL4
+;;; 
 DialogueDLL:
           lda StatsLines
           cmp #$21
@@ -71,59 +72,49 @@ DialogueDLL:
           sta Counter         ; lines in mid section @ 8px
           ;; XXX no partial zones
 
-          .mvayi DLL, # 7 | DLLHoley8 | DLLDLI
-          .mvayi DLL, #>DialogueTopDL
-          .mvayi DLL, #<DialogueTopDL
+          .mvapyi DLLTail, # 7 | DLLHoley8 | DLLDLI
+          .mvapyi DLLTail, #>DialogueTopDL
+          .mvapyi DLLTail, #<DialogueTopDL
 
-          sty Temp              ; DLL index
+          tya
+          .Add16a DLLTail
           ldy # 0
-          .mvaw Pointer, DialogueDL ; end of DialogueDLs
+          .mvaw DLTail, DialogueDL ; end of DialogueDLs
 NextDialogueZone:
           ldx # 0
 CopyDialogueMidDL:
           lda DialogueMidDL, x
-          sta (Pointer), y
+          sta (DLTail), y
           iny
           inx
           cpx #DialogueBottomDL - DialogueMidDL + 1
           bne CopyDialogueMidDL
-
-          sty Swap              ; DialogueDL index
 
           tya
           sec
           sbc # 13
           tay                   ; go back to string header padding
           
-          lda #<Dialogue2Text + 1
-          sta (Pointer), y
-          iny
+          .mvapyi DLTail, #<Dialogue2Text + 1
           iny                   ; skip over mode byte
-          lda #>Dialogue2Text + 1
-          sta (Pointer), y
-          iny
+          .mvapyi DLTail, #>Dialogue2Text + 1
           lda Dialogue2Text
           sec
           sbc # 1
           eor #$1f              ; encode width
           ora #$20              ; palette 2
-          sta (Pointer), y
+          sta (DLTail), y
 
-          ldy Temp              ; DLL index
+          .Add16 DLTail, #DialogueBottomDL - DialogueMidDL + 1
 
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueDL
-          .mvayi DLL, #<DialogueDL
+          ldy # 0               ; DLL index
 
-          sty Temp              ; DLL index
-          ldy Swap              ; DialogueDL index
+          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, #>DialogueDL
+          .mvapyi DLLTail, #<DialogueDL
+
           tya
-          clc
-          adc Pointer           ; end of DialogueDLs
-          bcc +
-          inc Pointer + 1
-+
-          sta Pointer
+          .Add16a DLLTail
 
           lda Counter
           sec
@@ -132,59 +123,40 @@ CopyDialogueMidDL:
           beq DoneDialogueMid
           bpl NextDialogueZone
 
-          ;; ;; partial zone only
-          ;; lda Temp              ; DLL index
-          ;; sec
-          ;; sbc # 2
-          ;; tax
-          ;; lda DLL, x
-          ;; adc Counter           ; negative
-          ;; sta DLL, x
-
-          ldy Temp              ; DLL index
+          ;; XXX partial zone
 
 DoneDialogueMid:
-          .mvayi DLL, # 7 | DLLHoley8
-          .mvayi DLL, #>DialogueBottomDL
-          .mvayi DLL, #<DialogueBottomDL
+          ldy # 0
+          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, #>DialogueBottomDL
+          .mvapyi DLLTail, #<DialogueBottomDL
 
 DoneDialogue:
+          tya
+          .Add16a DLLTail
+;;; 
+MapSectionDLL:
           lda MapLines
           cmp #$10
           blt DoneMap
 
-          lda # 0               ; XXX scrolling
-          sta Counter           ; current map tile row
+DrawMapSection:
+          lda MapTopRow
+          sta MapNextY
 
-          lda # 0
-          sta Counter + 1       ; current screen tile row
+          ldy # 0
+          sty ScreenNextY
 
-          .mvaw Pointer, MapDL
-          .mvaw Dest, MapStrings
-
-          sty Temp              ; Index into the DLL
-
-MoreMapRows:
-          ldy Temp              ; Index into the DLL
-          lda # 15 | DLLHoley16
-          ldx Counter + 1       ; current screen tile row
-          bne +
-          ora # DLLDLI
-+
-          sta DLL, y
-          iny
-
-          .mvayi DLL, Pointer + 1
-          .mvayi DLL, Pointer
-
-          sty Temp              ; Index into the DLL
+          .mvaw DLTail, MapDLStart
+          .mvaw StringsTail, MapStringsStart
 
           lda #<MapArt
           sta Source
           lda #>MapArt
           sta Source + 1
 
-          lda Counter           ; map tile row 0 - 31
+          ;; multiply row × 32 and add to Source pointer
+          lda MapTopRow
           asl a
           asl a
           asl a
@@ -199,37 +171,60 @@ MoreMapRows:
           adc Source
           sta Source
 
-          ldy # 0               ; horizontal scroll gross position XXX
+MoreMapRows:
+          ldy # 0
+          lda # 15 | DLLHoley16
+          ldx ScreenNextY
+          bne +
+          ora # DLLDLI
++
+          sta DLLTail, y
+          iny
+
+          .mvapyi DLLTail, DLTail + 1
+          .mvapyi DLLTail, DLTail
+
+          tya
+          .Add16a DLLTail
+
+          ldy MapLeftColumn
+          sty Swap
           ldx # 0               ; horizontal tile screen position index
-          sty Swap              ; horizontal scroll gross position
 CopyTiles:
           lda (Source), y
-          asl a
+          bpl PaletteOK
+          ;; XXX handle palette swap
+PaletteOK:
+          asl a                 ; tile byte address
           ldy # 0
-          sta (Dest), y
+          sta (StringsTail), y
+          iny
           clc
           adc # 1
-          sta (Dest), y
+          sta (StringsTail), y
           inc Swap
           inc Swap
-          ldy Swap
 
-          .Add16 Dest, # 2
+          .Add16 StringsTail, # 2
           inx
           cpx #$11              ; because of fine scrolling
           blt CopyTiles
 
           ldy # 0               ; drawing list index
-          .mvapyi Pointer, Dest + 1
-          .mvapyi Pointer, #DLExtMode(false, true)
-          .mvapyi Pointer, Dest
-          .mvapyi Pointer, DLPalWidth(2, 16) ; XXX palette
-          .mvapy Pointer, # 0               ; XXX fine scroll
+          .mvapyi DLTail, StringsTail + 1
+          .mvapyi DLTail, #DLExtMode(false, true)
+          .mvapyi DLTail, StringsTail
+          .mvapyi DLTail, DLPalWidth(2, 16) ; XXX palette
+          .mvapyi DLTail, MapLeftPixel
 
-          .Add16 Pointer, # 5
+          .mvapyi DLTail, # 0
+          .mvapy DLTail, # 0
 
-          inc Counter + 1
-          lda Counter + 1
+          .Add16 DLTail, # 7
+
+          .Add16 Source, #$20   ; next row in map data too
+          inc ScreenNextY
+          lda ScreenNextY
           asl a
           asl a
           asl a
@@ -237,38 +232,39 @@ CopyTiles:
           cmp MapLines
           blt MoreMapRows
 
-          
-
 DoneMap:
-          .mvayi DLL, # 0 | DLLDLI
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+;;; 
+          .mvapyi DLLTail, # 0 | DLLDLI
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
-          .mvayi DLL, # 11
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvapyi DLLTail, # 11
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
-          .mvayi DLL, # 12
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvapyi DLLTail, # 12
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
           ;; These should not be necessary? XXX
 
-          .mvayi DLL, # 15
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvapyi DLLTail, # 15
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
-          .mvayi DLL, # 15
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvapyi DLLTail, # 15
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
-          .mvayi DLL, # 15
-          .mvayi DLL, #>BlankDL
-          .mvayi DLL, #<BlankDL
+          .mvapyi DLLTail, # 15
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
 
           .WaitForVBlank
+          .mva DPPL, #<DLL
+          .mva DPPH, #>DLL
           .mva CTRL, #CTRLDMAEnable
-
+;;; 
 Loop:
           jmp Loop
 ;;; 
@@ -318,7 +314,6 @@ IEndDialogue:
           .SaveRegs
 DoBeginMap:
           jmp JTileDLI
-
 ;;; 
           .enc "minifont"
 LocationNameString: .ptext "locale name here"

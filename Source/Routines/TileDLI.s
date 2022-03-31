@@ -15,12 +15,8 @@ TileDLI:  .block
           .next
 
           .mva CHARBASE, #>$8000
-          .mvaw NMINext, TileDLIDone
 
-          jmp ReturnFromInterrupt
-
-TileDLIDone:
-          .SaveRegs
+          .WaitForVBlank
 
           .BankSwitch CurrentBank
 

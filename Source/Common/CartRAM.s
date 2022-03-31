@@ -60,6 +60,17 @@ CurrentMap:         .byte ?
 MapBackground:      .byte ?
 MapPalettes:        .fill (8 * 3), ?
           
+MapTopRow:          .byte ?
+MapTopLine:         .byte ?
+MapLeftColumn:      .byte ?
+MapLeftPixel:       .byte ?
+
+MapNextY:         .byte ?
+MapNextX:        .byte ?
+
+ScreenNextY:        .byte ?
+ScreenNextX:        .byte ?
+
           .align $100
 MapArt:
           .fill $400, ?
@@ -71,6 +82,7 @@ MapSprites:
           .fill $800, ?
 MapExits:
           .fill $300, ?
+
 
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)

@@ -24,6 +24,11 @@ Source:
           .word ?
 Dest:
           .word ?
+
+DLTail:    .word ?
+StringsTail:         .word ?
+DLLTail:  .word ?
+
           
           .if * > $100
             .error format("Overran Zero Page, must end by $ff but ran to $%04x", *-1)
