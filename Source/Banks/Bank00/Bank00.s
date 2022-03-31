@@ -19,8 +19,8 @@ BankEntry:
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
           DLL = SysRAMHigh
-          DialogueDL = DLL + $100
-          MapDLStart = DLL + $200
+          DialogueDL = DLL + $80
+          MapDLStart = DLL + $180
           MapStringsStart = DLL + $400
 
 BuildDLL:
@@ -127,7 +127,7 @@ CopyDialogueMidDL:
 
 DoneDialogueMid:
           ldy # 0
-          .mvapyi DLLTail, # 7 | DLLHoley8
+          .mvapyi DLLTail, # 7 | DLLHoley8 | DLLDLI
           .mvapyi DLLTail, #>DialogueBottomDL
           .mvapyi DLLTail, #<DialogueBottomDL
 
@@ -178,7 +178,7 @@ MoreMapRows:
           lda # 15 | DLLHoley16
           ldx ScreenNextY
           bne +
-          ora # DLLDLI
+          ora # 0 ;; DLLDLI
 +
           sta (DLLTail), y
           iny
@@ -206,7 +206,7 @@ CopyTileSpan:
           beq DoneEmittingSpan
 
 EmitSpanMidLine:
-          ;; Palette changed, what was it, what will it be? XXX
+          ;; Palette changed, what was it, what will it be?
           ldy # 0
           .mvapyi DLTail, Pointer
           .mvapyi DLTail, #DLExtMode(false, true)
@@ -253,9 +253,9 @@ DoneEmittingSpan:
           lda (Dest), y
           ;; got the attribute indirect ID, multiply by 6
           asl a
-          sta Dest              ; XXX
+          sta Dest              ; temp
           asl a
-          adc Dest
+          adc Dest              ; temp
           ;; index into attributes table + 4 bytes to get palette ID
           tay
           lda MapAttributes + 4, y
