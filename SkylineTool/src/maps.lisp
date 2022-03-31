@@ -134,6 +134,16 @@
     (setf (aref tile-attributes 0) (logior (ash wall-bits 4) (aref tile-attributes 0))
           (aref tile-attributes 1) (logior #x01 (aref tile-attributes 1)))))
 
+(defun mark-palette-transitions (grid attributes-table)
+  (dotimes (y (array-dimension grid 1))
+    (dotimes (x (array-dimension grid 0))
+      (if (zerop x)
+          (setf (aref grid x y 0) (logior #x80 (aref grid x y 0)))
+          (let ((palette-left (tile-effective-palette grid (1- x) y attributes-table))
+                (palette-self (tile-effective-palette grid x y attributes-table)))
+            (unless (= palette-left palette-self)
+              (setf (aref grid x y 0) (logior #x80 (aref grid x y 0)))))))))
+
 (defun parse-tile-grid (layers objects tileset)
   (let* ((ground (parse-layer (first layers)))
          (detail (and (= 2 (length layers))
@@ -161,6 +171,7 @@
             (setf (aref output x y 0) tile-id
                   (aref output x y 1) (assign-attributes tile-attributes
                                                          attributes-table))))))
+    (mark-palette-transitions output attributes-table)
     (values output attributes-table sprites-table exits-table)))
 
 (defun map-layer-depth (layer.xml)
@@ -358,7 +369,10 @@
         (warn "Locked tile without Lock code")))
     (when-let (tile-id (assocdr "id" (second xml) nil))
       (when (and palettes tile-id)
-        (set-bit 4 (aref palettes (parse-integer tile-id)))))))
+        (set-bit 4 (aref palettes (parse-integer tile-id)))))
+    (when-let (palette (tile-property-value "Palette" xml))
+      (clear-bit 4 #x07)
+      (set-bit 4 (mod (parse-integer palette :radix 16) 8)))))
 
 (defun parse-tile-attributes (palettes xml i)
   (let ((bytes (make-array '(6) :element-type '(unsigned-byte 8)))
@@ -368,6 +382,9 @@
                            (subseq xml 2))))
     (add-attribute-values palettes tile.xml bytes)
     bytes))
+
+(defun tile-effective-palette (grid x y attributes-table)
+  (logand #x07 (aref (elt attributes-table (aref grid x y 1)) 4)))
 
 (defun load-tileset (xml-reference)
   (let* ((pathname (if (consp xml-reference)
