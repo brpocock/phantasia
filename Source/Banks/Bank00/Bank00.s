@@ -21,7 +21,7 @@ BankEntry:
           DLL = SysRAMHigh
           DialogueDL = DLL + $100
           MapDLStart = DLL + $200
-          MapStringsStart = DLL + $300
+          MapStringsStart = DLL + $400
 
 BuildDLL:
           .mvaw DLLTail, DLL
@@ -241,7 +241,6 @@ EmitSpanMidLine:
 
           .Add16 DLTail, # 5
 DoneEmittingSpan:
-
           ;; Look up the palette
           ;; Source is exactly 1kiB below the place we want
           .mva Dest + 1, Source + 1
@@ -252,12 +251,12 @@ DoneEmittingSpan:
 
           ldy Swap
           lda (Dest), y
-
+          ;; got the attribute indirect ID, multiply by 6
           asl a
           sta Dest              ; XXX
           asl a
           adc Dest
-
+          ;; index into attributes table + 4 bytes to get palette ID
           tay
           lda MapAttributes + 4, y
           and #$07
@@ -278,7 +277,7 @@ PaletteOK:
 
           .Add16 StringsTail, # 2
           inx
-          cpx #$11              ; because of fine scrolling
+          cpx #$21
           blt CopyTileSpan
 
 EmitFinalSpan:
