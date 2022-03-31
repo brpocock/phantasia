@@ -15,6 +15,8 @@ BankEntry:
 
           ldy # 0
           lax (Pointer), y
+          beq DoneAttributes
+
           iny
 CopyAttributesLoop:
           .rept 5
@@ -33,6 +35,8 @@ CopyAttributesLoop:
           dex
           bne CopyAttributesLoop
 
+DoneAttributes:
+
           ;; TODO copy sprites table
 
           ;; TODO the source pointer
@@ -41,6 +45,7 @@ CopyAttributesLoop:
 
           ldy # 0
           lax (Pointer), y
+          beq DoneExits
           iny
 CopyExitsLoop:
           lda (Pointer), y
@@ -58,13 +63,15 @@ CopyExitsLoop:
 
           dex
           bne CopyExitsLoop
-          
+
+DoneExits:
+
           ;; Decompress map tile data
           ;; TODO the source pointer should come from Map_Atsirav + 2, 3
           .mvaw Pointer, Map_Atsirav.Art
           .mvaw Pointer2, MapArt
           jsr RLE
-          ;; jsr Span32 ; expand to 32×32 size
+          ;; jsr Span32 ; expand to 32×32 sizexo
 
           ;; Decompress pointers to map attribute data
           ;; TODO the source pointer should come from Map_Atsirav + 4, 5
@@ -72,6 +79,7 @@ CopyExitsLoop:
           .mvaw Pointer2, MapTileAttributes
           jsr RLE
           ;; jsr Span32 ; expand to 32×32 size
+          rts
 
           .include "RLE.s"
           .include "Atsirav.s"

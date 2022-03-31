@@ -261,6 +261,17 @@ mva:      .macro dest, src
           sta \dest
           .endm
 
+mvapy:     .macro dest, src
+          lda \src
+          sta (\dest), y
+          .endm
+
+mvapyi:     .macro dest, src
+          lda \src
+          sta (\dest), y
+          iny
+          .endm
+
 mvay:     .macro dest, src
           lda \src
           sta \dest, y

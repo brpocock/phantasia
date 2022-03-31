@@ -162,22 +162,22 @@ DoneDialogue:
           .mvaw Pointer, MapDL
           .mvaw Dest, MapStrings
 
-          sty Swap              ; Index into the DLL
+          sty Temp              ; Index into the DLL
 
 MoreMapRows:
-          ldy Swap              ; Index into the DLL
+          ldy Temp              ; Index into the DLL
           lda # 15 | DLLHoley16
-          ldx Counter + 1
+          ldx Counter + 1       ; current screen tile row
           bne +
           ora # DLLDLI
 +
           sta DLL, y
           iny
 
-          .mvayi DLL, MapDL + 1
-          .mvayi DLL, MapDL
+          .mvayi DLL, Pointer + 1
+          .mvayi DLL, Pointer
 
-          sty Swap              ; Index into the DLL
+          sty Temp              ; Index into the DLL
 
           lda #<MapArt
           sta Source
@@ -200,25 +200,35 @@ MoreMapRows:
           sta Source
 
           ldy # 0               ; horizontal scroll gross position XXX
-          ldx # 0               ; screen column 0 - 16
+          ldx # 0               ; horizontal tile screen position index
+          sty Swap              ; horizontal scroll gross position
 CopyTiles:
           lda (Source), y
-          sta (Dest), y         ; XXX
+          asl a
+          ldy # 0
+          sta (Dest), y
+          clc
+          adc # 1
+          sta (Dest), y
+          inc Swap
+          inc Swap
+          ldy Swap
 
+          .Add16 Dest, # 2
           inx
           cpx #$11              ; because of fine scrolling
           blt CopyTiles
 
           ldy # 0               ; drawing list index
-          .mvayi Pointer, Dest + 1
-          .mvayi Pointer, #DLExtMode(false, true)
-          .mvayi Pointer, Dest
-          .mvayi Pointer, DLPalWidth(2, 16) ; XXX palette
-          .mvay Pointer, # 0               ; XXX fine scroll
+          .mvapyi Pointer, Dest + 1
+          .mvapyi Pointer, #DLExtMode(false, true)
+          .mvapyi Pointer, Dest
+          .mvapyi Pointer, DLPalWidth(2, 16) ; XXX palette
+          .mvapy Pointer, # 0               ; XXX fine scroll
 
-          .Add16 Dest, #$11
-          .Add16 Pointer, 5 
+          .Add16 Pointer, # 5
 
+          inc Counter + 1
           lda Counter + 1
           asl a
           asl a
@@ -226,6 +236,8 @@ CopyTiles:
           asl a
           cmp MapLines
           blt MoreMapRows
+
+          
 
 DoneMap:
           .mvayi DLL, # 0 | DLLDLI
