@@ -3,6 +3,12 @@
 
 TileDLI:  .block
 
+          ldx # 8
+-
+          stx WSYNC
+          dex
+          bne -
+
           .BankSwitch # 1
 
           .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
