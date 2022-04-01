@@ -7,59 +7,86 @@
 
 BankEntry:
           ;; TODO find the map from CurrentMap index
+          lda CurrentMap
+          asl a
+          tay
 
-          ;; Copy map attributes table
-          ;; TODO the source pointer
-          .mvaw Pointer, Map_Atsirav.Attributes
-          .mvaw Pointer2, MapAttributes - 1
+          lda Maps, y
+          sta Pointer
+          lda Maps + 1, y
+          sta Pointer + 1
+
+CopyMapDimensions:
+          ldy #MapOffsetWidth
+          lda (Pointer), y
+          sta CurrentMapWidth
+          ;; ldy #MapOffsetHeight
+          iny
+          lda (Pointer), y
+          sta CurrentMapHeight
+CopyMapAttributesTable:
+          ldy # MapOffsetAttributes
+          lda (Pointer), y
+          sta Source
+          iny
+          lda (Pointer), y
+          sta Source + 1
+          .mvaw Dest, MapAttributes - 1
 
           ldy # 0
-          lax (Pointer), y
+          lax (Source), y
           beq DoneAttributes
 
           iny
 CopyAttributesLoop:
           .rept 5
-            lda (Pointer), y
-            sta (Pointer2), y
+            lda (Source), y
+            sta (Dest), y
             iny
           .next
 
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
           ldy # 1
 
-          .Add16 Pointer, # 6
-          .Add16 Pointer2, # 6
+          .Add16 Source, # 6
+          .Add16 Dest, # 6
 
           dex
           bne CopyAttributesLoop
 
 DoneAttributes:
 
+CopyMapSprites:
           ;; TODO copy sprites table
 
-          ;; TODO the source pointer
-          .mvaw Pointer, Map_Atsirav.Exits
-          .mvaw Pointer2, MapExits
+CopyMapExits:
+          ldy # MapOffsetExits
+          lda (Pointer), y
+          sta Source
+          iny
+          lda (Pointer), y
+          sta Source + 1
+
+          .mvaw Dest, MapExits - 1
 
           ldy # 0
-          lax (Pointer), y
+          lax (Source), y
           beq DoneExits
           iny
 CopyExitsLoop:
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
           iny
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
           iny
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
           
           ldy # 1
-          .Add16 Pointer, # 6
-          .Add16 Pointer2, # 6
+          .Add16 Source, # 6
+          .Add16 Dest, # 6
 
           dex
           bne CopyExitsLoop
@@ -67,24 +94,33 @@ CopyExitsLoop:
 DoneExits:
 
           ;; Decompress map tile data
-          ;; TODO the source pointer should come from Map_Atsirav + 2, 3
-          .mvaw Pointer, Map_Atsirav.Art
-          .mvaw Pointer2, MapArt
+          ldy #MapOffsetArt
+          lda (Pointer), y
+          sta Source
+          iny
+          lda (Pointer), y
+          sta Source + 1
+          .mvaw Dest, MapArt
           jsr RLE
-          ;; jsr Span32 ; expand to 32×32 sizexo
 
           ;; Decompress pointers to map attribute data
-          ;; TODO the source pointer should come from Map_Atsirav + 4, 5
-          .mvaw Pointer, Map_Atsirav.TileAttributes
-          .mvaw Pointer2, MapTileAttributes
+          ldy #MapOffsetTileAttributes
+          lda (Pointer), y
+          sta Source
+          iny
+          lda (Pointer), y
+          sta Source + 1
+          .mvaw Dest, MapTileAttributes
           jsr RLE
-          ;; jsr Span32 ; expand to 32×32 size
           rts
 
           .include "RLE.s"
+
+Maps:
+          .word Map_Atsirav
+          .word Map_Onetsur
+          
           .include "Atsirav.s"
-          .include "PlayerHouse.s"
-          .include "AtsiravTownHall.s"
           .include "Onetsur.s"
 
           .include "EndBank.s"

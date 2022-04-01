@@ -305,7 +305,7 @@ EmitFinalSpan:
           tya
           .Add16a DLTail
 
-          .Add16 Source, #$20   ; next row in map data too
+          .Add16 Source, CurrentMapWidth
           inc ScreenNextY
           lda ScreenNextY
           asl a

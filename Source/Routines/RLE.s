@@ -4,23 +4,23 @@
 RLE:      .block
           
           ldy # 0
-          lda (Pointer), y
+          lda (Source), y
           sta Counter
           iny                   ; Y = 1
-          lda (Pointer), y
+          lda (Source), y
           sta Counter + 1
 
-          lda Pointer
+          lda Source
           clc
           adc # 2
           bcc +
-          inc Pointer + 1
+          inc Source + 1
 +
-          sta Pointer
+          sta Source
 
           dey                   ; Y = 0
 
-          lda (Pointer), y
+          lda (Source), y
           cmp #$ff
           bne Decompress
 
@@ -28,14 +28,14 @@ RLE:      .block
           ;; probably the “compressed” version would have been
           ;; longer than the original.
 StraightCopy:
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
 
           iny
           bne +
 
-          inc Pointer + 1
-          inc Pointer2 + 1
+          inc Source + 1
+          inc Dest + 1
 
 +
           lda Counter
@@ -52,20 +52,20 @@ StraightCopy:
           rts
 
 Decompress:
-          lda (Pointer), y      ; length of run (OR) $80 = repeated
+          lda (Source), y      ; length of run (OR) $80 = repeated
           bmi RepeatSegment
 
 CopySegment:
           tax                   ; length of run (-1)
 
           ldy # 1
-          jsr FlattenPointer
+          jsr FlattenSource
 
           txa                   ; length of run (-1)
           tay                   ; length of run (-1)
 CopySegmentLoop:
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
 
           dey
 
@@ -74,7 +74,7 @@ CopySegmentLoop:
           txa                   ; length of run (-1)
           tay                   ; length of run (-1)
           iny
-          jsr FlattenBothPointers
+          jsr FlattenBothSources
           ;; fall through
 ;;; 
 DecompressNext:
@@ -91,13 +91,13 @@ RepeatSegment:
           tax                   ; length of run (-1)
 
           iny                   ; Y = 1
-          jsr FlattenPointer
+          jsr FlattenSource
 
-          lda (Pointer), y      ; repeat count (-1)
+          lda (Source), y      ; repeat count (-1)
           pha                  ; repeat count (-1)
 
           iny                   ; Y = 1
-          jsr FlattenPointer
+          jsr FlattenSource
 
           txa                   ; length of run (-1)
           tay                   ; length of run (-1)
@@ -112,8 +112,8 @@ RepeatSegment:
 RepeatSegmentHead:
           ldy # 0               ; index into run
 RepeatSegmentLoop:
-          lda (Pointer), y
-          sta (Pointer2), y
+          lda (Source), y
+          sta (Dest), y
 
           iny                   ; index into run
           cpy Temp              ; length of run
@@ -124,38 +124,38 @@ RepeatSegmentLoop:
 
           lda Temp              ; length of run
           clc
-          adc Pointer2
+          adc Dest
           bcc +
-          inc Pointer2 + 1
+          inc Dest + 1
 +
-          sta Pointer2
+          sta Dest
 
           jmp RepeatSegmentHead
 
 RepeatedSegment:
           ldy Temp              ; length of run
-          jsr FlattenBothPointers
+          jsr FlattenBothSources
 
           jmp DecompressNext
 
 ;;; 
-FlattenBothPointers:
+FlattenBothSources:
           tya
           clc
-          adc Pointer2
+          adc Dest
           bcc +
-          inc Pointer2 + 1
+          inc Dest + 1
 +
-          sta Pointer2
+          sta Dest
 
-FlattenPointer:
+FlattenSource:
           tya
           clc
-          adc Pointer
+          adc Source
           bcc +
-          inc Pointer + 1
+          inc Source + 1
 +
-          sta Pointer
+          sta Source
 
           sty Temp
           lda Counter
