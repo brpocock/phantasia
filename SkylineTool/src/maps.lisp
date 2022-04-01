@@ -234,13 +234,16 @@
         (setf (aref palettes p (1+ c)) (aref palette-strip (+ 1 c (* p 3)) 0))))
     palettes))
 
+(defun all-colors-in-tile (tile)
+  (remove-duplicates (loop for y below 16 
+                           append
+                           (loop for x below 8
+                                 collect (aref tile x y)))
+                     :test #'=))
+
 (defun tile-fits-palette-p (tile palette)
   (every (lambda (c) (member c palette))
-         (remove-duplicates (loop for y below 16 
-                                  append
-                                  (loop for x below 8
-                                        collect (aref tile x y)))
-                            :test #'=)))
+         (all-colors-in-tile tile)))
 
 (defun 2a-to-list (2a)
   (loop for row from 0 below (array-dimension 2a 0)
@@ -585,6 +588,7 @@ after considering ~:d option~:p."
                                   :type "s")
                    :direction :output
                    :if-exists :supersede)
+    (format *trace-output* "~&Loading tile map from ~a" pathname)
     (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
       (assert (equal "map" (car xml)))
       (assert (equal "orthogonal" (assocdr "orientation" (second xml))))
