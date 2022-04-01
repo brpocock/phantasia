@@ -6,7 +6,6 @@
           .include "StartBank.s"
 
 BankEntry:
-          ;; TODO find the map from CurrentMap index
           lda CurrentMap
           asl a
           tay
