@@ -149,7 +149,7 @@ for my $tv (qw(NTSC PAL)) {
         } elsif ('tmx' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
-          print "$genrdir/$base.s:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.tsx)
+          print "$genrdir/$base.s:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.tsx $bankdir/*.png)
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-map \$<\n\n";
           push @files => "$genrdir/$base.s";
