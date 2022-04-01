@@ -171,18 +171,11 @@ DrawMapSection:
           adc Source
           sta Source
 
-          .mva SelectedPalette, # $ff
+          .mva SelectedPalette, # 0
 
 MoreMapRows:
           ldy # 0
-          lda # 15 | DLLHoley16
-          ldx ScreenNextY
-          bne +
-          ora # 0 ;; DLLDLI
-+
-          sta (DLLTail), y
-          iny
-
+          .mvapyi DLLTail, # 15 | DLLHoley16
           .mvapyi DLLTail, DLTail + 1
           .mvapyi DLLTail, DLTail
 
@@ -195,7 +188,7 @@ MoreMapRows:
           .mva MapNextX, MapLeftPixel
 CopyTileSpan:
           lda Temp              ; current span width
-          cmp #$0f
+          cmp #$0f              ; is this string getting too long for one draw?
           bge EmitSpanMidLine
           
           ldy Swap              ; current column of source
@@ -212,17 +205,12 @@ EmitSpanMidLine:
           .mvapyi DLTail, #DLExtMode(false, true)
           .mvapyi DLTail, Pointer + 1
           ;; calculate palette + width value
-          lda SelectedPalette
-          .rept 5
-            asl a
-          .next
-          sta SelectedPalette   ; × 32
           lda Temp              ; span width
           asl a
           sec
           sbc # 1
           eor #$1f              ; encode span width
-          ora SelectedPalette   ; × 32
+          ora SelectedPalette
           sta (DLTail), y
           iny
           .mvapyi DLTail, MapNextX
@@ -241,25 +229,28 @@ EmitSpanMidLine:
 
           .Add16 DLTail, # 5
 DoneEmittingSpan:
+
+ReadNextPalette:
           ;; Look up the palette
           ;; Source is exactly 1kiB below the place we want
-          .mva Dest + 1, Source + 1
-          lda Source
+          .mva Dest, Source
+          lda Source + 1
           clc
           adc # 4
-          sta Dest
+          sta Dest + 1
 
-          ldy Swap
+          ldy Swap              ; column in source
           lda (Dest), y
           ;; got the attribute indirect ID, multiply by 6
           asl a
           sta Dest              ; temp
           asl a
+          clc
           adc Dest              ; temp
           ;; index into attributes table + 4 bytes to get palette ID
           tay
           lda MapAttributes + 4, y
-          and #$07
+          and #$e0
           sta SelectedPalette
 
           ldy Swap              ; column in source
@@ -272,7 +263,7 @@ PaletteOK:
           clc
           adc # 1
           sta (StringsTail), y
-          inc Swap              ; map column
+          inc Swap              ; column in map source
           inc Temp              ; current span width
 
           .Add16 StringsTail, # 2
@@ -286,11 +277,6 @@ EmitFinalSpan:
           .mvapyi DLTail, #DLExtMode(false, true)
           .mvapyi DLTail, Pointer + 1
           ;; calculate palette + width value
-          lda SelectedPalette
-          .rept 5
-            asl a
-          .next
-          sta SelectedPalette   ; × 32
           lda Temp              ; span width
           asl a
           sec

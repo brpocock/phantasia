@@ -171,7 +171,12 @@
             (setf (aref output x y 0) tile-id
                   (aref output x y 1) (assign-attributes tile-attributes
                                                          attributes-table))))))
+    #+ (or)  (dotimes (y 32)
+               (fresh-line *trace-output*)
+               (dotimes (x 32)
+                 (format *trace-output* "~x " (tile-effective-palette output x y attributes-table))))
     (mark-palette-transitions output attributes-table)
+    #+ (or) (format *trace-output* "~&~S" attributes-table)
     (values output attributes-table sprites-table exits-table)))
 
 (defun map-layer-depth (layer.xml)
@@ -266,6 +271,7 @@
       (setf (aref output i) (or (best-palette (elt tiles i) palettes)
                                 (error "Tile ~d does not match any palette~%~s~2%~s"
                                        i (elt tiles i) palettes))))
+    #+ (or) (format *trace-output* "~&Palettes for all tiles: ~s" output)
     output))
 
 (defun tile-property-value (key tile.xml)
@@ -312,9 +318,10 @@
 
 (defun assign-exit (locale point exits)
   (let ((locale.xml (load-other-map locale)))
-    (warn "Not finding point ~s in locale ~s" point locale)))
+    (warn "Not finding point ~s in locale ~s" point locale)
+    1))
 
-(defun add-attribute-values (palettes xml bytes &optional (exits nil exits-provided-p))
+(defun add-attribute-values (tile-palettes xml bytes &optional (exits nil exits-provided-p))
   (labels ((set-bit (byte bit)
              (setf (elt bytes byte) (logior (elt bytes byte) bit)))
            (clear-bit (byte bit)
@@ -361,7 +368,7 @@
       (set-bit 2 #x80)
       (destructuring-bind (locale point) (split-sequence #\/ destination)
         (if exits-provided-p
-            (set-bit 4 (assign-exit locale point exits))
+            (set-bit 4 (logand #x1f (assign-exit locale point exits)))
             (warn "Exit in tileset data is not supported (to ~s in ~s)" point locale))))
     (when-let (lock (tile-property-value "Lock" xml))
       (set-bit 3 (logand #x1f (parse-integer lock :radix 16))))
@@ -371,11 +378,11 @@
       (when (tile-property-value "Locked" xml)
         (warn "Locked tile without Lock code")))
     (when-let (tile-id (assocdr "id" (second xml) nil))
-      (when (and palettes tile-id)
-        (set-bit 4 (aref palettes (parse-integer tile-id)))))
+      (when (and tile-palettes tile-id)
+        (set-bit 4 (ash (aref tile-palettes (parse-integer tile-id)) 5))))
     (when-let (palette (tile-property-value "Palette" xml))
       (clear-bit 4 #x07)
-      (set-bit 4 (mod (parse-integer palette :radix 16) 8)))))
+      (set-bit 4 (ash (mod (parse-integer palette :radix 16) 8) 5)))))
 
 (defun parse-tile-attributes (palettes xml i)
   (let ((bytes (make-array '(6) :element-type '(unsigned-byte 8)))
@@ -384,12 +391,14 @@
                                   (= i (parse-integer (assocdr "id" (second el))))))
                            (subseq xml 2))))
     (add-attribute-values palettes tile.xml bytes)
+    #+ (or) (format *trace-output* "~& Tile (~2,'0x) Palette ~x Attrs ~s"
+                    i (logand #x07 (aref bytes 4)) bytes)
     bytes))
 
 (defun tile-effective-palette (grid x y attributes-table)
-  (let ((byte4 (aref (elt attributes-table (aref grid x y 1)) 4)))
-    (assert (= (logand #x07 byte4) byte4))
-    (logand #x07 byte4)))
+  (let ((byte4 (ash (logand #xe0 (aref (elt attributes-table (aref grid x y 1)) 4)) -5)))
+    (check-type byte4 (integer 0 7))
+    byte4))
 
 (defun load-tileset (xml-reference)
   (let* ((pathname (if (consp xml-reference)
@@ -646,8 +655,11 @@ Name:     .ptext \"~a\""
               (format t "~2%Art:     ;; Tile art")
               (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
                 (dotimes (y height)
+                  #+ (or) (fresh-line *trace-output*)
                   (dotimes (x width)
-                    (setf (aref string (+ (* width y) x)) (aref tile-grid x y 0))))
+                    (let ((cell (aref tile-grid x y 0)))
+                      #+ (or) (format *trace-output* "~2,'0x " cell)
+                      (setf (aref string (+ (* width y) x)) cell))))
                 (hex-dump-comment string)
                 (let ((compressed (rle-compress string)))
                   (format t "~&     .word $~4,'0x" (length compressed))

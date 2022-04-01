@@ -11,7 +11,7 @@ BankEntry:
           ;; Copy map attributes table
           ;; TODO the source pointer
           .mvaw Pointer, Map_Atsirav.Attributes
-          .mvaw Pointer2, MapAttributes
+          .mvaw Pointer2, MapAttributes - 1
 
           ldy # 0
           lax (Pointer), y
