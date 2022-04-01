@@ -220,9 +220,9 @@
           (assert (= 8 (array-dimension tile 0)))
           (assert (= 16 (array-dimension tile 1)))
           (push tile output))))
-    (format *trace-output* "… found ~d tile~:p in ~d×~d image" 
+    (format *trace-output* "… found ~d tile~:p in ~d×~d image"
             (length output) (array-dimension image 0) (array-dimension image 1))
-    output))
+    (reverse output)))
 
 (defun extract-palettes (image)
   (let* ((last-row (1- (array-dimension image 1)))
@@ -384,7 +384,9 @@
     bytes))
 
 (defun tile-effective-palette (grid x y attributes-table)
-  (logand #x07 (aref (elt attributes-table (aref grid x y 1)) 4)))
+  (let ((byte4 (aref (elt attributes-table (aref grid x y 1)) 4)))
+    (assert (= (logand #x07 byte4) byte4))
+    (logand #x07 byte4)))
 
 (defun load-tileset (xml-reference)
   (let* ((pathname (if (consp xml-reference)
