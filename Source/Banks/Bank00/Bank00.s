@@ -316,6 +316,7 @@ EmitFinalSpan:
           blt MoreMapRows
 DoneMap:
 ;;; 
+WriteOverscanDLL:
           .mvapyi DLLTail, # 0 | DLLDLI
           .mvapyi DLLTail, #>BlankDL
           .mvapyi DLLTail, #<BlankDL
