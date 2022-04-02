@@ -326,7 +326,9 @@ WriteOverscanDLL:
           .mva CTRL, #CTRLDMAEnable
 ;;; 
 Loop:
-          jmp Loop
+          lda ScreenChangedP
+          beq Loop
+          jmp BuildDLL
 ;;; 
 EmitSpan:
           ldy # 0

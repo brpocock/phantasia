@@ -54,7 +54,6 @@ StatsLines:         .byte ?
 DialogueLines:     .byte ?
 MapLines:           .byte ?
 ;;; 
-
 Counter:          .word ?
 Counter2:         .word ?
 
@@ -80,6 +79,7 @@ ScreenNextX:        .byte ?
 
 SelectedPalette:    .byte ?
 
+ScreenChangedP:     .byte ?
           .align $100
 MapArt:
           .fill $400, ?

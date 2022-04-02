@@ -28,7 +28,7 @@ TileDLI:  .block
           jsr FrameService
 
           lda NewSWCHA
-          beq DoneStick
+          beq NoStick
 
           and #$10
           beq DoneUp
@@ -84,7 +84,9 @@ RightOK:
           stx MapLeftPixel
 DoneRight:
 DoneStick:
+          inc ScreenChangedP
 
+NoStick:
           ;; XXX do useful work while Maria is busy
 
           .WaitForVBlank
