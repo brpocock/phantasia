@@ -25,7 +25,7 @@ BankEntry:
 
 BuildDLL:
           .mvaw DLLTail, DLL
-          lda # 192
+          lda # 240
           sec
           sbc StatsLines
           sbc DialogueLines
@@ -209,21 +209,7 @@ CopyTileSpan:
 
 EmitSpanMidLine:
           ;; Palette changed, what was it, what will it be?
-          ldy # 0
-          .mvapyi DLTail, Pointer
-          .mvapyi DLTail, #DLExtMode(false, true)
-          .mvapyi DLTail, Pointer + 1
-          ;; calculate palette + width value
-          lda Temp              ; span width
-          asl a
-          sec
-          sbc # 1
-          eor #$1f              ; encode span width
-          ora SelectedPalette
-          sta (DLTail), y
-          iny
-          .mvapyi DLTail, MapNextX
-          .mvap Pointer, StringsTail
+          jsr EmitSpan
 
           ;; update left of next span
           lda Temp
@@ -277,21 +263,7 @@ PaletteOK:
           blt CopyTileSpan
 
 EmitFinalSpan:
-          ldy # 0               ; drawing list index
-          .mvapyi DLTail, Pointer
-          .mvapyi DLTail, #DLExtMode(false, true)
-          .mvapyi DLTail, Pointer + 1
-          ;; calculate palette + width value
-          lda Temp              ; span width
-          asl a
-          sec
-          sbc # 1
-          eor #$1f              ; encode span width
-          ora SelectedPalette
-          sta (DLTail), y
-          iny
-          .mvapyi DLTail, MapNextX
-          .mvap Pointer, StringsTail
+          jsr EmitSpan
 
           .Add16 DLTail, # 5
           ldy # 0
@@ -355,6 +327,25 @@ WriteOverscanDLL:
 ;;; 
 Loop:
           jmp Loop
+;;; 
+EmitSpan:
+          ldy # 0
+          .mvapyi DLTail, Pointer
+          .mvapyi DLTail, #DLExtMode(false, true)
+          .mvapyi DLTail, Pointer + 1
+          ;; calculate palette + width value
+          lda Temp              ; span width
+          asl a
+          sec
+          sbc # 1
+          eor #$1f              ; encode span width
+          ora SelectedPalette
+          sta (DLTail), y
+          iny
+          .mvapyi DLTail, MapNextX
+          .mvap Pointer, StringsTail
+
+          rts
 ;;; 
 BeginStats:
           .mva P0C2, #CoLu(COLGRAY, $9)

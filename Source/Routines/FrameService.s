@@ -9,7 +9,6 @@ FrameService:       .block
 
           jsr Clock
           jsr Alarm
-
           jsr ReadInputs
 
           rts

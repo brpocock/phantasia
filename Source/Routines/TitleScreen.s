@@ -85,13 +85,15 @@ Loop:
           .WaitForVBlank
           jsr JFrameService
 
-          lda NewButtonI
+          lda NewButtonII
           beq Loop
           bpl Loop
 
           ldy # 0
           sty NMINext + 1
           sty NMINext
+          sty AlarmV + 1
+          sty AlarmV
 
           .mva GameMode, #ModeMap
 
