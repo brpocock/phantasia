@@ -488,15 +488,15 @@ StatsDLTop:
           .DLAltHeader DrawUI + $02, 0, 4, $0c
           .DLAltHeader DrawUI + $00, 0, 4, $18
           .DLAltHeader DrawUI + $02, 0, 4, $20
-          
+
 StatsDL2:
           .DLAltHeader DrawUI + $10, 0, 2, $04
           .DLAltHeader DrawUI + $14, 0, 2, $10
 
-          .DLAltHeader Items + $00 * 2, 4, 4, $08
-
           .DLAltHeader DrawUI + $10, 0, 2, $18
           .DLAltHeader DrawUI + $14, 0, 2, $24
+
+          .DLAltHeader Items + $00 * 2, 4, 4, $08
 
           .DLAltHeader Items + $02 * 2, 4, 4, $1c
 
@@ -506,10 +506,10 @@ StatsDL3:
           .DLAltHeader DrawUI + $10, 0, 2, $04
           .DLAltHeader DrawUI + $14, 0, 2, $10
 
-          .DLAltHeader Items + $10 * 2, 4, 4, $08
-
           .DLAltHeader DrawUI + $10, 0, 2, $18
           .DLAltHeader DrawUI + $14, 0, 2, $24
+
+          .DLAltHeader Items + $10 * 2, 4, 4, $08
 
           .DLAltHeader Items + $12 * 2, 4, 4, $1c
 
