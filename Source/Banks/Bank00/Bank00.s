@@ -41,7 +41,7 @@ GotPointers:
           lda ActiveDLL
           eor # 1
           sta ActiveDLL
-          
+
           lda # 233
           sec
           sbc StatsLines
@@ -62,30 +62,9 @@ StatsDLL:
 
           .mvap Pointer, DLTail
 
-          ;; XXX copy this as a string maybe?
-          .mvapyi DLTail, #<(DrawUI + $00)
-          .mvapyi DLTail, #DLExtMode(true, false)
-          .mvapyi DLTail, #>(DrawUI + $00)
-          .mvapyi DLTail, #DLPalWidth(0, 4)
-          .mvapyi DLTail, #$04
-          
-          .mvapyi DLTail, #<(DrawUI + $02)
-          .mvapyi DLTail, #DLExtMode(true, false)
-          .mvapyi DLTail, #>(DrawUI + $02)
-          .mvapyi DLTail, #DLPalWidth(0, 4)
-          .mvapyi DLTail, #$0c
-
-          .mvapyi DLTail, #<(DrawUI + $00)
-          .mvapyi DLTail, #DLExtMode(true, false)
-          .mvapyi DLTail, #>(DrawUI + $00)
-          .mvapyi DLTail, #DLPalWidth(0, 4)
-          .mvapyi DLTail, #$18
-          
-          .mvapyi DLTail, #<(DrawUI + $02)
-          .mvapyi DLTail, #DLExtMode(true, false)
-          .mvapyi DLTail, #>(DrawUI + $02)
-          .mvapyi DLTail, #DLPalWidth(0, 4)
-          .mvapyi DLTail, #$20
+          ldx # 5 * 4
+          .mvaw Source, StatsDLTop
+          jsr CopyToDL
 
           .mvapyi DLTail, #<MapNameString + 1
           .mvapyi DLTail, #DLExtMode(false, true)
@@ -398,6 +377,18 @@ Loop:
           beq Loop
           jmp BuildDLL
 ;;; 
+CopyToDL:
+          sty Temp
+          ldy # 0
+          lda (Source), y
+          ldy Temp
+          sta (DLTail), y
+          iny
+          .Add16 Source, # 1
+          dex
+          bne CopyToDL
+          rts
+;;; 
 EmitSpan:
           ldy # 0
           .mvapyi DLTail, Pointer
@@ -492,6 +483,12 @@ Dialogue2Text:      .ptext "hello, world."
 Dialogue3Text:      .ptext "this is a test"
 Dialogue4Text:      .ptext "this is only a test"
 
+StatsDLTop:
+          .DLAltHeader DrawUI + $00, 0, 4, $04
+          .DLAltHeader DrawUI + $02, 0, 4, $0c
+          .DLAltHeader DrawUI + $00, 0, 4, $18
+          .DLAltHeader DrawUI + $02, 0, 4, $20
+          
 StatsDL2:
           .DLAltHeader DrawUI + $10, 0, 2, $04
           .DLAltHeader DrawUI + $14, 0, 2, $10
