@@ -27,7 +27,7 @@ ColdStart:	.block
           jmp ZeroRAM
 
 NotJoy2b:
-          .mva CTLSWB, #$04       ; enable 7800 dual-button controller
+          .mva CTLSWB, #SWCHBP0TwoButton
           .mva ControllerMode, #Controller7800
           sty SWCHB
 

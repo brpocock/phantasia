@@ -2,26 +2,33 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 UserInput:          .block
-          lda NewSWCHA
-          beq NoStick
+          lda StickY
+          beq DoneUpDown
 
-          and #$10
-          bne DoneUp
+          bmi StickDown
+
+StickUp:
           ldx MapTopRow
-          beq DoneUp
+          beq DoneUpDown
+
           dex
           stx MapTopRow
-DoneUp:
-          and #$20
-          bne DoneDown
+          jmp DoneUpDown
+
+StickDown:
           ldx MapTopRow
           inx
           cpx # 20
-          bge DoneDown
+          bge DoneUpDown
           stx MapTopRow
-DoneDown:
-          and #$40
-          bne DoneLeft
+
+DoneUpDown:
+          lda StickX
+          beq DoneLeftRight
+
+          bpl StickRight
+
+StickLeft:
           ldx MapLeftPixel
           dex
           bpl LeftOK
@@ -34,12 +41,12 @@ DoneDown:
           sec
           sbc # 1
           sta MapLeftColumn
-          lda NewSWCHA
 LeftOK:
           stx MapLeftPixel
 DoneLeft:
-          and #$80
-          bne DoneRight
+          jmp DoneLeftRight
+
+StickRight:
           ldx MapLeftPixel
           inx
           cpx # 8
@@ -54,10 +61,10 @@ DoneLeft:
           clc
           adc # 1
           sta MapLeftColumn
-          lda NewSWCHA
 RightOK:
           stx MapLeftPixel
 DoneRight:
+DoneLeftRight:
 DoneStick:
           inc ScreenChangedP
 

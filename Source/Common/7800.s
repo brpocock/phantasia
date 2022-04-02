@@ -226,3 +226,51 @@ PSKCTL   = $F    ; Serial Port control
           .else
             FramesPerSecond=50
           .fi
+
+          ;; read SWCHA
+          P0StickUp = $10
+          P0StickDown = $20
+          P0StickLeft = $40
+          P0StickRight = $80
+          P0StickCentered = $f0
+          P1StickUp = 1
+          P1StickDown = 2
+          P1StickLeft = 4
+          P1StickRight = 8
+          P1StickCentered = $f
+
+          ;; read INPT4 (P0), INPT5 (P1) for stick fire button
+          PRESSED = $80
+
+          P0Fire = INPT4
+          P1Fire = INPT5
+
+          ;; Paddles: TODO.
+
+          ;; Keypad
+          ;; Set SWACNT ← $0f (for P1)
+          SWACNTKeypadP0 = $f0
+          SWACNTKeypadP1 = $0f
+          P0KeypadRow1 = $10
+          P0KeypadRow2 = $20
+          P0KeypadRow3 = $40
+          P0KeypadRow4 = $80
+          P1KeypadRow1 = 1
+          P1KeypadRow2 = 2
+          P1KeypadRow3 = 4
+          P1KeypadRow4 = 8
+          P0KeypadLeftColumn = INPT0
+          P0KeypadMiddleColumn = INPT1
+          P0KeypadRightColumn = INPT4
+          P1KeypadLeftColumn = INPT2
+          P1KeypadMiddleColumn = INPT3
+          P1KeypadRightColumn = INPT5
+
+          ;; Console
+          SWCHBReset = $01
+          SWCHBSelect = $02
+          SWCHBPause = $08
+          SWCHBP0Advanced = $40
+          SWCHBP1Advanced = $80
+          SWCHBP1TwoButton = $10
+          SWCHBP0TwoButton = $04

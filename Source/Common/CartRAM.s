@@ -32,20 +32,18 @@ AlarmV:   .word ?
 ;;; 
 ControllerMode:     .byte ?
 
-DebounceSWCHA:      .byte ?
+StickX:   .byte ?
+StickY:   .byte ?
+
 DebounceSWCHB:      .byte ?
 DebounceButtonI:      .byte ?
 DebounceButtonII:      .byte ?
 DebounceButtonIII:      .byte ?
 
-HeldSWCHA:      .byte ?
-HeldSWCHB:      .byte ?
 HeldButtonI:      .byte ?
 HeldButtonII:      .byte ?
 HeldButtonIII:      .byte ?
 
-NewSWCHA:      .byte ?
-NewSWCHB:      .byte ?
 NewButtonI:      .byte ?
 NewButtonII:      .byte ?
 NewButtonIII:       .byte ?

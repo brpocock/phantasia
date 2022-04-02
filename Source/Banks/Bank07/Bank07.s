@@ -45,6 +45,7 @@ ReturnFromInterrupt:
 
           .include "UserInput.s"
           .include "FrameWork.s"
+          .include "ReadInputs.s"
 
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)
