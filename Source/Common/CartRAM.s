@@ -73,11 +73,15 @@ MapLeftPixel:       .byte ?
 
 MapNextY:         .byte ?
 MapNextX:        .byte ?
+SpanWidth:          .byte ?
 
 ScreenNextY:        .byte ?
 ScreenNextX:        .byte ?
 
 SelectedPalette:    .byte ?
+ActiveDLL:          .byte ?
+
+MapRowEnd:          .fill (13 * 2), ?
 
 ScreenChangedP:     .byte ?
           .align $100

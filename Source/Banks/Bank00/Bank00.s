@@ -9,7 +9,7 @@ BankEntry:
           .mva NMINext, # 0
           .mva CTRL, #CTRLDMADisable
 
-          .mva CurrentMap, # 0
+          ;; Decompress the current map
           ldy # 0
           ldx # 2
           jsr JFarCall
@@ -18,25 +18,39 @@ BankEntry:
           .mvaw NMINext, IBeginStats
           .mva BACKGRND, #CoLu(COLYELLOW, $f)
 
-          DLL = SysRAMHigh
-          DialogueDL = DLL + $80
-          MapDLStart = DLL + $180
-          MapStringsStart = DLL + $400
+          BlankDL = SysRAMHigh
+          DLL = SysRAMHigh + $02
+          DLSpace = SysRAMHigh + $80
+          StringsStart = DLSpace + $280
+          AltDLL = StringsStart + $200
+          AltDLSpace = StringsStart + $280
+          AltStringsStart = AltDLSpace + $280
 
 BuildDLL:
+          lda ActiveDLL
+          beq +
+          .mvaw DLLTail, AltDLL
+          .mvaw DLTail, AltDLSpace
+          .mvaw StringsTail, AltStringsStart
+          jmp GotPointers
++
           .mvaw DLLTail, DLL
-          lda # 240
+          .mvaw DLTail, DLSpace
+          .mvaw StringsTail, StringsStart
+GotPointers:
+          lda # 233
           sec
           sbc StatsLines
           sbc DialogueLines
           sta MapLines
-          
+
           ldy # 0
+          sty BlankDL
+          sty BlankDL + 1
 
           .mvapyi DLLTail, # 11 | DLLDLI
           .mvapyi DLLTail, #>BlankDL
           .mvapyi DLLTail, #<BlankDL
-
 StatsDLL:
           .mvapyi DLLTail, # 7 | DLLHoley8
           .mvapyi DLLTail, #>StatsDL1
@@ -62,6 +76,7 @@ DialogueDLL:
           lda DialogueLines
           beq DoneDialogue
 
+          .mvap Dest, DLTail
           sec
           sbc #$10              ; XXX minimum height
           bmi DoneDialogue
@@ -79,7 +94,6 @@ DialogueDLL:
           tya
           .Add16a DLLTail
           ldy # 0
-          .mvaw DLTail, DialogueDL ; end of DialogueDLs
 NextDialogueZone:
           ldx # 0
 CopyDialogueMidDL:
@@ -110,8 +124,8 @@ CopyDialogueMidDL:
           ldy # 0               ; DLL index
 
           .mvapyi DLLTail, # 7 | DLLHoley8
-          .mvapyi DLLTail, #>DialogueDL
-          .mvapyi DLLTail, #<DialogueDL
+          .mvapyi DLLTail, Dest + 1
+          .mvapyi DLLTail, Dest
 
           tya
           .Add16a DLLTail
@@ -156,9 +170,6 @@ DrawMapSection:
           ldy # 0
           sty ScreenNextY
 
-          .mvaw DLTail, MapDLStart
-          .mvaw StringsTail, MapStringsStart
-
           lda #<MapArt
           sta Source
           lda #>MapArt
@@ -180,7 +191,8 @@ DrawMapSection:
           adc Source
           sta Source
 
-          .mva SelectedPalette, # 0
+          ldy # 0
+          jsr LookUpPalette
 
 MoreMapRows:
           ldy # 0
@@ -192,19 +204,19 @@ MoreMapRows:
           .Add16a DLLTail
 
           .mvy Swap, MapLeftColumn
-          .mvx Temp, # 0        ; current span width in Temp, current output h pos in x
+          .mvx SpanWidth, # 0
           .mvap Pointer, StringsTail
           .mva MapNextX, MapLeftPixel
 CopyTileSpan:
-          lda Temp              ; current span width
-          cmp #$0f              ; is this string getting too long for one draw?
+          lda SpanWidth
+          cmp #$1f              ; is this string getting too long for one draw?
           bge EmitSpanMidLine
           
           ldy Swap              ; current column of source
           lda (Source), y
           bpl PaletteOK
 
-          lda Temp              ; width of current span string
+          lda SpanWidth
           beq DoneEmittingSpan
 
 EmitSpanMidLine:
@@ -212,7 +224,7 @@ EmitSpanMidLine:
           jsr EmitSpan
 
           ;; update left of next span
-          lda Temp
+          lda SpanWidth
           asl a
           asl a
           asl a
@@ -220,33 +232,15 @@ EmitSpanMidLine:
           adc MapNextX
           sta MapNextX
 
-          .mva Temp, # 0
+          .mva SpanWidth, # 0
 
           .Add16 DLTail, # 5
+
+          ldy Swap              ; column in source
 DoneEmittingSpan:
 
 ReadNextPalette:
-          ;; Look up the palette
-          ;; Source is exactly 1kiB below the place we want
-          .mva Dest, Source
-          lda Source + 1
-          clc
-          adc # 4
-          sta Dest + 1
-
-          ldy Swap              ; column in source
-          lda (Dest), y
-          ;; got the attribute indirect ID, multiply by 6
-          asl a
-          sta Dest              ; temp
-          asl a
-          clc
-          adc Dest              ; temp
-          ;; index into attributes table + 4 bytes to get palette ID
-          tay
-          lda MapAttributes + 4, y
-          and #$e0
-          sta SelectedPalette
+          jsr LookUpPalette
 
           ldy Swap              ; column in source
           lda (Source), y
@@ -255,29 +249,36 @@ PaletteOK:
           ldy # 0
           sta (StringsTail), y
           inc Swap              ; column in map source
-          inc Temp              ; current span width
+          inc SpanWidth
 
           .Add16 StringsTail, # 1
           inx
-          cpx #$21
+          cpx # 21
           blt CopyTileSpan
 
 EmitFinalSpan:
           jsr EmitSpan
 
           .Add16 DLTail, # 5
+SaveMapEnd:
+          lda ScreenNextY
+          asl a
+          tay
+          lda DLTail
+          sta MapRowEnd, y
+          iny
+          lda DLTail + 1
+          sta MapRowEnd, y
+
           ldy # 0
 
           lda # 0
-          ldx #$10              ; XXX room for stamps
--
+          ldx #$12              ; XXX room for stamps + terminal $0000
+FillSpanZeroes:
           sta (DLTail), y
           iny
           dex
-          bne -
-          
-          .mvapyi DLTail, # 0
-          .mvapyi DLTail, # 0
+          bne FillSpanZeroes
 
           tya
           .Add16a DLTail
@@ -285,12 +286,16 @@ EmitFinalSpan:
           .Add16 Source, CurrentMapWidth
           inc ScreenNextY
           lda ScreenNextY
-          asl a
+          asl a                 ; 16 lines per row
           asl a
           asl a
           asl a
           cmp MapLines
-          blt MoreMapRows
+          bge DoneMap
+
+          ldy # 0
+          jsr LookUpPalette
+          jmp MoreMapRows
 DoneMap:
 ;;; 
 WriteOverscanDLL:
@@ -336,8 +341,7 @@ EmitSpan:
           .mvapyi DLTail, #DLExtMode(false, true)
           .mvapyi DLTail, Pointer + 1
           ;; calculate palette + width value
-          lda Temp              ; span width
-          asl a
+          lda SpanWidth
           sec
           sbc # 1
           eor #$1f              ; encode span width
@@ -346,6 +350,30 @@ EmitSpan:
           iny
           .mvapyi DLTail, MapNextX
           .mvap Pointer, StringsTail
+
+          rts
+;;; 
+LookUpPalette:
+          ;; Look up the palette
+          ;; Source is exactly 1kiB below the place we want
+          .mva Dest, Source
+          lda Source + 1
+          clc
+          adc # 4
+          sta Dest + 1
+
+          lda (Dest), y
+          ;; got the attribute indirect ID, multiply by 6
+          asl a
+          sta Dest              ; temp
+          asl a
+          clc
+          adc Dest              ; temp
+          ;; index into attributes table + 4 bytes to get palette ID
+          tay
+          lda MapAttributes + 4, y
+          and #$e0
+          sta SelectedPalette
 
           rts
 ;;; 
@@ -412,7 +440,6 @@ StatsDL1:
           .DLAltHeader DrawUI + $00, 0, 4, $18
           .DLAltHeader DrawUI + $02, 0, 4, $20
 
-BlankDL:
           .DLEnd
 
 StatsDL2:
