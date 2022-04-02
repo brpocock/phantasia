@@ -1,4 +1,4 @@
-;;; Phantasia Source/Source/Banks/Bank03/Bank03.s
+;;; Phantasia Source/Banks/Bank03/Bank03.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
           BANK = 03
@@ -6,9 +6,16 @@
           .include "StartBank.s"
 
 BankEntry:
-          
-          
+          MapStartOffset = $10
+          .include "LoadMap.s"
 
-          brk
+          .include "RLE.s"
+
+Maps:
+          .word Map_PlayerHouse
+          .word Map_AtsiravTownHall
+
+          .include "PlayerHouse.s"
+          .include "AtsiravTownHall.s"
 
           .include "EndBank.s"

@@ -7,3 +7,12 @@
           ModeTitleScreen = $12
 
           ModeMap = $80
+
+;;; 
+          MapOffsetWidth = 0
+          MapOffsetHeight = 1
+          MapOffsetArt = 2
+          MapOffsetTileAttributes = 4
+          MapOffsetAttributes = 6
+          MapOffsetSprites = 8
+          MapOffsetExits = 10

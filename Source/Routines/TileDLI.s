@@ -3,16 +3,13 @@
 
 TileDLI:  .block
 
-          ldx # 8
--
           stx WSYNC
-          dex
-          bne -
+          .mva BACKGRND, # 0
+          .mva CTRL, #CTRLDMADisable
 
           .BankSwitch # 1
 
-          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
-          .mva BACKGRND, $9000
+          .mva CHARBASE, #>$8000
 
           .for p := 0, p < 8, p := p + 1
             .for c := 0, c < 3, c := c + 1
@@ -20,7 +17,14 @@ TileDLI:  .block
             .next
           .next
 
-          .mva CHARBASE, #>$8000
+          stx WSYNC
+          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
+
+          stx WSYNC
+          stx WSYNC
+          .mva BACKGRND, $9000
+          
+          ;; jsr FrameService
 
           ;; XXX do useful work while Maria is busy
 

@@ -127,7 +127,7 @@ CopyDialogueMidDL:
 
 DoneDialogueMid:
           ldy # 0
-          .mvapyi DLLTail, # 7 | DLLHoley8 | DLLDLI
+          .mvapyi DLLTail, # 7 | DLLHoley8
           .mvapyi DLLTail, #>DialogueBottomDL
           .mvapyi DLLTail, #<DialogueBottomDL
 
@@ -139,6 +139,15 @@ MapSectionDLL:
           lda MapLines
           cmp #$10
           blt DoneMap
+
+          ldy # 0
+          .mvapyi DLLTail, # 2 | DLLDLI
+          .mvapyi DLLTail, #>BlankDL
+          .mvapyi DLLTail, #<BlankDL
+          .mvapyi DLLTail, # 1
+          .mvapyi DLLTail, #>BlankDL
+          .mvapy DLLTail, #<BlankDL
+          .Add16 DLLTail, # 3
 
 DrawMapSection:
           lda MapTopRow
@@ -305,7 +314,7 @@ EmitFinalSpan:
           tya
           .Add16a DLTail
 
-          .Add16 Source, #$20   ; next row in map data too
+          .Add16 Source, CurrentMapWidth
           inc ScreenNextY
           lda ScreenNextY
           asl a

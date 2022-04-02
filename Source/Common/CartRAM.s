@@ -57,6 +57,8 @@ CurrentBank:        .byte ?
           
 CurrentMap:         .byte ?
 
+CurrentMapWidth:    .byte ?
+CurrentMapHeight:   .byte ?
 MapBackground:      .byte ?
 MapPalettes:        .fill (8 * 3), ?
           
