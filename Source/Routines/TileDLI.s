@@ -18,7 +18,7 @@ TileDLI:  .block
           .next
 
           stx WSYNC
-          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB
+          .mva CTRL, #CTRLDMAEnable | CTRLRead160AB | CTRLCharWide
 
           stx WSYNC
           stx WSYNC

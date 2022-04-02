@@ -268,14 +268,10 @@ PaletteOK:
           asl a                 ; tile byte address
           ldy # 0
           sta (StringsTail), y
-          iny
-          clc
-          adc # 1
-          sta (StringsTail), y
           inc Swap              ; column in map source
           inc Temp              ; current span width
 
-          .Add16 StringsTail, # 2
+          .Add16 StringsTail, # 1
           inx
           cpx #$21
           blt CopyTileSpan

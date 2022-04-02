@@ -76,6 +76,7 @@ ReadInputs:
           lda SWCHA
           cmp DebounceSWCHA
           beq SWCHAHeld
+
           eor DebounceSWCHA
           sta NewSWCHA
           jmp DoneSWCHA
@@ -87,6 +88,7 @@ SWCHAHeld:
           lda HeldSWCHA
           cmp #FramesPerSecond
           blt DoneSWCHA
+
           lda #FramesPerSecond
           sta HeldSWCHA
 DoneSWCHA:
@@ -94,6 +96,7 @@ DoneSWCHA:
           lda SWCHB
           cmp DebounceSWCHB
           beq SWCHBHeld
+
           eor DebounceSWCHB
           sta NewSWCHB
           jmp DoneSWCHB
@@ -105,49 +108,57 @@ SWCHBHeld:
           lda HeldSWCHB
           cmp #FramesPerSecond
           blt DoneSWCHB
+
           lda #FramesPerSecond
           sta HeldSWCHB
 DoneSWCHB:
 
-ReadINPT0:
-          lda INPT0 
+          lda ControllerMode
+          beq Read7800Controller
+
+MapInput: .macro register, button
+          .block
+
+          buttonIndex := \button - 1
+
+          lda \register
           and #$80
-          cmp DebounceINPT0 
-          beq INPT0Held
-          ora #$01
-          sta NewINPT0 
-          jmp DoneINPT0
+          eor #$80
 
-INPT0Held:
-          lda # 0
-          sta NewINPT0 
-          inc HeldINPT0 
-          lda HeldINPT0 
-          cmp #FramesPerSecond
-          blt DoneINPT0
-          lda #FramesPerSecond
-          sta HeldINPT0 
-DoneINPT0:
+          cmp DebounceButtonI + buttonIndex
+          beq ButtonSame
 
-ReadINPT1:
-          lda INPT1 
-          and #$80
-          cmp DebounceINPT1 
-          beq INPT1Held
-          ora #$01
-          sta NewINPT1 
-          jmp DoneINPT1
+ButtonChanged:
+          sta DebounceButtonI + buttonIndex
+          ora # 1
+          sta NewButtonI + buttonIndex
+          ldy # 0
+          sty HeldButtonI + buttonIndex
+          geq ButtonDone
 
-INPT1Held:
-          lda # 0
-          sta NewINPT1 
-          inc HeldINPT1 
-          lda HeldINPT1 
-          cmp #FramesPerSecond
-          blt DoneINPT1
-          lda #FramesPerSecond
-          sta HeldINPT1 
-DoneINPT1:
+ButtonSame:
+          cmp # 0
+          beq ButtonDone
+
+          lda HeldButtonI + buttonIndex
+          bmi ButtonDone
+          inc HeldButtonI + buttonIndex
+
+ButtonDone:
+
+          .bend
+          .endm
+          
+ReadJoy2bController:
+          .MapInput INPT4, 1
+          .MapInput INPT0, 2
+          .MapInput INPT1, 3
+
+          rts
+
+Read7800Controller:
+          .MapInput INPT0, 1
+          .MapInput INPT1, 2
 
           rts
 

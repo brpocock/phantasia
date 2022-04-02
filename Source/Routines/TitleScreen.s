@@ -72,7 +72,7 @@ FillBottomBlank:
           .mva DPPH, #>PreludeDLL
 
           ;; Duplicate this in the bottommost NMI routine as well
-          .mvaw NMINext, NMISwitchToBigFont
+          .mvaw NMINext, ISwitchToBigFont
           .mva BACKGRND, #CoLu(COLBLUE, $8)
           .mva CHARBASE, #>Font
           ;; Turn on the Maria
@@ -85,7 +85,8 @@ Loop:
           .WaitForVBlank
           jsr JFrameService
 
-          lda NewINPT0
+          lda NewButtonI
+          beq Loop
           bpl Loop
 
           ldy # 0
@@ -94,11 +95,15 @@ Loop:
 
           .mva GameMode, #ModeMap
 
-          ;; FIXME clear the DLL before leaving the ROM bank
+          ;; XXX clear the DLL before leaving the ROM bank
 
           .mva StatsLines, #$20  ; 4 × 8
           .mva DialogueLines, #$28 ; 5 × 8
 
+          .mva MapTopRow, # 2
+          .mva MapLeftColumn, # 2
+          .mva MapTopLine, # 0
+          .mva MapLeftPixel, #-4
           ldx # 0
           jmp JFarJump
 ;;; 
@@ -124,16 +129,18 @@ HidePressRightButton:
           .mva AlarmEnabledP, #$80
           rts
 ;;; 
-NMISwitchToBigFont:
-          .mvaw NMINext, NMISwitchToFont
+ISwitchToBigFont:
+          .mvaw NMINext, ISwitchToFont
+          stx WSYNC
           .mva BACKGRND, #CoLu(COLGREEN, $8)
           .mva CHARBASE, #>BigFont
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC | CTRLCharWide
 RTI:
           rti
 
-NMISwitchToFont:
-          .mvaw NMINext, NMISwitchToBigFont
+ISwitchToFont:
+          .mvaw NMINext, ISwitchToBigFont
+          stx WSYNC
           .mva BACKGRND, #CoLu(COLBLUE, $8)
           .mva CHARBASE, #>Font
           .mva CTRL, #CTRLDMAEnable | CTRLRead320AC

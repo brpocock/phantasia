@@ -30,20 +30,25 @@ AlarmSeconds:       .byte ?
 AlarmEnabledP:      .byte ?
 AlarmV:   .word ?
 ;;; 
+ControllerMode:     .byte ?
+
 DebounceSWCHA:      .byte ?
 DebounceSWCHB:      .byte ?
-DebounceINPT0:      .byte ?
-DebounceINPT1:      .byte ?
+DebounceButtonI:      .byte ?
+DebounceButtonII:      .byte ?
+DebounceButtonIII:      .byte ?
 
 HeldSWCHA:      .byte ?
 HeldSWCHB:      .byte ?
-HeldINPT0:      .byte ?
-HeldINPT1:      .byte ?
+HeldButtonI:      .byte ?
+HeldButtonII:      .byte ?
+HeldButtonIII:      .byte ?
 
 NewSWCHA:      .byte ?
 NewSWCHB:      .byte ?
-NewINPT0:      .byte ?
-NewINPT1:      .byte ?
+NewButtonI:      .byte ?
+NewButtonII:      .byte ?
+NewButtonIII:       .byte ?
 ;;;
 StatsLines:         .byte ?
 DialogueLines:     .byte ?

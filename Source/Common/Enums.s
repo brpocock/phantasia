@@ -7,7 +7,6 @@
           ModeTitleScreen = $12
 
           ModeMap = $80
-
 ;;; 
           MapOffsetWidth = 0
           MapOffsetHeight = 1
@@ -16,3 +15,6 @@
           MapOffsetAttributes = 6
           MapOffsetSprites = 8
           MapOffsetExits = 10
+;;; 
+          ControllerJoy2b = $01
+          Controller7800 = $00

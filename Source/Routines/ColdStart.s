@@ -13,12 +13,23 @@ ColdStart:	.block
           dex                   ; X = $ff
           txs                   ; clear stack
 
-          ;; TODO: detect Joy2b+ / Genesis controller
+          ldy # 0
+          sty CTLSWA
+          sty CTLSWB
 
-          lda #$14
-          sta CTLSWB            ; enable 7800 dual-button controllers
-          lda # 0
-          sta SWCHB
+          lda INPT0
+          bpl NotJoy2b
+
+          lda INPT1
+          bpl NotJoy2b
+
+          .mva ControllerMode, #ControllerJoy2b
+          jmp ZeroRAM
+
+NotJoy2b:
+          .mva CTLSWB, #$04       ; enable 7800 dual-button controller
+          .mva ControllerMode, #Controller7800
+          sty SWCHB
 
 ZeroRAM:
 	ldx #$40
