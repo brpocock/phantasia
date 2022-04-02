@@ -6,14 +6,14 @@ UserInput:          .block
           beq NoStick
 
           and #$10
-          beq DoneUp
+          bne DoneUp
           ldx MapTopRow
           beq DoneUp
           dex
           stx MapTopRow
 DoneUp:
           and #$20
-          beq DoneDown
+          bne DoneDown
           ldx MapTopRow
           inx
           cpx # 20
@@ -21,7 +21,7 @@ DoneUp:
           stx MapTopRow
 DoneDown:
           and #$40
-          beq DoneLeft
+          bne DoneLeft
           ldx MapLeftPixel
           dex
           bpl LeftOK
@@ -39,7 +39,7 @@ LeftOK:
           stx MapLeftPixel
 DoneLeft:
           and #$80
-          beq DoneRight
+          bne DoneRight
           ldx MapLeftPixel
           inx
           cpx # 8

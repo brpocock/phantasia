@@ -23,7 +23,7 @@ BankEntry:
           DLSpace = SysRAMHigh + $80
           StringsStart = DLSpace + $280
           AltDLL = StringsStart + $200
-          AltDLSpace = StringsStart + $280
+          AltDLSpace = AltDLL + $80
           AltStringsStart = AltDLSpace + $280
 
 BuildDLL:
@@ -38,6 +38,10 @@ BuildDLL:
           .mvaw DLTail, DLSpace
           .mvaw StringsTail, StringsStart
 GotPointers:
+          lda ActiveDLL
+          eor # 1
+          sta ActiveDLL
+          
           lda # 233
           sec
           sbc StatsLines
@@ -52,9 +56,61 @@ GotPointers:
           .mvapyi DLLTail, #>BlankDL
           .mvapyi DLLTail, #<BlankDL
 StatsDLL:
+
+          sty Swap              ; DLL index
+          ldy # 0               ; DL index
+
+          .mvap Pointer, DLTail
+
+          ;; XXX copy this as a string maybe?
+          .mvapyi DLTail, #<(DrawUI + $00)
+          .mvapyi DLTail, #DLExtMode(true, false)
+          .mvapyi DLTail, #>(DrawUI + $00)
+          .mvapyi DLTail, #DLPalWidth(0, 4)
+          .mvapyi DLTail, #$04
+          
+          .mvapyi DLTail, #<(DrawUI + $02)
+          .mvapyi DLTail, #DLExtMode(true, false)
+          .mvapyi DLTail, #>(DrawUI + $02)
+          .mvapyi DLTail, #DLPalWidth(0, 4)
+          .mvapyi DLTail, #$0c
+
+          .mvapyi DLTail, #<(DrawUI + $00)
+          .mvapyi DLTail, #DLExtMode(true, false)
+          .mvapyi DLTail, #>(DrawUI + $00)
+          .mvapyi DLTail, #DLPalWidth(0, 4)
+          .mvapyi DLTail, #$18
+          
+          .mvapyi DLTail, #<(DrawUI + $02)
+          .mvapyi DLTail, #DLExtMode(true, false)
+          .mvapyi DLTail, #>(DrawUI + $02)
+          .mvapyi DLTail, #DLPalWidth(0, 4)
+          .mvapyi DLTail, #$20
+
+          .mvapyi DLTail, #<MapNameString + 1
+          .mvapyi DLTail, #DLExtMode(false, true)
+          .mvapyi DLTail, #>MapNameString + 1
+          lda MapNameString
+          sec
+          sbc # 1
+          eor #$1f
+          ora #(2 << 5)
+          sta (DLTail), y
+          iny
+          .mvapyi DLTail, #DLPalWidth(2, MapNameString)
+          .mvapyi DLTail, #$50
+
+          .mvapyi DLTail, # 0
+          sta (DLTail), y
+          iny
+
+          tya
+          .Add16a DLTail
+          ldy Swap
+
           .mvapyi DLLTail, # 7 | DLLHoley8
-          .mvapyi DLLTail, #>StatsDL1
-          .mvapyi DLLTail, #<StatsDL1
+          .mvapyi DLLTail, Pointer + 1
+          .mvapyi DLLTail, Pointer
 
           .mvapyi DLLTail, # 7 | DLLHoley8
           .mvapyi DLLTail, #>StatsDL2
@@ -326,8 +382,15 @@ WriteOverscanDLL:
           .mvapyi DLLTail, #<BlankDL
 
           .WaitForVBlank
+          lda ActiveDLL
+          beq +
           .mva DPPL, #<DLL
           .mva DPPH, #>DLL
+          jmp EnableDMA
++
+          .mva DPPL, #<AltDLL
+          .mva DPPH, #>AltDLL
+EnableDMA:
           .mva CTRL, #CTRLDMAEnable
 ;;; 
 Loop:
@@ -425,22 +488,9 @@ DoBeginMap:
           jmp JTileDLI
 ;;; 
           .enc "minifont"
-LocationNameString: .ptext "locale name here"
-
 Dialogue2Text:      .ptext "hello, world."
 Dialogue3Text:      .ptext "this is a test"
 Dialogue4Text:      .ptext "this is only a test"
-
-StatsDL1:
-          .DLAltHeader DrawUI + $00, 0, 4, $04
-          .DLAltHeader DrawUI + $02, 0, 4, $0c
-
-          .DLStringHeader LocationNameString, 2, $50
-
-          .DLAltHeader DrawUI + $00, 0, 4, $18
-          .DLAltHeader DrawUI + $02, 0, 4, $20
-
-          .DLEnd
 
 StatsDL2:
           .DLAltHeader DrawUI + $10, 0, 2, $04

@@ -15,6 +15,7 @@
           MapOffsetAttributes = 6
           MapOffsetSprites = 8
           MapOffsetExits = 10
+          MapOffsetTitle = 12
 ;;; 
           ControllerJoy2b = $01
           Controller7800 = $00

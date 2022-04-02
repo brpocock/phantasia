@@ -96,22 +96,8 @@ Loop:
           sty AlarmV
 
           ;; XXX clear the DLL before leaving the ROM bank
-StartNewGame:
-          .mva GameMode, #ModeMap
 
-          .mva StatsLines, #$20  ; 4 × 8
-          .mva DialogueLines, # 0
-
-          .mva MapTopRow, # 2
-          .mva MapLeftColumn, # 2
-          .mva MapTopLine, # 0
-          .mva MapLeftPixel, #-4
-
-          .mva CurrentMap, # 0
-          .mva ActiveDLL, # 0
-
-          ldx # 0
-          jmp JFarJump
+          jmp StartNewGame
 ;;; 
 ShowPressRightButton:
           ldy # 3 * 15

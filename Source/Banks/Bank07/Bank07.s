@@ -43,6 +43,9 @@ ReturnFromInterrupt:
           .include "TileDLI.s"
           .include "TileDisplay.s"
 
+          .include "UserInput.s"
+          .include "FrameWork.s"
+
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)
           .fi

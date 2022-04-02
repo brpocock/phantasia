@@ -83,6 +83,8 @@ ActiveDLL:          .byte ?
 
 MapRowEnd:          .fill (13 * 2), ?
 
+MapNameString:      .fill 22, ?
+
 ScreenChangedP:     .byte ?
           .align $100
 MapArt:

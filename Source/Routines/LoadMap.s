@@ -92,6 +92,7 @@ CopyExitsLoop:
 
 DoneExits:
 
+DecompressMapTile:
           ;; Decompress map tile data
           ldy #MapOffsetArt
           lda (Pointer), y
@@ -102,6 +103,7 @@ DoneExits:
           .mvaw Dest, MapArt
           jsr RLE
 
+DecompressMapTileAttributes:
           ;; Decompress pointers to map attribute data
           ldy #MapOffsetTileAttributes
           lda (Pointer), y
@@ -111,6 +113,22 @@ DoneExits:
           sta Source + 1
           .mvaw Dest, MapTileAttributes
           jsr RLE
+
+CopyMapNameString:
+          ldy #MapOffsetTitle
+          lda (Pointer), y
+          sta MapNameString
+          iny
+          ldx # 0
+CopyTitleLoop:
+          inx
+          lda (Pointer), y
+          iny
+          sta MapNameString, x
+          cpx MapNameString
+          bne CopyTitleLoop
+
+DoneLoadMap:
           rts
 
           .bend

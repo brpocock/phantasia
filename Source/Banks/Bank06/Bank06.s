@@ -13,11 +13,12 @@ BankEntry:
           beq TitleScreen          
 
           brk
-
           
           .include "PublisherPrelude.s"
           .include "AuthorPrelude.s"
           .include "TitleScreen.s"
+
+          .include "StartNewGame.s"
 
           .align $800, 0
 Font:
