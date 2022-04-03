@@ -4,6 +4,11 @@
           * = $1800
 SysRAMLow:
 
+PlayerName:         .fill 8, ?
+PlayerSkinColor:    .byte ?
+PlayerHairColor:    .byte ?
+PlayerClothesColor: .byte ?
+
           .if * > $2040
             .error format("Overran RAM, must end by $203f, ended at $%04x", *-1)
           .fi
