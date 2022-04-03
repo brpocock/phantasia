@@ -11,10 +11,6 @@ GameMode:
 SaveGameSlot:
           .byte ?
 
-PlayerName:
-          .fill 8, ?
-
-
 GameFlags:
           .fill 32, ?
 
