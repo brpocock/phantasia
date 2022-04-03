@@ -727,7 +727,7 @@ Name:     .ptext \"~a\""
       (hex-dump-bytes bytes)
       (format t "~2&BackgroundColor:    .byte $~2,'0x" (aref palettes 0 0))
       (format t "~2&Palettes:")
-      (dotimes (palette-index 8)
+      (dotimes (palette-index 7)
         (format t "~&     .byte $~2,'0x, $~2,'0x, $~2,'0x" 
                 (aref palettes palette-index 1)
                 (aref palettes palette-index 2)
