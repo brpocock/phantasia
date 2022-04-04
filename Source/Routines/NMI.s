@@ -6,6 +6,7 @@ NMI:      .block
           pha
           lda NMINext + 1
           beq +
+
           pla
           jmp (NMINext)
 +

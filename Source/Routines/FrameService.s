@@ -9,9 +9,7 @@ FrameService:       .block
 
           jsr Clock
           jsr Alarm
-          jsr ReadInputs
-
-          rts
+          jmp ReadInputs        ; tail call
 ;;; 
 Clock:
           ldy # 0
@@ -71,5 +69,5 @@ AlarmNow:
           beq AlarmDone
           jmp (AlarmV)          ; tail call
 ;;; 
-          jmp ReadInputs        ; tail call
+
           .bend

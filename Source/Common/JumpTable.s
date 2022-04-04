@@ -21,3 +21,4 @@
           JTileDisplay = $c018
           JTileDLI = $c01b
           JReturnFromInterrupt = $c01e
+          JGetPlayerFrame = $c021

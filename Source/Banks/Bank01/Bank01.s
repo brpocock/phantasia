@@ -8,8 +8,6 @@
 Tileset:
           .include "OverworldTiles.s"
 
-          rts
-
           .align $2000
 Sprites:
           .include "OverworldSprites.s"

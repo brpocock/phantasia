@@ -3,6 +3,6 @@
 
 IRQ:      .block
 
-          rti
+          jmp Break
 
           .bend

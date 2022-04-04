@@ -1017,8 +1017,13 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
           (push bytes bytes-lists))))
     (reverse bytes-lists)))
 
+(defun 160b-palette-monkey (values)
+  (dotimes (i (length values))
+    (setf (elt values i) (position (elt values i) '(0 1 2 3 0 4 5 6 0 7 8 9 0 10 11 12))))
+  values)
+
 (defmethod parse-7800-object ((mode (eql :160b)) pixels &key width height palette)
-  (assert (>= 13 (length palette)))
+  (assert (= 13 (length palette)))
   (let ((total-width (array-dimension pixels 0))
         (total-height (1- (array-dimension pixels 1))))
     (assert (zerop (mod total-height height)) (total-height)
@@ -1030,7 +1035,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
             "Width for mode 160B must be modulo 2px, not ~:Dpx" width))
   (let* ((byte-width (/ width 2))
          (images (extract-regions pixels width height))
-         (bytes-lists (list)))
+         (bytes-lists (list))) 
     (dolist (image images)
       (dotimes (b byte-width)
         (let ((bytes (list)))
@@ -1038,7 +1043,8 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
             (let* ((byte-pixels (extract-region image
                                                 (* b 2) y
                                                 (1+ (* b 2)) y))
-                   (indices (pixels-into-palette byte-pixels palette)))
+                   (indices (160b-palette-monkey
+                             (pixels-into-palette byte-pixels palette))))
               ;; pixel:bit order = A: 3276, B: 1054
               ;;; which translates to bit:pixel order =
               ;; A1 A0 B1 B0 A3 A2 B3 B2

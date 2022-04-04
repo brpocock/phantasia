@@ -19,3 +19,7 @@
 ;;; 
           ControllerJoy2b = $01
           Controller7800 = $00
+
+
+          NumMapRows = 13
+          MaxSprites = 16
