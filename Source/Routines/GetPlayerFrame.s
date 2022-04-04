@@ -3,14 +3,19 @@
 
 GetPlayerFrame:     .block
           ;; XXX actually grab the right frame
-          ldx # 0
+          .mvaw Source, PlayerTiles + (8 * 7 + 2) * (4 * 16)
+          .mvaw Dest, AnimationBuffer
+          ldx # 16
 CopyPlayerSprite:
-          lda PlayerTiles + (8 * 3 + 2) * 4 * 16, y
-          iny
-          sta PlayerSpriteArt, x
-          inx
-          cpx # 4 * 16
-          blt CopyPlayerSprite
+          .rept 4
+            lda (Source), y
+            sta (Dest), y
+            iny
+          .next
+          inc Source + 1
+          inc Dest + 1
+          dex
+          bne CopyPlayerSprite
 
           rts
 

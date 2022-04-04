@@ -27,3 +27,11 @@ SysRAMHigh:
             .error format("Overran RAM, must end by $27ff, ended at $%04x", *-1)
           .fi
 
+
+          BlankDL = SysRAMHigh
+          DLL = SysRAMHigh + $02
+          DLSpace = SysRAMHigh + $80
+          StringsStart = DLSpace + $280
+          AltDLL = SysRAMMid
+          AltDLSpace = AltDLL + $80
+          AltStringsStart = SysRAMHigh + $400

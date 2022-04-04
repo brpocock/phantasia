@@ -14,19 +14,11 @@ BankEntry:
           ldx # 2
           jsr JFarCall
 
+BuildDLL:
           .WaitForVBlank
           .mvaw NMINext, IBeginStats
-          .mva BACKGRND, #CoLu(COLYELLOW, $f)
+          .mva BACKGRND, #CoLu(COLYELLOW, $f) ; XXX just for testing purposes
 
-          BlankDL = SysRAMHigh
-          DLL = SysRAMHigh + $02
-          DLSpace = SysRAMHigh + $80
-          StringsStart = DLSpace + $280
-          AltDLL = SysRAMMid
-          AltDLSpace = AltDLL + $80
-          AltStringsStart = SysRAMHigh + $400
-
-BuildDLL:
           lda ActiveDLL
           beq +
           .mvaw DLLTail, AltDLL
@@ -51,6 +43,10 @@ GotPointers:
           ldy # 0
           sty BlankDL
           sty BlankDL + 1
+
+          iny
+          iny
+          iny
 
           .mvapyi DLLTail, # 11 | DLLDLI
           .mvapyi DLLTail, #>BlankDL
@@ -85,7 +81,7 @@ StatsDLL:
 
           tya
           .Add16a DLTail
-          ldy Swap
+          ldy Swap              ; DLL index
 
           .mvapyi DLLTail, # 7 | DLLHoley8
           .mvapyi DLLTail, Pointer + 1
@@ -104,85 +100,7 @@ StatsDLL:
           .mvapyi DLLTail, #<StatsDL4
 ;;; 
 DialogueDLL:
-          lda StatsLines
-          cmp #$21
-          bge DoneDialogue
-
-          lda DialogueLines
-          beq DoneDialogue
-
-          .mvap Dest, DLTail
-          sec
-          sbc #$10              ; XXX minimum height
-          bmi DoneDialogue
-
-          lsr a
-          lsr a
-          lsr a
-          sta Counter         ; lines in mid section @ 8px
-          ;; XXX no partial zones
-
-          .mvapyi DLLTail, # 7 | DLLHoley8 | DLLDLI
-          .mvapyi DLLTail, #>DialogueTopDL
-          .mvapyi DLLTail, #<DialogueTopDL
-
-          tya
-          .Add16a DLLTail
-          ldy # 0
-NextDialogueZone:
-          ldx # 0
-CopyDialogueMidDL:
-          lda DialogueMidDL, x
-          sta (DLTail), y
-          iny
-          inx
-          cpx #DialogueBottomDL - DialogueMidDL + 1
-          bne CopyDialogueMidDL
-
-          tya
-          sec
-          sbc # 13
-          tay                   ; go back to string header padding
-          
-          .mvapyi DLTail, #<Dialogue2Text + 1
-          iny                   ; skip over mode byte
-          .mvapyi DLTail, #>Dialogue2Text + 1
-          lda Dialogue2Text
-          sec
-          sbc # 1
-          eor #$1f              ; encode width
-          ora #$20              ; palette 2
-          sta (DLTail), y
-
-          .Add16 DLTail, #DialogueBottomDL - DialogueMidDL + 1
-
-          ldy # 0               ; DLL index
-
-          .mvapyi DLLTail, # 7 | DLLHoley8
-          .mvapyi DLLTail, Dest + 1
-          .mvapyi DLLTail, Dest
-
-          tya
-          .Add16a DLLTail
-
-          lda Counter
-          sec
-          sbc # 8
-          sta Counter
-          beq DoneDialogueMid
-          bpl NextDialogueZone
-
-          ;; XXX partial zone
-
-DoneDialogueMid:
-          ldy # 0
-          .mvapyi DLLTail, # 7 | DLLHoley8
-          .mvapyi DLLTail, #>DialogueBottomDL
-          .mvapyi DLLTail, #<DialogueBottomDL
-
-DoneDialogue:
-          tya
-          .Add16a DLLTail
+          jsr DialogueDL
 ;;; 
 MapSectionDLL:
           lda MapLines
@@ -300,10 +218,9 @@ SaveMapEnd:
           asl a
           tay
           lda DLTail
-          sta MapRowEnd, y
-          iny
+          sta MapRowEndL, y
           lda DLTail + 1
-          sta MapRowEnd, y
+          sta MapRowEndH, y
 
           ldy # 0
 
@@ -360,7 +277,6 @@ WriteOverscanDLL:
           .mvapyi DLLTail, #>BlankDL
           .mvapyi DLLTail, #<BlankDL
 
-WriteSpritesToDLs:
           jsr UpdateSprites
 
 SwitchToNewDLL:
@@ -374,9 +290,13 @@ SwitchToNewDLL:
           .mva DPPL, #<AltDLL
           .mva DPPH, #>AltDLL
 EnableDMA:
+          .WaitForVBlank
           .mva CTRL, #CTRLDMAEnable
+          .mva ScreenChangedP, # 0
 ;;; 
 Loop:
+          .WaitForVBlank
+          jsr UpdateSprites
           lda ScreenChangedP
           beq Loop
           jmp BuildDLL
@@ -409,58 +329,6 @@ EmitSpan:
           .mvapyi DLTail, MapNextX
           .mvap Pointer, StringsTail
 
-          rts
-;;; 
-UpdateSprites:
-          ldx # 0
-ClearSpritesFromDLs:
-          lda MapRowEnd, x
-          sta Pointer
-          inx
-          lda MapRowEnd, x
-          sta Pointer + 1
-          inx
-
-          ldy # 0
-          tya
-          sta (Pointer), y
-          iny
-          sta (Pointer), y
-          
-          cpx # 26
-          bne ClearSpritesFromDLs
-
-          ldx NumSprites
-AddOneSprite:
-
-          lda MapSpritesYH
-          asl a
-          tay
-          lda MapRowEnd, y
-          sta Pointer
-          lda MapRowEnd + 1, y
-          sta Pointer + 1
-          ldy # 0
-FindSpriteBlanks:
-          lda (Pointer), y
-          beq FoundSpriteBlanks
-
-          .rept 5
-            iny
-          .next
-          gne FindSpriteBlanks
-
-FoundSpriteBlanks:
-          .mvapyi Pointer, #<PlayerSpriteArt
-          .mvapyi Pointer, #DLExtMode(true, false)
-          .mvapyi Pointer, #>PlayerSpriteArt
-          .mvapyi Pointer, #DLPalWidth(1, 4)
-          .mvapyi Pointer, MapSpritesXL
-
-          dex
-          bne AddOneSprite
-
-DoneUpdatingSprites:
           rts
 ;;; 
 LookUpPalette:
@@ -534,9 +402,9 @@ IEndDialogue:
 DoBeginMap:
           jmp JTileDLI
 ;;; 
-
           .include "ScreenTopAssets.s"
-          
+          .include "UpdateSprites.s"
+          .include "DialogueDL.s"
           * = $9000
           jmp IBeginStats
 

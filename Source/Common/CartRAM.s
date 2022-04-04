@@ -75,7 +75,8 @@ ScreenNextX:        .byte ?
 SelectedPalette:    .byte ?
 ActiveDLL:          .byte ?
 
-MapRowEnd:          .fill (13 * 2), ?
+MapRowEndL:          .fill NumMapRows, ?
+MapRowEndH:          .fill NumMapRows, ?
 
 MapNameString:      .fill 22, ?
 
@@ -87,7 +88,7 @@ MapTileAttributes:
           .fill $400, ?
 MapAttributes:
           .fill $600, ?
-          MaxSprites = 16
+
 NumSprites:         .byte ?
 MapSpritesXH:
           .fill MaxSprites, ?
@@ -105,11 +106,11 @@ MapSpritesArtH:
           .fill MaxSprites, ?
 MapSpritesArtL:
           .fill MaxSprites, ?
-PlayerSpriteArt:
-          .fill 4 * 16, ?
 MapExits:
           .fill $300, ?
-
+          .align $2000
+AnimationBuffer:
+          .fill $1000, ?
 
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)

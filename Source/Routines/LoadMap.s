@@ -69,9 +69,9 @@ CopyMapSprites:
           lda # 0
           sta MapSpritesYL
           sta MapSpritesYFraction
-          lda #>PlayerSpriteArt
+          lda #>AnimationBuffer
           sta MapSpritesArtH
-          lda #<PlayerSpriteArt
+          lda #<AnimationBuffer
           sta MapSpritesArtL
 
           ldx # 0

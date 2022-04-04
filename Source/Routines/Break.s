@@ -3,7 +3,6 @@
 
 Break:      .block
 
-          brk
-          rts
+          jmp Break
 
           .bend
