@@ -30,7 +30,7 @@ TileDLI:  .block
 
           ;; XXX AlarmV is probably in the other ROM bank?
           jsr FrameService
-          ;; jsr UserInput
+          jsr UserInput
           jsr FrameWork
 
           ;; XXX do useful work while Maria is busy
@@ -44,5 +44,5 @@ TileDLI:  .block
 
           .mvaw NMINext, $9000
           jmp JReturnFromInterrupt
-          
+
           .bend

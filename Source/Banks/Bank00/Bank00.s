@@ -22,9 +22,9 @@ BankEntry:
           DLL = SysRAMHigh + $02
           DLSpace = SysRAMHigh + $80
           StringsStart = DLSpace + $280
-          AltDLL = StringsStart + $200
+          AltDLL = SysRAMMid
           AltDLSpace = AltDLL + $80
-          AltStringsStart = AltDLSpace + $280
+          AltStringsStart = SysRAMHigh + $400
 
 BuildDLL:
           lda ActiveDLL
@@ -308,7 +308,7 @@ SaveMapEnd:
           ldy # 0
 
           lda # 0
-          ldx #$12              ; XXX room for stamps + terminal $0000
+          ldx #$12              ; room for stamps + terminal $0000
 FillSpanZeroes:
           sta (DLTail), y
           iny
@@ -360,6 +360,10 @@ WriteOverscanDLL:
           .mvapyi DLLTail, #>BlankDL
           .mvapyi DLLTail, #<BlankDL
 
+WriteSpritesToDLs:
+          jsr UpdateSprites
+
+SwitchToNewDLL:
           .WaitForVBlank
           lda ActiveDLL
           beq +
@@ -405,6 +409,58 @@ EmitSpan:
           .mvapyi DLTail, MapNextX
           .mvap Pointer, StringsTail
 
+          rts
+;;; 
+UpdateSprites:
+          ldx # 0
+ClearSpritesFromDLs:
+          lda MapRowEnd, x
+          sta Pointer
+          inx
+          lda MapRowEnd, x
+          sta Pointer + 1
+          inx
+
+          ldy # 0
+          tya
+          sta (Pointer), y
+          iny
+          sta (Pointer), y
+          
+          cpx # 26
+          bne ClearSpritesFromDLs
+
+          ldx NumSprites
+AddOneSprite:
+
+          lda MapSpritesYH
+          asl a
+          tay
+          lda MapRowEnd, y
+          sta Pointer
+          lda MapRowEnd + 1, y
+          sta Pointer + 1
+          ldy # 0
+FindSpriteBlanks:
+          lda (Pointer), y
+          beq FoundSpriteBlanks
+
+          .rept 5
+            iny
+          .next
+          gne FindSpriteBlanks
+
+FoundSpriteBlanks:
+          .mvapyi Pointer, #<PlayerSpriteArt
+          .mvapyi Pointer, #DLExtMode(true, false)
+          .mvapyi Pointer, #>PlayerSpriteArt
+          .mvapyi Pointer, #DLPalWidth(1, 4)
+          .mvapyi Pointer, MapSpritesXL
+
+          dex
+          bne AddOneSprite
+
+DoneUpdatingSprites:
           rts
 ;;; 
 LookUpPalette:

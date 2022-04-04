@@ -22,6 +22,7 @@ JumpTable:
           jmp TileDisplay
           jmp TileDLI
           jmp ReturnFromInterrupt
+          jmp GetPlayerFrame
 
 ReturnFromInterrupt:
           pla
@@ -46,6 +47,11 @@ ReturnFromInterrupt:
           .include "UserInput.s"
           .include "FrameWork.s"
           .include "ReadInputs.s"
+
+          .include "GetPlayerFrame.s"
+
+PlayerTiles:
+          .binary "PlayerTiles.art.bin"
 
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)

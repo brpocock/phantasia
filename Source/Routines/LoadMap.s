@@ -56,7 +56,30 @@ CopyAttributesLoop:
 
 DoneAttributes:
 
+          jsr JGetPlayerFrame
+
 CopyMapSprites:
+          lda # 4
+          sta MapSpritesXH
+          lda # 0
+          sta MapSpritesXL
+          sta MapSpritesXFraction
+          lda # 4
+          sta MapSpritesYH
+          lda # 0
+          sta MapSpritesYL
+          sta MapSpritesYFraction
+          lda #>PlayerSpriteArt
+          sta MapSpritesArtH
+          lda #<PlayerSpriteArt
+          sta MapSpritesArtL
+
+          ldx # 0
+          inx
+          stx NumSprites
+
+          ldy # 0
+          
           ;; TODO copy sprites table
 
 CopyMapExits:

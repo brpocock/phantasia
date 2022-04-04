@@ -87,8 +87,26 @@ MapTileAttributes:
           .fill $400, ?
 MapAttributes:
           .fill $600, ?
-MapSprites:
-          .fill $800, ?
+          MaxSprites = 16
+NumSprites:         .byte ?
+MapSpritesXH:
+          .fill MaxSprites, ?
+MapSpritesXL:
+          .fill MaxSprites, ?
+MapSpritesXFraction:
+          .fill MaxSprites, ?
+MapSpritesYH:
+          .fill MaxSprites, ?
+MapSpritesYL:
+          .fill MaxSprites, ?
+MapSpritesYFraction:
+          .fill MaxSprites, ?
+MapSpritesArtH:
+          .fill MaxSprites, ?
+MapSpritesArtL:
+          .fill MaxSprites, ?
+PlayerSpriteArt:
+          .fill 4 * 16, ?
 MapExits:
           .fill $300, ?
 
