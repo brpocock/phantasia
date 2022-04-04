@@ -214,9 +214,7 @@ EmitFinalSpan:
 
           .Add16 DLTail, # 5
 SaveMapEnd:
-          lda ScreenNextY
-          asl a
-          tay
+          ldy ScreenNextY
           lda DLTail
           sta MapRowEndL, y
           lda DLTail + 1

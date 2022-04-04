@@ -5,6 +5,9 @@
 
           * = $4000
 
+AnimationBuffer:
+          .fill $1000, ?
+
 GameMode:
           .byte ?
           
@@ -81,7 +84,9 @@ MapRowEndH:          .fill NumMapRows, ?
 MapNameString:      .fill 22, ?
 
 ScreenChangedP:     .byte ?
+
           .align $100
+
 MapArt:
           .fill $400, ?
 MapTileAttributes:
@@ -108,9 +113,6 @@ MapSpritesArtL:
           .fill MaxSprites, ?
 MapExits:
           .fill $300, ?
-          .align $2000
-AnimationBuffer:
-          .fill $1000, ?
 
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)

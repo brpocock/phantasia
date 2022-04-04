@@ -18,7 +18,7 @@ ClearSpritesFromDLs:
           sta (Pointer), y
 
           ldy Swap              ; map row being cleared
-          cpy # NumMapRows
+          cpy #NumMapRows
           bne ClearSpritesFromDLs
 
           ldx NumSprites
