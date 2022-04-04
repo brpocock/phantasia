@@ -25,7 +25,7 @@ ClearSpritesFromDLs:
           beq DoneUpdatingSprites
 
 AddOneSprite:
-          ldy MapSpritesYH
+          ldy # 4
           lda MapRowEndL, y
           sta Pointer
           lda MapRowEndH, y
@@ -49,11 +49,12 @@ NotFound2:
           gne FindSpriteBlanks
 
 FoundSpriteBlanks:
+          dey
           .mvapyi Pointer, #<AnimationBuffer
           .mvapyi Pointer, #DLExtMode(true, false)
           .mvapyi Pointer, #>AnimationBuffer
           .mvapyi Pointer, #DLPalWidth(1, 4)
-          .mvapyi Pointer, MapSpritesXL
+          .mvapyi Pointer, #$20
 
           dex
           bne AddOneSprite
