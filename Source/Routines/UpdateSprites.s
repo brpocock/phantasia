@@ -53,7 +53,7 @@ FoundSpriteBlanks:
           .mvapyi Pointer, #<AnimationBuffer
           .mvapyi Pointer, #DLExtMode(true, false)
           .mvapyi Pointer, #>AnimationBuffer
-          .mvapyi Pointer, #DLPalWidth(1, 4)
+          .mvapyi Pointer, #DLPalWidth(4, 4)
           .mvapyi Pointer, #$20
 
           dex

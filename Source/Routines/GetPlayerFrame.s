@@ -3,7 +3,7 @@
 
 GetPlayerFrame:     .block
           ;; XXX actually grab the right frame
-          .mvaw Source, PlayerTiles + (8 * 7 + 2) * 4
+          .mvaw Source, PlayerTiles + (8 * 6 + 2) * 4
           .mvaw Dest, AnimationBuffer
           ldx # 16
 CopyPlayerSprite:

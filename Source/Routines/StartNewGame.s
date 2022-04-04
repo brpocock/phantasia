@@ -16,6 +16,16 @@ StartNewGame:	.block
           .mva CurrentMap, # 0
           .mva ActiveDLL, # 0
 
+          .mva PlayerSkinColor, #CoLu(COLBROWN, $7)
+          .mva PlayerHairColor, #CoLu(COLYELLOW, $9)
+          .mva PlayerClothesColor, #CoLu(COLPURPLE, $7)
+
+          .enc "minifont"
+          .mva PlayerNameLength, 4
+          .mva PlayerName, #"b"
+          .mva PlayerName + 1, #"a"
+          .mva PlayerName + 2, #"k"
+          .mva PlayerName + 3, #"u"
           ldx # 0
           jmp JFarJump
           
