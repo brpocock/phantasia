@@ -982,7 +982,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
          (output (make-array (list width) :element-type '(unsigned-byte 8))))
     (dotimes (x width)
       (let ((index (position (aref pixels x 0) palette)))
-        (assert index (index) "Color value ~x not found in palette, error" (aref pixels x 0))
+        (assert index (index) "Color value ~x at ~d not found in palette, error" (aref pixels x 0) x)
         (setf (aref output x) index)))
     output))
 
