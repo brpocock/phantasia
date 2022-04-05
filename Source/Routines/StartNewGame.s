@@ -2,6 +2,7 @@
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
 StartNewGame:	.block
+          .mva CTRL, #CTRLDMADisable
           .mva GameMode, #ModeMap
 
           .mva StatsLines, #$20  ; 4 × 8
