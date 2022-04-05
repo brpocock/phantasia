@@ -25,7 +25,15 @@ ClearSpritesFromDLs:
           beq DoneUpdatingSprites
 
 AddOneSprite:
-          ldy # 4
+          lda MapSpritesXH
+          sec
+          sbc MapTopRow
+          bmi DonePlayer
+
+          cmp #NumMapRows
+          bge DonePlayer
+
+          tay
           lda MapRowEndL, y
           sta Pointer
           lda MapRowEndH, y
@@ -34,9 +42,11 @@ AddOneSprite:
 FindSpriteBlanks:
           lda (Pointer), y
           bne NotFoundSpriteBlanks
+
           iny
           lda (Pointer), y
           bne NotFound2
+
           geq FoundSpriteBlanks
 
 NotFoundSpriteBlanks:
@@ -46,7 +56,7 @@ NotFound2:
           iny
           iny
           iny
-          gne FindSpriteBlanks
+          jmp FindSpriteBlanks
 
 FoundSpriteBlanks:
           dey
@@ -56,6 +66,7 @@ FoundSpriteBlanks:
           .mvapyi Pointer, #DLPalWidth(4, 4)
           .mvapyi Pointer, #$20
 
+DonePlayer:
           dex
           bne AddOneSprite
 

@@ -8,11 +8,13 @@ GetPlayerFrame:     .block
           ldx # 16
 CopyPlayerSprite:
           ldy # 0
-          .rept 4
+          .rept 3
             lda (Source), y
             sta (Dest), y
             iny
           .next
+          lda (Source), y
+          sta (Dest), y
           inc Source + 1
           inc Dest + 1
           dex

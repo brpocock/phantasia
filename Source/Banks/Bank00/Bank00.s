@@ -275,6 +275,8 @@ WriteOverscanDLL:
           .mvapyi DLLTail, #>BlankDL
           .mvapyi DLLTail, #<BlankDL
 
+          jsr JGetPlayerFrame
+
           jsr UpdateSprites
 
 SwitchToNewDLL:
@@ -294,9 +296,13 @@ EnableDMA:
 ;;; 
 Loop:
           .WaitForVBlank
+          jsr JGetPlayerFrame
+
           jsr UpdateSprites
+
           lda ScreenChangedP
           beq Loop
+
           jmp BuildDLL
 ;;; 
 CopyToDL:

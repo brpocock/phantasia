@@ -56,8 +56,6 @@ CopyAttributesLoop:
 
 DoneAttributes:
 
-          jsr JGetPlayerFrame
-
 CopyMapSprites:
           lda # 4
           sta MapSpritesXH
