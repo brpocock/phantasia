@@ -1,6 +1,8 @@
 ;;; Phantasia Source/Common/EndBank.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
+          .warn format("Bank %02x ends at $%04x (length $%04x, %d)", BANK, *-1, *-$8001, *-$8001)
+          
           .if * > $c000
             .error format("Bank %02x overran ROM, must end by $bfff, ended at $%04x", BANK, *-1)
           .fi
