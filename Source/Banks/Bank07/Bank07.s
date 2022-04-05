@@ -86,6 +86,8 @@ PlayerTiles:
           ;; actually also does not need to be in Bank 7 in that case.
           .binary "PlayerTiles.art.bin"
 ;;; 
+          .warn format("Bank 7 ends at $%04x (length $%04x, %d)", *-1, *-$c001, *-$c001)
+
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)
           .fi
