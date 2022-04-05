@@ -3,7 +3,6 @@
 
 PlayMusic:	.block
 
-          brk
           rts
 
           .bend

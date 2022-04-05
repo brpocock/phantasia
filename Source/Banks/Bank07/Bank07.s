@@ -42,19 +42,24 @@ ReturnFromInterrupt:
           * = $c0de             ; XXX for debugging so I can find it
 
           .include "Break.s"
-          .include "FarCall.s"
-          .include "FarJump.s"
-          .include "FrameService.s"
-          .include "TileDLI.s"
-          .include "TileDisplay.s"
-
-          .include "UserInput.s"
-          .include "FrameWork.s"
-          .include "ReadInputs.s"
 
           .include "BeginDialogue.s"
           .include "BeginStats.s"
+          .include "CheckPlayerCollision.s"
+          .include "CheckSpriteCollision.s"
+          .include "FarCall.s"
+          .include "FarJump.s"
+          .include "FrameService.s"
+          .include "FrameWork.s"
           .include "GetPlayerFrame.s"
+          .include "MoveSprites.s"
+          .include "PlayMusic.s"
+          .include "PlaySFX.s"
+          .include "PlaySpeech.s"
+          .include "ReadInputs.s"
+          .include "TileDLI.s"
+          .include "TileDisplay.s"
+          .include "UserInput.s"
 
 IBeginStats:
           .SaveRegs

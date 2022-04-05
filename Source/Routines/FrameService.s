@@ -3,13 +3,14 @@
 
 FrameService:       .block
 
-          ;; jsr PlayMusic
-          ;; jsr PlaySFX
-          ;; jsr PlaySpeech
+          ;; XXX AlarmV is probably in the other ROM bank?
 
           jsr Clock
-          jsr Alarm
-          jmp ReadInputs        ; tail call
+          jsr ReadInputs
+          jsr PlayMusic
+          jsr PlaySFX
+          jsr PlaySpeech
+          jmp Alarm             ; tail call
 ;;; 
 Clock:
           ldy # 0
@@ -53,21 +54,14 @@ Alarm:
           dec AlarmFrames
           rts
 +
-          dec AlarmSeconds
           lda AlarmSeconds
-          beq AlarmNow
+          beq AlarmDone
 
-          lda #FramesPerSecond - 1
-          sta AlarmFrames
+          dec AlarmSeconds
+          .mva AlarmFrames, #FramesPerSecond - 1
 AlarmDone:
           rts
 
-AlarmNow:
-          lda # 0
-          sta AlarmEnabledP
-          lda AlarmV + 1
-          beq AlarmDone
-          jmp (AlarmV)          ; tail call
 ;;; 
 
           .bend

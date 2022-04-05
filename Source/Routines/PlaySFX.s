@@ -3,7 +3,6 @@
 
 PlaySFX:	.block
 
-          brk
           rts
 
           .bend

@@ -3,7 +3,6 @@
 
 PlaySpeech:	.block
 
-          brk
           rts
 
           .bend

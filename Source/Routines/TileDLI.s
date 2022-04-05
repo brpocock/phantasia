@@ -28,9 +28,11 @@ TileDLI:  .block
           stx WSYNC
           .mva BACKGRND, $9000
 
-          ;; XXX AlarmV is probably in the other ROM bank?
           jsr FrameService
           jsr UserInput
+          jsr CheckPlayerCollision
+          jsr MoveSprites
+          jsr CheckSpriteCollision
           jsr FrameWork
 
           ;; XXX do useful work while Maria is busy
