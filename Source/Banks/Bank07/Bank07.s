@@ -38,6 +38,9 @@ ReturnFromInterrupt:
           .include "WarmStart.s"
           .include "IRQ.s"
           .include "NMI.s"
+
+          * = $c0de             ; XXX for debugging so I can find it
+
           .include "Break.s"
           .include "FarCall.s"
           .include "FarJump.s"
