@@ -22,6 +22,8 @@ AlarmDone:
           lda ScreenChangedP
           beq MainLoop
 
+          jmp MainLoop          ; XXX
+
           jmp GenerateDrawingList
 
 CallAlarmFunction:

@@ -2,9 +2,6 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 BeginStats:         .block
-          ldx # 0
-          stx $8001
-
           .mva P0C2, #CoLu(COLGRAY, $9)
           .mva P1C2, #CoLu(COLGRAY, $b)
           .mva P2C2, #CoLu(COLGRAY, $f)

@@ -3,8 +3,6 @@
 
 FrameService:       .block
 
-          ;; XXX AlarmV is probably in the other ROM bank?
-
           jsr Clock
           jsr ReadInputs
           jsr PlayMusic

@@ -1,7 +1,7 @@
 ;;; Phantasia Source/Source/Banks/Bank00/Bank00.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
-          BANK = 00
+          BANK = $00
 
           .include "StartBank.s"
 ;;; 
@@ -19,6 +19,7 @@ GenerateDrawingList:
           jsr JGetPlayerFrame
           jsr UpdateSprites
           jsr SwitchToNewDLL
+
           .include "MainLoop.s"
 ;;; 
           .include "CopyToDL.s"
@@ -32,7 +33,6 @@ GenerateDrawingList:
           .include "SwitchToNewDLL.s"
           .include "UpdateSprites.s"
           .include "WriteOverscanDL.s"
-
 ;;; 
           * = $a000
 Font:

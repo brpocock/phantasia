@@ -385,7 +385,7 @@ BankSwitch:         .macro bank
           lda \bank
           sta $8001             ; bank switch “register”
           .endm
-
+          
 WaitForVBlank:      .macro
           .block
 Wait0:

@@ -1,7 +1,7 @@
 ;;; Phantasia Source/Source/Banks/Bank07/Bank07.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
-          BANK = 07
+          BANK = $07
 
           .include "StartBank.s"
 
@@ -24,7 +24,7 @@ JumpTable:
           jmp ReturnFromInterrupt
           jmp GetPlayerFrame
           jmp IBeginStats
-
+;;; 
 ReturnFromInterrupt:
           pla
           tay
@@ -42,7 +42,7 @@ ReturnFromInterrupt:
           * = $c0de             ; XXX for debugging so I can find it
 
           .include "Break.s"
-
+;;; 
           .include "BeginDialogue.s"
           .include "BeginStats.s"
           .include "CheckPlayerCollision.s"
@@ -60,7 +60,7 @@ ReturnFromInterrupt:
           .include "TileDLI.s"
           .include "TileDisplay.s"
           .include "UserInput.s"
-
+;;; 
 IBeginStats:
           .SaveRegs
           jsr BeginStats
@@ -80,11 +80,11 @@ IEndDialogue:
           .SaveRegs
 DoBeginMap:
           jmp JTileDLI
-
-          
+;;; 
 PlayerTiles:
+          ;; does not need to be aligned, since they are copied to RAM
+          ;; actually also does not need to be in Bank 7 in that case.
           .binary "PlayerTiles.art.bin"
-
 ;;; 
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)

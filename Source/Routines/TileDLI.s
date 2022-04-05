@@ -37,7 +37,13 @@ TileDLI:  .block
 
           ;; XXX do useful work while Maria is busy
 
+WaitForOverscan:
+          bit MSTAT
+          bpl WaitForOverscan
+
+          .BankSwitch # 0
           .mvaw NMINext, IBeginStats
+
           jmp ReturnFromInterrupt
           
           .bend

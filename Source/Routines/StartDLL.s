@@ -2,8 +2,6 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 StartDLL: .block
-          .mva NMINext, # 0
-
           lda NextMap
           cmp CurrentMap
           beq BuildDLL
