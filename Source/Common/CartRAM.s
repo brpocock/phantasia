@@ -62,7 +62,7 @@ NextMap:  .byte ?
 CurrentMapWidth:    .byte ?
 CurrentMapHeight:   .byte ?
 MapBackground:      .byte ?
-MapPalettes:        .fill (8 * 3), ?
+MapPalettes:        .fill (7 * 3), ?
           
 MapTopRow:          .byte ?
 MapTopLine:         .byte ?
