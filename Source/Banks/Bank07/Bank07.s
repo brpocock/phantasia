@@ -52,6 +52,7 @@ ReturnFromInterrupt:
           .include "FrameService.s"
           .include "FrameWork.s"
           .include "GetPlayerFrame.s"
+          .include "MoveSprite.s"
           .include "MoveSprites.s"
           .include "PlayMusic.s"
           .include "PlaySFX.s"

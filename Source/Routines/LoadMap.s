@@ -56,21 +56,21 @@ CopyAttributesLoop:
 
 DoneAttributes:
 
-CopyMapSprites:
+CopySprite:
           lda # 4
-          sta MapSpritesXH
+          sta SpriteXH
           lda # 0
-          sta MapSpritesXL
-          sta MapSpritesXFraction
+          sta SpriteXL
+          sta SpriteXFraction
           lda # 4
-          sta MapSpritesYH
+          sta SpriteYH
           lda # 0
-          sta MapSpritesYL
-          sta MapSpritesYFraction
+          sta SpriteYL
+          sta SpriteYFraction
           lda #>AnimationBuffer
-          sta MapSpritesArtH
+          sta SpriteArtH
           lda #<AnimationBuffer
-          sta MapSpritesArtL
+          sta SpriteArtL
 
           ldx # 0
           inx

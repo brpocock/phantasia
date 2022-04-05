@@ -2,33 +2,26 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 UserInput:          .block
-          lda StickY
+          ldy StickY
           beq DoneUpDown
 
-          bmi StickDown
-
-StickUp:
-          ldx MapTopRow
-          beq DoneUpDown
-
-          dex
-          stx MapTopRow
-          jmp DoneUpDown
-
-StickDown:
-          ldx MapTopRow
-          inx
-          cpx # 20
-          bge DoneUpDown
-          stx MapTopRow
+          ldx # 0
+          jsr MoveSpriteY
 
 DoneUpDown:
-          lda StickX
-          beq DoneLeftRight
+          ldy StickX
+          beq DoneStick
 
-          bpl StickRight
+          ldx # 0
+          jsr MoveSpriteX
 
-StickLeft:
+DoneStick:
+
+NoStick:
+          rts
+
+;;; 
+ScrollMapLeft:
           ldx MapLeftPixel
           dex
           bpl LeftOK
@@ -43,10 +36,10 @@ StickLeft:
           sta MapLeftColumn
 LeftOK:
           stx MapLeftPixel
-DoneLeft:
-          jmp DoneLeftRight
+          inc ScreenChangedP
+          rts
 
-StickRight:
+ScrollMapRight:
           ldx MapLeftPixel
           inx
           cpx # 8
@@ -63,12 +56,28 @@ StickRight:
           sta MapLeftColumn
 RightOK:
           stx MapLeftPixel
-DoneRight:
-DoneLeftRight:
-DoneStick:
           inc ScreenChangedP
 
-NoStick:
           rts
 
+ScrollMapUp:
+          ldx MapTopRow
+          beq DoneUpDown
+
+          dex
+          stx MapTopRow
+          inc ScreenChangedP
+
+          rts
+
+ScrollMapDown:
+          ldx MapTopRow
+          inx
+          cpx # 20
+          bge DoneUpDown
+          stx MapTopRow
+          inc ScreenChangedP
+
+          rts
+          
           .bend

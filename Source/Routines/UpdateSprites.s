@@ -25,7 +25,7 @@ ClearSpritesFromDLs:
           beq DoneUpdatingSprites
 
 AddOneSprite:
-          lda MapSpritesXH
+          lda SpriteYH
           sec
           sbc MapTopRow
           bmi DonePlayer
@@ -60,11 +60,28 @@ NotFound2:
 
 FoundSpriteBlanks:
           dey
-          .mvapyi Pointer, #<AnimationBuffer
+          .mva SpriteDLL, Pointer
+          .mva SpriteDLH, Pointer + 1
+          .mvaw Source, AnimationBuffer
+          .mvapyi Pointer, Source
           .mvapyi Pointer, #DLExtMode(true, false)
-          .mvapyi Pointer, #>AnimationBuffer
+          lda Source + 1
+          clc
+          adc SpriteYL
+          sta (Pointer), y
+          iny
           .mvapyi Pointer, #DLPalWidth(4, 4)
-          .mvapyi Pointer, #$20
+          lda SpriteXH
+          sec
+          sbc MapLeftColumn
+          asl a
+          asl a
+          asl a
+          clc
+          adc SpriteXL
+          sec
+          sbc MapLeftPixel
+          sta (Pointer), y
 
 DonePlayer:
           dex

@@ -35,8 +35,6 @@ TileDLI:  .block
           jsr CheckSpriteCollision
           jsr FrameWork
 
-          ;; XXX do useful work while Maria is busy
-
 WaitForOverscan:
           bit MSTAT
           bpl WaitForOverscan

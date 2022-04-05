@@ -2,6 +2,10 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 MainLoop: .block
+WaitForOverscan:
+          bit MSTAT
+          bpl WaitForOverscan
+
           ;; Check alarm for expiry
           lda # 0
           sta AlarmEnabledP
@@ -21,8 +25,6 @@ AlarmDone:
 
           lda ScreenChangedP
           beq MainLoop
-
-          jmp MainLoop          ; XXX
 
           jmp GenerateDrawingList
 

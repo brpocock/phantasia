@@ -4,19 +4,16 @@
 ;;; Cartridge RAM layout
 
           * = $4000
-
+;;; 
 AnimationBuffer:
           .fill $1000, ?
-
-GameMode:
-          .byte ?
-          
-SaveGameSlot:
-          .byte ?
-
-GameFlags:
-          .fill 32, ?
-
+;;; 
+GameMode:          .byte ?
+SaveGameSlot:          .byte ?
+GameFlags:          .fill 32, ?
+;;; 
+Counter:          .word ?
+Counter2:         .word ?
 ;;; 
 ClockFrames:        .byte ?
 ClockSeconds:       .byte ?
@@ -51,9 +48,6 @@ StatsLines:         .byte ?
 DialogueLines:     .byte ?
 MapLines:           .byte ?
 ;;; 
-Counter:          .word ?
-Counter2:         .word ?
-
 CurrentBank:        .byte ?
           
 CurrentMap:         .byte ?
@@ -85,36 +79,40 @@ MapRowEndH:          .fill NumMapRows, ?
 MapNameString:      .fill 22, ?
 
 ScreenChangedP:     .byte ?
-
+;;; 
           .align $100
-
 MapArt:
           .fill $400, ?
 MapTileAttributes:
           .fill $400, ?
 MapAttributes:
           .fill $600, ?
-
+;;; 
 NumSprites:         .byte ?
-MapSpritesXH:
+SpriteXH:
           .fill MaxSprites, ?
-MapSpritesXL:
+SpriteXL:
           .fill MaxSprites, ?
-MapSpritesXFraction:
+SpriteXFraction:
           .fill MaxSprites, ?
-MapSpritesYH:
+SpriteYH:
           .fill MaxSprites, ?
-MapSpritesYL:
+SpriteYL:
           .fill MaxSprites, ?
-MapSpritesYFraction:
+SpriteYFraction:
           .fill MaxSprites, ?
-MapSpritesArtH:
+SpriteArtH:
           .fill MaxSprites, ?
-MapSpritesArtL:
+SpriteArtL:
           .fill MaxSprites, ?
+SpriteDLH:
+          .fill MaxSprites, ?
+SpriteDLL:
+          .fill MaxSprites, ?
+;;; 
 MapExits:
           .fill $300, ?
-
+;;; 
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)
           .fi
