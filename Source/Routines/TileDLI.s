@@ -35,14 +35,7 @@ TileDLI:  .block
 
           ;; XXX do useful work while Maria is busy
 
-          .WaitForVBlank
-
-          .BankSwitch CurrentBank
-
-          stx WSYNC
-          .mva BACKGRND, # 0
-
-          .mvaw NMINext, $9000
-          jmp JReturnFromInterrupt
-
+          .mvaw NMINext, IBeginStats
+          jmp ReturnFromInterrupt
+          
           .bend

@@ -57,6 +57,7 @@ Counter2:         .word ?
 CurrentBank:        .byte ?
           
 CurrentMap:         .byte ?
+NextMap:  .byte ?
 
 CurrentMapWidth:    .byte ?
 CurrentMapHeight:   .byte ?

@@ -23,6 +23,7 @@ JumpTable:
           jmp TileDLI
           jmp ReturnFromInterrupt
           jmp GetPlayerFrame
+          jmp IBeginStats
 
 ReturnFromInterrupt:
           pla
@@ -30,6 +31,7 @@ ReturnFromInterrupt:
           pla
           tax
           pla
+          plp
           rti
 
           .include "ColdStart.s"
@@ -48,11 +50,35 @@ ReturnFromInterrupt:
           .include "FrameWork.s"
           .include "ReadInputs.s"
 
+          .include "BeginDialogue.s"
+          .include "BeginStats.s"
           .include "GetPlayerFrame.s"
 
+IBeginStats:
+          .SaveRegs
+          jsr BeginStats
+          .mvaw NMINext, IEndStats
+          jmp ReturnFromInterrupt
+
+IEndStats:
+          .SaveRegs
+          lda DialogueLines
+          beq DoBeginMap
+
+          jsr BeginDialogue
+          .mvaw NMINext, IEndDialogue
+          jmp ReturnFromInterrupt
+
+IEndDialogue:
+          .SaveRegs
+DoBeginMap:
+          jmp JTileDLI
+
+          
 PlayerTiles:
           .binary "PlayerTiles.art.bin"
 
+;;; 
           .if * > $ff80
             .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)
           .fi

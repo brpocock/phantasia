@@ -21,5 +21,4 @@ CopyPlayerSprite:
           bne CopyPlayerSprite
 
           rts
-
           .bend

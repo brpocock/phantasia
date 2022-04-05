@@ -22,3 +22,4 @@
           JTileDLI = $c01b
           JReturnFromInterrupt = $c01e
           JGetPlayerFrame = $c021
+          JBeginStats = $c024

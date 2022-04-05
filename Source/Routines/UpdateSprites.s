@@ -1,7 +1,7 @@
 ;;; Phantasia Source/Routines/UpdateSprites.s
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
-UpdateSprites:
+UpdateSprites:      .block
           ldy # 0
 ClearSpritesFromDLs:
           lda MapRowEndL, y
@@ -72,3 +72,4 @@ DonePlayer:
 
 DoneUpdatingSprites:
           rts
+          .bend
