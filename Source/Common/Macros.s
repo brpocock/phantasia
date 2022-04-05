@@ -399,7 +399,6 @@ Wait1:
           .endm
 
 SaveRegs: .macro
-          php
           pha
           txa
           pha

@@ -31,7 +31,6 @@ ReturnFromInterrupt:
           pla
           tax
           pla
-          plp
           rti
 
           .include "ColdStart.s"
