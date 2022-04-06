@@ -47,6 +47,7 @@ ReturnFromInterrupt:
           .include "BeginStats.s"
           .include "CheckPlayerCollision.s"
           .include "CheckSpriteCollision.s"
+          .include "CheckWall.s"
           .include "FarCall.s"
           .include "FarJump.s"
           .include "FrameService.s"
