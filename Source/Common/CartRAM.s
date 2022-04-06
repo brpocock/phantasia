@@ -63,6 +63,9 @@ GameMode:          .byte ?
 SaveGameSlot:          .byte ?
 GameFlags:          .fill 32, ?
 
+AnimationFrame:     .byte ?
+AnimationFrameFraction:     .byte ?
+
 ClockFrames:        .byte ?
 ClockSeconds:       .byte ?
 ClockMinutes:       .byte ?
@@ -80,6 +83,7 @@ ControllerMode:     .byte ?
 
 StickX:   .byte ?
 StickY:   .byte ?
+IdleTime: .byte ?
 
 DebounceSWCHB:      .byte ?
 DebounceButtonI:      .byte ?

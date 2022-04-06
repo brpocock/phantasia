@@ -15,6 +15,7 @@ MoveMinus:
           lda \fraction, x
           sec
           sbc Swap
+          sta \fraction, x
           bcs DoneMath
 
           dec \low, x

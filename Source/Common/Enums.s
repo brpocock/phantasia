@@ -31,3 +31,7 @@
           PlayerFacingRight = 4 * 8 * 6
           PlayerFacingDown = 4 * 8 * 7
 
+          PlayerIdle = 4 * 8 * 7 + 4 * 2
+
+          ActionIdle = $00
+          ActionWalking = $01

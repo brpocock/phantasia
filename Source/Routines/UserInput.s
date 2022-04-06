@@ -2,9 +2,6 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 UserInput:          .block
-          lda # 0
-          sta SpriteFacing
-
           ldy StickY
           beq DoneUpDown
 
@@ -12,12 +9,19 @@ UserInput:          .block
           ldx # 0               ; sprite number
           jsr MoveSpriteY
 
-          lda #P0StickDown
+          ldx #P0StickUp
           ldy StickY
           bmi +
-          lda #P0StickUp
+          ldx #P0StickDown
 +
+	lda SpriteFacing
+          and #~(P0StickUp|P0StickDown)
           sta SpriteFacing
+          txa
+          ora SpriteFacing
+          sta SpriteFacing
+          lda #ActionWalking
+          sta SpriteAction
 
 DoneUpDown:
           ldy StickX
@@ -27,25 +31,35 @@ DoneUpDown:
           ldx # 0               ; sprite number
           jsr MoveSpriteX
 
-          lda #P0StickRight
+          ldx #P0StickLeft
           ldy StickX
           bmi +
-          lda #P0StickLeft
+          ldx #P0StickRight
 +
+	lda SpriteFacing
+          and #~(P0StickLeft|P0StickRight)
+          sta SpriteFacing
+          txa
           ora SpriteFacing
           sta SpriteFacing
+          lda #ActionWalking
+          sta SpriteAction
 
 DoneStick:
           lda StickX
           ora StickY
-          beq +
-          jsr GetPlayerFrame
-+
+          bne Leave
 
+          inc IdleTime
+          lda IdleTime
+          cmp # FramesPerSecond / 10
+          lda #ActionIdle
+          sta SpriteAction
+          lda # 0
+          sta SpriteFacing
 
-NoStick:
-          rts
-
+Leave:
+          jmp GetPlayerFrame    ; tail call
 ;;; 
 ScrollMapLeft:
           ldx MapLeftPixel

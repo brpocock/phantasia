@@ -13,6 +13,14 @@ FrameService:       .block
 Clock:
           ldy # 0
 
+          inc AnimationFrameFraction
+          lda AnimationFrameFraction
+          cmp # FramesPerSecond / 10
+          blt +
+          inc AnimationFrame
+          sty AnimationFrameFraction
++
+
           inc ClockFrames
           lda ClockFrames
           cmp #FramesPerSecond

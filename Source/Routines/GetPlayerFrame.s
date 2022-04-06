@@ -2,37 +2,43 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 GetPlayerFrame:     .block
-          lda SpriteFacing
-          ora #P0StickUp
-          beq +
-          ldx #PlayerFacingUp
-          bne SetSource
-+
-          lda SpriteFacing
-          ora #P0StickDown
-          beq +
+          lda SpriteAction
+
+          cmp #ActionIdle
+          bne NotIdle
+          ldx #PlayerIdle
+          jmp CopyTile
+          
+NotIdle:
           ldx #PlayerFacingDown
-          bne SetSource
-+
+
+SetFacing:          .macro stick, art
+          .block
           lda SpriteFacing
-          ora #P0StickLeft
+          and #\stick
+          beq NoArt
+          ldx #\art
+          bne SetSourceWalk
+NoArt:
+          .bend
+          .endm
+
+          .SetFacing P0StickDown, PlayerFacingDown
+          .SetFacing P0StickLeft, PlayerFacingLeft
+          .SetFacing P0StickRight, PlayerFacingRight
+          .SetFacing P0StickUp, PlayerFacingUp
+
+SetSourceWalk:
+          lda AnimationFrame
+          and # 4
           beq +
-          ldx #PlayerFacingLeft
-          bne SetSource
-+
-          lda SpriteFacing
-          ora #P0StickRight
-          beq +
-          ldx #PlayerFacingRight
-          bne SetSource
+          inx
+          inx
+          inx
+          inx
 +
 
-SetSource:
-          inx
-          inx
-          inx
-          inx
-
+CopyTile:
           .mvaw Source, PlayerTiles
           txa
           .Add16a Source
