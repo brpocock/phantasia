@@ -7,9 +7,8 @@ WaitForOverscan:
           bpl WaitForOverscan
 
           ;; Check alarm for expiry
-          lda # 0
-          sta AlarmEnabledP
-          lda AlarmV + 1
+          lda AlarmEnabledP
+          ora AlarmV + 1
           beq AlarmDone
 
           lda AlarmSeconds
@@ -19,14 +18,16 @@ WaitForOverscan:
           jsr CallAlarmFunction
 
 AlarmDone:
-
           jsr JGetPlayerFrame
+
           jsr UpdateSprites
 
           lda ScreenChangedP
           beq MainLoop
 
-          jmp GenerateDrawingList
+          jsr GenerateDrawingList
+
+          jmp MainLoop
 
 CallAlarmFunction:
           jmp (AlarmV)          ; should RTS when done

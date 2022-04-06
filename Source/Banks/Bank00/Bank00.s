@@ -7,24 +7,17 @@
 ;;; 
 BankEntry:
           cpy # 0
-          beq GenerateDrawingList
+          beq GamePlay
           brk
 
-GenerateDrawingList:
-          jsr StartDLL
-          jsr StatsDL
-          jsr DialogueDL
-          jsr MapSectionDL
-          jsr WriteOverscanDL
-          jsr JGetPlayerFrame
-          jsr UpdateSprites
-          jsr SwitchToNewDLL
-
+GamePlay:
+          jsr GenerateDrawingList
           .include "MainLoop.s"
 ;;; 
           .include "CopyToDL.s"
           .include "DialogueDL.s"
           .include "EmitSpan.s"
+          .include "GenerateDrawingList.s"
           .include "LookUpPalette.s"
           .include "MapSectionDL.s"
           .include "ScreenTopAssets.s"
