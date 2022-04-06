@@ -2,14 +2,6 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 GetPlayerFrame:     .block
-          lda SpriteAction
-
-          cmp #ActionIdle
-          bne NotIdle
-          ldx #PlayerIdle
-          jmp CopyTile
-          
-NotIdle:
           ldx #PlayerFacingDown
 
 SetFacing:          .macro stick, art
@@ -29,14 +21,30 @@ NoArt:
           .SetFacing P0StickUp, PlayerFacingUp
 
 SetSourceWalk:
+          lda SpriteAction
+          ;; cmp #ActionIdle ; unnecessary, it's zero
+          bne NotIdle
+          ldy # 2
+          jmp SetSourceFrame
+
+NotIdle:
           lda AnimationFrame
-          and # 4
-          beq +
+          and #$0c
+          lsr a
+          lsr a
+          tay
+          lda FramePattern, y
+          tay
+SetSourceFrame:
+          cpy # 0
+          beq CopyTile
+-
           inx
           inx
           inx
           inx
-+
+          dey
+          bne -
 
 CopyTile:
           .mvaw Source, PlayerTiles
@@ -60,5 +68,8 @@ CopyPlayerSprite:
           bne CopyPlayerSprite
 
           rts
+
+FramePattern:
+          .byte 0, 2, 1, 2
 
           .bend

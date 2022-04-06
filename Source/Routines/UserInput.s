@@ -2,6 +2,13 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 UserInput:          .block
+          lda StickX
+          ora StickY
+          beq DoneStick
+
+          lda # 0
+          sta SpriteFacing
+
           ldy StickY
           beq DoneUpDown
 
@@ -14,12 +21,7 @@ UserInput:          .block
           bmi +
           ldx #P0StickDown
 +
-	lda SpriteFacing
-          and #~(P0StickUp|P0StickDown)
-          sta SpriteFacing
-          txa
-          ora SpriteFacing
-          sta SpriteFacing
+          stx SpriteFacing
           lda #ActionWalking
           sta SpriteAction
 
@@ -36,9 +38,6 @@ DoneUpDown:
           bmi +
           ldx #P0StickRight
 +
-	lda SpriteFacing
-          and #~(P0StickLeft|P0StickRight)
-          sta SpriteFacing
           txa
           ora SpriteFacing
           sta SpriteFacing
@@ -55,8 +54,6 @@ DoneStick:
           cmp # FramesPerSecond / 10
           lda #ActionIdle
           sta SpriteAction
-          lda # 0
-          sta SpriteFacing
 
 Leave:
           jmp GetPlayerFrame    ; tail call
