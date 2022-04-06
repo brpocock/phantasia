@@ -53,6 +53,7 @@ ReturnFromInterrupt:
           .include "FrameService.s"
           .include "FrameWork.s"
           .include "GetPlayerFrame.s"
+          .include "GetTileAttributes.s"
           .include "MoveSprite.s"
           .include "MoveSprites.s"
           .include "PlayMusic.s"

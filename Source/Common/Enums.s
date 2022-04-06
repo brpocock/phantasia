@@ -35,6 +35,7 @@
           ActionFlying = $02
           ActionSwimming = $03
           ActionUseEquipment = $04
+          ActionClimbing = $05
 ;;; 
           ;; Byte 0
           AttrWallNorth = $01

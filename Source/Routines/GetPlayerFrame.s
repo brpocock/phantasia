@@ -28,6 +28,46 @@ SetSourceWalk:
           jmp SetSourceFrame
 
 NotIdle:
+          cmp #ActionWalking
+          beq SetFrameForWalking
+          cmp #ActionSwimming
+          beq SetFrameForSwimming
+          cmp #ActionUseEquipment
+          beq SetFrameForUsingEquipment
+          cmp #ActionClimbing
+          beq SetFrameForClimbing
+          ;; fall through to walking for now XXX
+          jmp SetFrameForWalking
+
+SetFrameForClimbing:
+          lda AnimationFrame
+          and #$03
+          asl a
+          asl a
+          clc
+          adc # 4 * 4
+          tax
+          gne CopyTile
+
+SetFrameForUsingEquipment:
+          ;; XXX TODO
+          jmp CopyTile
+
+SetFrameForSwimming:
+          txa
+          sec
+          sbc # 4 * 8 * 4
+          tax
+          lda AnimationFrame
+          and #$04
+          beq CopyTile
+          inx
+          inx
+          inx
+          inx
+          gne CopyTile
+
+SetFrameForWalking:
           lda AnimationFrame
           and #$06
           lsr a

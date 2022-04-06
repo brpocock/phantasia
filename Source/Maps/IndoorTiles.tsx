@@ -217,7 +217,7 @@
  <tile id="59">
   <properties>
    <property name="Door" type="bool" value="true"/>
-   <property name="Lock" type="bool" value="true"/>
+   <property name="Locked" type="bool" value="true"/>
   </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
@@ -300,7 +300,7 @@
  </tile>
  <tile id="76">
   <properties>
-   <property name="Lock" type="bool" value="true"/>
+   <property name="Locked" type="bool" value="true"/>
   </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
@@ -346,7 +346,7 @@
  <tile id="90">
   <properties>
    <property name="Door" type="bool" value="true"/>
-   <property name="Lock" type="bool" value="true"/>
+   <property name="Locked" type="bool" value="true"/>
   </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
@@ -355,7 +355,7 @@
  <tile id="91">
   <properties>
    <property name="Door" type="bool" value="true"/>
-   <property name="Lock" type="bool" value="true"/>
+   <property name="Locked" type="bool" value="true"/>
   </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>

@@ -9,26 +9,7 @@ CheckWall:          .block
           cmp #ActionFlying
           beq IsOK
 
-          .mvaw Pointer, MapTileAttributes
-          lda CheckY
-          tax
-          cpx # 0
--
-          beq DoneMult
-          .Add16 Pointer, MapWidth
-          dex
-          bne -
-DoneMult:
-          lda CheckX
-          tay
-
-          lda (Pointer), y
-          asl a
-          sta Temp
-          asl a
-          clc
-          adc Temp
-          tay
+          jsr GetTileAttributes
           lda MapAttributes, y
           and CheckMask
           beq IsOK

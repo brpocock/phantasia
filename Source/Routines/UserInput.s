@@ -56,6 +56,23 @@ DoneStick:
           sta SpriteAction
 
 Leave:
+          ;; XXX but wait — are we swimming actually?
+          lda SpriteXH
+          sta CheckX
+          lda SpriteYH
+          sta CheckY
+          inc CheckY
+          jsr GetTileAttributes
+          lda MapAttributes + 1, y
+          and #AttrSwim
+          beq +
+          .mva SpriteAction, #ActionSwimming
++
+          lda MapAttributes + 1, y
+          and #AttrClimb
+          beq +
+          .mva SpriteAction, #ActionClimbing
++
           jmp GetPlayerFrame    ; tail call
 ;;; 
 ScrollMapLeft:
