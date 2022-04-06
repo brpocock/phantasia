@@ -283,7 +283,6 @@
           (when-let (value (assocdr "value" (second prop)))
             (return-from tile-property-value
               (let ((value (string-trim #(#\Space) value)))
-                (format *trace-output* "~&Property ~s = ~s" key value)
                 (cond ((or (equalp "true" value)
                            (equalp "t" value)
                            (equalp "on" value))
