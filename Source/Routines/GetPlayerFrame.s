@@ -29,8 +29,7 @@ SetSourceWalk:
 
 NotIdle:
           lda AnimationFrame
-          and #$0c
-          lsr a
+          and #$06
           lsr a
           tay
           lda FramePattern, y
