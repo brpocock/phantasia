@@ -36,6 +36,12 @@ SpriteArtH:
           .fill MaxSprites, ?
 SpriteArtL:
           .fill MaxSprites, ?
+
+PriorH:   .byte ?
+PriorL:   .byte ?
+CheckX:   .byte ?
+CheckY:   .byte ?
+CheckMask:          .byte ?
           HoleSum += * - $4040
 ;;; 
 
@@ -105,8 +111,8 @@ CurrentBank:        .byte ?
 CurrentMap:         .byte ?
 NextMap:  .byte ?
 
-CurrentMapWidth:    .byte ?
-CurrentMapHeight:   .byte ?
+MapWidth:    .byte ?
+MapHeight:   .byte ?
 MapBackground:      .byte ?
 MapPalettes:        .fill (7 * 3), ?
           

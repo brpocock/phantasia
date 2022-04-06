@@ -18,11 +18,11 @@ LoadMap:  .block
 CopyMapDimensions:
           ldy #MapOffsetWidth
           lda (Pointer), y
-          sta CurrentMapWidth
+          sta MapWidth
           ;; ldy #MapOffsetHeight
           iny
           lda (Pointer), y
-          sta CurrentMapHeight
+          sta MapHeight
 CopyMapAttributesTable:
           ldy # MapOffsetAttributes
           lda (Pointer), y

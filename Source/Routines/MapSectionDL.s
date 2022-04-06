@@ -134,7 +134,7 @@ FillSpanZeroes:
           tya
           .Add16a DLTail
 
-          .Add16 Source, CurrentMapWidth
+          .Add16 Source, MapWidth
           inc ScreenNextY
           lda ScreenNextY
           asl a                 ; 16 lines per row
