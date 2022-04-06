@@ -20,21 +20,24 @@ MoveMinus:
 
           lda \low, x
           sta PriorL
-          dec \low, x
           lda \high, x
           sta PriorH
+
+          dec \low, x
+          lda \low, x
           bpl DoneMinorMinus
 
           lda #\lowSize
           sta \low, x
           dec \high, x
 DoneMinorMinus:
+          jsr GetCheckPoint
           .if \isX
             .mva CheckMask, #AttrWallEast
           .else
             .mva CheckMask, #AttrWallSouth
           .fi
-          jmp DoneMath
+          jmp BounceOffTheWalls
 
 MovePlus:
           clc
@@ -44,9 +47,10 @@ MovePlus:
 
           lda \low, x
           sta PriorL
-          inc \low, x
           lda \high, x
           sta PriorH
+
+          inc \low, x
           lda \low, x
           cmp #\lowSize
           blt DoneMinorPlus
@@ -55,15 +59,23 @@ MovePlus:
           sta \low, x
           inc \high, x
 DoneMinorPlus:
+          jsr GetCheckPoint
           .if \isX
+            inc CheckX
             .mva CheckMask, #AttrWallWest
           .else
             .mva CheckMask, #AttrWallNorth
           .fi
 
 BounceOffTheWalls:
-          jsr GetCheckPoint
-          .mva CheckMask, #$0f  ; XXX
+          .if !(\isX)
+            lda SpriteXL, x
+            cmp #4
+            blt +
+            inc CheckX
++
+          .fi
+          .mva CheckMask, #$0f  ; XXX TODO
           jsr CheckWall
           bcc DoneMath
 
@@ -82,21 +94,11 @@ MoveSpriteX:
 
 MoveSpriteY:
           .MoveSprite SpriteYH, SpriteYL, SpriteYFraction, 16, false
-
+          
 GetCheckPoint:      .block
           lda SpriteXH, x
           sta CheckX
-          lda SpriteXL, x
-          cmp # 4
-          blt +
-          inc CheckX
-+
           lda SpriteYH, x
           sta CheckY
-          lda SpriteYL, x
-          cmp # 2
-          blt +
-          inc CheckY
-+
           rts
           .bend
