@@ -34,6 +34,72 @@ AddOneSprite:
           bge DonePlayer
 
           tay
+          jsr FindBlankOnRow
+          .mvaw Source, AnimationBuffer + $1000
+          .mvapyi Pointer, Source
+          .mvapyi Pointer, #DLExtMode(true, false)
+          lda Source + 1
+          clc
+          adc SpriteYL
+          sta (Pointer), y
+          iny
+          .mvapyi Pointer, #DLPalWidth(4, 4)
+          lda SpriteXH
+          sec
+          sbc MapLeftColumn
+          asl a
+          asl a
+          asl a
+          clc
+          adc SpriteXL
+          sec
+          sbc MapLeftPixel
+          sta (Pointer), y
+
+          lda SpriteYL
+          beq DonePlayer
+
+          lda SpriteYH
+          sec
+          sbc MapTopRow
+          tay
+          iny
+
+          cpy #NumMapRows
+          bge DonePlayer
+
+          jsr FindBlankOnRow
+          .mvaw Source, AnimationBuffer
+          .mvapyi Pointer, Source
+          .mvapyi Pointer, #DLExtMode(true, false)
+          lda Source + 1
+          clc
+          adc SpriteYL
+          sta (Pointer), y
+          iny
+          .mvapyi Pointer, #DLPalWidth(4, 4)
+          lda SpriteXH
+          sec
+          sbc MapLeftColumn
+          asl a
+          asl a
+          asl a
+          clc
+          adc SpriteXL
+          sec
+          sbc MapLeftPixel
+          sta (Pointer), y
+          
+
+DonePlayer:
+          dex
+          bne AddOneSprite
+
+DoneUpdatingSprites:
+          rts
+
+FindBlankOnRow:
+          ;; row in Y, returns pointer in Pointer and Y
           lda MapRowEndL, y
           sta Pointer
           lda MapRowEndH, y
@@ -62,31 +128,6 @@ FoundSpriteBlanks:
           dey
           .mva SpriteDLL, Pointer
           .mva SpriteDLH, Pointer + 1
-          .mvaw Source, AnimationBuffer
-          .mvapyi Pointer, Source
-          .mvapyi Pointer, #DLExtMode(true, false)
-          lda Source + 1
-          clc
-          adc SpriteYL
-          sta (Pointer), y
-          iny
-          .mvapyi Pointer, #DLPalWidth(4, 4)
-          lda SpriteXH
-          sec
-          sbc MapLeftColumn
-          asl a
-          asl a
-          asl a
-          clc
-          adc SpriteXL
-          sec
-          sbc MapLeftPixel
-          sta (Pointer), y
-
-DonePlayer:
-          dex
-          bne AddOneSprite
-
-DoneUpdatingSprites:
           rts
+
           .bend

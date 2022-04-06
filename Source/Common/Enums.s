@@ -23,3 +23,11 @@
 
           NumMapRows = 13
           MaxSprites = 16
+
+          PlayerMovementSpeed = $40
+
+          PlayerFacingUp = 4 * 8 * 4
+          PlayerFacingLeft = 4 * 8 * 5
+          PlayerFacingRight = 4 * 8 * 6
+          PlayerFacingDown = 4 * 8 * 7
+

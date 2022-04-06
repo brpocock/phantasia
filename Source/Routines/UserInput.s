@@ -2,20 +2,46 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 UserInput:          .block
+          lda # 0
+          sta SpriteFacing
+
           ldy StickY
           beq DoneUpDown
 
-          ldx # 0
+          lda #PlayerMovementSpeed
+          ldx # 0               ; sprite number
           jsr MoveSpriteY
+
+          lda #P0StickDown
+          ldy StickY
+          bmi +
+          lda #P0StickUp
++
+          sta SpriteFacing
 
 DoneUpDown:
           ldy StickX
           beq DoneStick
 
-          ldx # 0
+          lda #PlayerMovementSpeed * 2
+          ldx # 0               ; sprite number
           jsr MoveSpriteX
 
+          lda #P0StickRight
+          ldy StickX
+          bmi +
+          lda #P0StickLeft
++
+          ora SpriteFacing
+          sta SpriteFacing
+
 DoneStick:
+          lda StickX
+          ora StickY
+          beq +
+          jsr GetPlayerFrame
++
+
 
 NoStick:
           rts

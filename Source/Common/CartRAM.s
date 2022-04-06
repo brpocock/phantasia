@@ -6,15 +6,49 @@
           * = $4000
 ;;; 
 AnimationBuffer:
-          .fill $1000, ?
-;;; 
+          .fill $3000, ?
+
+          * = $4080
+SpriteXH:
+          .fill MaxSprites, ?
+SpriteXL:
+          .fill MaxSprites, ?
+SpriteXFraction:
+          .fill MaxSprites, ?
+SpriteYH:
+          .fill MaxSprites, ?
+SpriteYL:
+          .fill MaxSprites, ?
+SpriteYFraction:
+          .fill MaxSprites, ?
+SpriteArtH:
+          .fill MaxSprites, ?
+SpriteArtL:
+          .fill MaxSprites, ?
+
+          * = $4180
+SpriteDLH:
+          .fill MaxSprites, ?
+SpriteDLL:
+          .fill MaxSprites, ?
+SpriteFacing:
+          .fill MaxSprites, ?
+SpriteController:
+          .fill MaxSprites, ?
+SpriteDatum:
+          .fill MaxSprites, ?
+SpriteHP:
+          .fill MaxSprites, ?
+SpriteAction:
+          .fill MaxSprites, ?
+SpriteActionParam:
+          .fill MaxSprites, ?
+
+          * = $4280
 GameMode:          .byte ?
 SaveGameSlot:          .byte ?
 GameFlags:          .fill 32, ?
-;;; 
-Counter:          .word ?
-Counter2:         .word ?
-;;; 
+
 ClockFrames:        .byte ?
 ClockSeconds:       .byte ?
 ClockMinutes:       .byte ?
@@ -25,7 +59,9 @@ AlarmFrames:        .byte ?
 AlarmSeconds:       .byte ?
 AlarmEnabledP:      .byte ?
 AlarmV:   .word ?
-;;; 
+
+
+          * = $4380
 ControllerMode:     .byte ?
 
 StickX:   .byte ?
@@ -43,11 +79,9 @@ HeldButtonIII:      .byte ?
 NewButtonI:      .byte ?
 NewButtonII:      .byte ?
 NewButtonIII:       .byte ?
-;;;
-StatsLines:         .byte ?
-DialogueLines:     .byte ?
-MapLines:           .byte ?
-;;; 
+
+          * = $4480
+
 CurrentBank:        .byte ?
           
 CurrentMap:         .byte ?
@@ -79,40 +113,30 @@ MapRowEndH:          .fill NumMapRows, ?
 MapNameString:      .fill 22, ?
 
 ScreenChangedP:     .byte ?
-;;; 
-          .align $100
+
+          * = $4580
+
+Counter:          .word ?
+Counter2:         .word ?
+
+StatsLines:         .byte ?
+DialogueLines:     .byte ?
+MapLines:           .byte ?
+NumSprites:         .byte ?
+
+          * = $7000
 MapArt:
           .fill $400, ?
 MapTileAttributes:
           .fill $400, ?
 MapAttributes:
-          .fill $600, ?
-;;; 
-NumSprites:         .byte ?
-SpriteXH:
-          .fill MaxSprites, ?
-SpriteXL:
-          .fill MaxSprites, ?
-SpriteXFraction:
-          .fill MaxSprites, ?
-SpriteYH:
-          .fill MaxSprites, ?
-SpriteYL:
-          .fill MaxSprites, ?
-SpriteYFraction:
-          .fill MaxSprites, ?
-SpriteArtH:
-          .fill MaxSprites, ?
-SpriteArtL:
-          .fill MaxSprites, ?
-SpriteDLH:
-          .fill MaxSprites, ?
-SpriteDLL:
-          .fill MaxSprites, ?
-;;; 
+          .fill $500, ?
 MapExits:
           .fill $300, ?
+
 ;;; 
+          .warn format("RAM has $%04x (%d) bytes free", $8001 - *, $8001 - *)
+
           .if * > $8000
             .error format("Overran Cart RAM, must end by $7fff, ended at $%04x", *-1)
           .fi

@@ -2,9 +2,42 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 GetPlayerFrame:     .block
-          ;; XXX actually grab the right frame
-          .mvaw Source, PlayerTiles + (8 * 6 + 2) * 4
-          .mvaw Dest, AnimationBuffer
+          lda SpriteFacing
+          ora #P0StickUp
+          beq +
+          ldx #PlayerFacingUp
+          bne SetSource
++
+          lda SpriteFacing
+          ora #P0StickDown
+          beq +
+          ldx #PlayerFacingDown
+          bne SetSource
++
+          lda SpriteFacing
+          ora #P0StickLeft
+          beq +
+          ldx #PlayerFacingLeft
+          bne SetSource
++
+          lda SpriteFacing
+          ora #P0StickRight
+          beq +
+          ldx #PlayerFacingRight
+          bne SetSource
++
+
+SetSource:
+          inx
+          inx
+          inx
+          inx
+
+          .mvaw Source, PlayerTiles
+          txa
+          .Add16a Source
+
+          .mvaw Dest, AnimationBuffer + $1000
           ldx # 16
 CopyPlayerSprite:
           ldy # 0
@@ -21,4 +54,5 @@ CopyPlayerSprite:
           bne CopyPlayerSprite
 
           rts
+
           .bend
