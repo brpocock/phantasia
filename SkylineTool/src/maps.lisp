@@ -291,8 +291,7 @@
                            (equalp "f" value)
                            (equalp "off" value))
                        :off)
-                      (t value)))))
-          (format *trace-output* "~& not property, but ~s" (car prop)))))))
+                      (t value))))))))))
 
 (defun tile-collision-p (tile.xml test-x test-y)
   (let* ((object-group (when (and tile.xml (< 1 (length tile.xml)))
