@@ -12,7 +12,7 @@ UserInput:          .block
           ldy StickY
           beq DoneUpDown
 
-          lda #PlayerMovementSpeed
+          lda #PlayerMovementSpeed * 2
           ldx # 0               ; sprite number
           jsr MoveSpriteY
 
@@ -29,7 +29,7 @@ DoneUpDown:
           ldy StickX
           beq DoneStick
 
-          lda #PlayerMovementSpeed * 2
+          lda #PlayerMovementSpeed
           ldx # 0               ; sprite number
           jsr MoveSpriteX
 
