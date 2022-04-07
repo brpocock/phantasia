@@ -48,8 +48,7 @@ DoneLeftRight:
           lda SWCHB
           and #SWCHBPause
           bne +
-          ;; XXX Pause handler
-          jmp JColdStart
+          jsr TogglePause
 +
 DoneSWCHB:
 
@@ -98,6 +97,10 @@ ReadJoy2bController:
           .MapInput INPT1, 2, false
           .MapInput INPT0, 3, false
 
+          lda NewButtonIII
+          bpl +
+          jsr TogglePause
++
           rts
 
 Read7800Controller:
@@ -115,6 +118,13 @@ GoOneButton:
           sta SWBCNT
 
 DoneController:
+;;;         
+;;; 
+TogglePause:
+          lda Paused
+          eor #$80
+          sta Paused
+
           rts
 
           .bend

@@ -3,13 +3,13 @@
 
 Break:      .block
 
-          jmp Break
-
-          ;; XXX this should be unnecessary but let's do this thing
+          .mva NextMap, CurrentMap
           .mva CurrentMap, #$ff
           .mva CTRL, CTRLDMADisable
-          lda # 0
-          tax
+          ldx #$ff
+          txs
+          inx
+          txa
           tay
           sta $8001
           jmp $8000

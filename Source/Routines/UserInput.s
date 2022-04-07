@@ -2,6 +2,21 @@
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
 UserInput:          .block
+
+CheckButtons:
+CheckButtonI:
+          lda NewButtonI
+          bpl DoneButtonI
+
+DoneButtonI:
+;;; 
+CheckButtonII:
+          lda NewButtonII
+          bpl DoneButtonII
+
+DoneButtonII:
+;;; 
+CheckStick:
           lda StickX
           ora StickY
           beq DoneStick
@@ -73,18 +88,58 @@ Leave:
           beq +
           .mva SpriteAction, #ActionClimbing
 +
-          jmp GetPlayerFrame    ; tail call
+          jsr GetPlayerFrame
+
+          lda SpriteXH
+          sec
+          sbc MapLeftColumn
+          cmp # 4
+          blt GoWestYoungMan
+
+          cmp # 16
+          blt EastWestOK
+
+          jsr ScrollMapRight
+
+          jmp EastWestOK
+
+GoWestYoungMan:
+          jsr ScrollMapLeft
+
+EastWestOK:
+          lda SpriteYH
+          sec
+          sbc MapTopRow
+          cmp # 3
+          blt GoNorth
+
+          cmp #NumMapRows - 3
+          blt NorthSouthOK
+
+          jsr ScrollMapDown
+
+          jmp NorthSouthOK
+
+GoNorth:
+          jsr ScrollMapUp
+
+NorthSouthOK:
+          rts
+
 ;;; 
 ScrollMapLeft:
+          rts                   ; XXX
           ldx MapLeftPixel
           dex
           bpl LeftOK
+
           txa
           clc
           adc # 8
           tax
           lda MapLeftColumn
           beq LeftOK
+
           sec
           sbc # 1
           sta MapLeftColumn
@@ -98,13 +153,15 @@ ScrollMapRight:
           inx
           cpx # 8
           blt RightOK
+
           txa
           sec
           sbc # 8
           tax
           lda MapLeftColumn
-          cmp # 11
+          cmp # 11              ;XXX
           bge RightOK
+
           clc
           adc # 1
           sta MapLeftColumn
@@ -115,6 +172,8 @@ RightOK:
           rts
 
 ScrollMapUp:
+          rts                   ;XXX
+
           ldx MapTopRow
           beq DoneUpDown
 
@@ -125,10 +184,12 @@ ScrollMapUp:
           rts
 
 ScrollMapDown:
+          rts                   ;XXX
           ldx MapTopRow
           inx
-          cpx # 20
+          cpx MapHeight         ; XXX
           bge DoneUpDown
+
           stx MapTopRow
           inc ScreenChangedP
 

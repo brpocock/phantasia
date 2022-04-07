@@ -6,6 +6,10 @@ WaitForOverscan:
           bit MSTAT
           bpl WaitForOverscan
 
+WaitForUnpaused:
+          bit Paused
+          bmi WaitForUnpaused
+          
           ;; Check alarm for expiry
           lda AlarmEnabledP
           and AlarmV + 1

@@ -13,7 +13,8 @@ TileDLI:  .block
 
           .for p := 0, p < 7, p := p + 1
             .for c := 0, c < 3, c := c + 1
-              .mva P0C1 + p * 4 + c, $9001 + p * 3 + c
+              lda $9001 + p * 3 + c
+              sta P0C1 + p * 4 + c 
             .next
           .next
 
@@ -29,9 +30,13 @@ TileDLI:  .block
           .mva BACKGRND, $9000
 
           jsr FrameService
+
+          lda Paused
+          bmi WaitForOverscan
+
           jsr UserInput
-          jsr CheckPlayerCollision
           jsr MoveSprites
+          jsr CheckPlayerCollision
           jsr CheckSpriteCollision
           jsr FrameWork
 

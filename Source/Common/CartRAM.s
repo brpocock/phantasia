@@ -69,19 +69,7 @@ GameMode:          .byte ?
 SaveGameSlot:          .byte ?
 GameFlags:          .fill 32, ?
 
-AnimationFrame:     .byte ?
-AnimationFrameFraction:     .byte ?
-
-ClockFrames:        .byte ?
-ClockSeconds:       .byte ?
-ClockMinutes:       .byte ?
-ClockHours:         .byte ?
-ClockDays:          .byte ?
-
-AlarmFrames:        .byte ?
-AlarmSeconds:       .byte ?
-AlarmEnabledP:      .byte ?
-AlarmV:   .word ?
+Paused:   .byte ?
           HoleSum += * - 4240
 ;;; 
           .Hole $4340
@@ -140,7 +128,21 @@ ScreenChangedP:     .byte ?
           HoleSum += * - $4440
 ;;; 
           .Hole $4540
+AnimationFrame:     .byte ?
+AnimationFrameFraction:     .byte ?
+
+ClockFrames:        .byte ?
+ClockSeconds:       .byte ?
+ClockMinutes:       .byte ?
+ClockHours:         .byte ?
+ClockDays:          .byte ?
+
+AlarmFrames:        .byte ?
+AlarmSeconds:       .byte ?
+AlarmEnabledP:      .byte ?
+AlarmV:   .word ?
           HoleSum += * - $4540
+;;; 
           .Hole $4640
           HoleSum += * - $4640
           .Hole $4740

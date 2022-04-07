@@ -3,11 +3,12 @@
 
 FrameService:       .block
 
-          jsr Clock
           jsr ReadInputs
           jsr PlayMusic
           jsr PlaySFX
           jsr PlaySpeech
+
+          jsr Clock
           jmp Alarm             ; tail call
 ;;; 
 Clock:
