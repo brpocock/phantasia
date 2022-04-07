@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="8" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="23">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="8" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="25">
  <tileset firstgid="1" source="OverworldTiles.tsx"/>
  <tileset firstgid="129" source="OverworldSprites.tsx"/>
  <layer id="2" name="Ground Layer" width="32" height="32">
@@ -43,6 +43,19 @@
    <properties>
     <property name="Entrance" value="PlayerHouse"/>
     <property name="Exit" value="PlayerHouse/Door"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="23" name="Locked Door" x="212" y="120">
+   <properties>
+    <property name="Lock" value="01"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="24" name="Shop door" x="68" y="124">
+   <properties>
+    <property name="Entrance" value="ShopDoor"/>
+    <property name="Exit" value="AtsiravShop/Door"/>
    </properties>
    <point/>
   </object>
