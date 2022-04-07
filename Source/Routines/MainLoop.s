@@ -29,7 +29,7 @@ AlarmDone:
           lda ScreenChangedP
           beq MainLoop
 
-          jsr GenerateDrawingList
+          ;;; jsr GenerateDrawingList
 
           jmp MainLoop
 

@@ -97,7 +97,9 @@ NewButtonIII:       .byte ?
 CurrentBank:        .byte ?
           
 CurrentMap:         .byte ?
+CurrentMapBank:     .byte ?
 NextMap:  .byte ?
+NextMapBank:        .byte ?
 
 MapWidth:    .byte ?
 MapHeight:   .byte ?
@@ -144,23 +146,35 @@ AlarmV:   .word ?
           HoleSum += * - $4540
 ;;; 
           .Hole $4640
+DialogueLine1:      .fill 40, ?
           HoleSum += * - $4640
           .Hole $4740
+DialogueLine2:      .fill 40, ?
           HoleSum += * - $4740
           .Hole $4840
+DialogueLine3:      .fill 40, ?
           HoleSum += * - $4840
           .Hole $4940
+DialogueLine4:      .fill 40, ?
           HoleSum += * - $4940
           .Hole $4a40
+DialogueLine5:      .fill 40, ?
           HoleSum += * - $4a40
           .Hole $4b40
+DialogueLine6:      .fill 40, ?
           HoleSum += * - $4b40
           .Hole $4c40
+DialogueLine7:      .fill 40, ?
           HoleSum += * - $4c40
           .Hole $4d40
+DialogueLine8:      .fill 40, ?
           HoleSum += * - $4d40
+;;; 
           .Hole $4e40
+DialogueTextLines:  .byte ?
+DialogueReplyP:     .byte ?
           HoleSum += * - $4e40
+;;; 
           .Hole $4f40
           HoleSum += * - $4f40
 ;;; 

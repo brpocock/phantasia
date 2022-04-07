@@ -62,7 +62,7 @@ DoneUpDown:
 DoneStick:
           lda StickX
           ora StickY
-          bne Leave
+          bne DoneIdle
 
           inc IdleTime
           lda IdleTime
@@ -70,8 +70,7 @@ DoneStick:
           lda #ActionIdle
           sta SpriteAction
 
-Leave:
-          ;; XXX but wait — are we swimming actually?
+DoneIdle:
           lda SpriteXH
           sta CheckX
           lda SpriteYH
@@ -128,7 +127,9 @@ NorthSouthOK:
 
 ;;; 
 ScrollMapLeft:
-          rts                   ; XXX
+          lda MapLeftColumn
+          beq Return
+
           ldx MapLeftPixel
           dex
           bpl LeftOK
@@ -137,18 +138,23 @@ ScrollMapLeft:
           clc
           adc # 8
           tax
-          lda MapLeftColumn
-          beq LeftOK
 
-          sec
-          sbc # 1
-          sta MapLeftColumn
+          ldy MapLeftColumn
+          dey
+          sty MapLeftColumn
 LeftOK:
           stx MapLeftPixel
           inc ScreenChangedP
+Return:
           rts
 
 ScrollMapRight:
+          lda MapWidth
+          sec
+          sbc # 20
+          cmp MapLeftColumn
+          bge Return
+
           ldx MapLeftPixel
           inx
           cpx # 8
@@ -158,41 +164,50 @@ ScrollMapRight:
           sec
           sbc # 8
           tax
-          lda MapLeftColumn
-          cmp # 11              ;XXX
-          bge RightOK
 
-          clc
-          adc # 1
-          sta MapLeftColumn
+          ldy MapLeftColumn
+          iny
+          sty MapLeftColumn
 RightOK:
           stx MapLeftPixel
           inc ScreenChangedP
-
           rts
 
 ScrollMapUp:
-          rts                   ;XXX
+          ldy MapTopRow
+          beq Return
 
-          ldx MapTopRow
-          beq DoneUpDown
+          ldx MapTopLine
+          inx
+          cpx #$10
+          blt UpOK
 
-          dex
-          stx MapTopRow
+          ldx # 0
+          iny
+          sty MapTopRow
+UpOK:
+          stx MapTopLine
           inc ScreenChangedP
-
           rts
 
 ScrollMapDown:
-          rts                   ;XXX
-          ldx MapTopRow
-          inx
-          cpx MapHeight         ; XXX
-          bge DoneUpDown
+          lda MapHeight
+          sec
+          sbc NumMapRows
+          cmp MapTopRow
+          bge Return
 
-          stx MapTopRow
+          ldx MapTopLine
+          dex
+          bpl DownOK
+
+          ldx #$10
+          ldy MapTopRow
+          dey
+          sty MapTopRow
+DownOK:
+          stx MapTopLine
           inc ScreenChangedP
-
           rts
           
           .bend

@@ -7,10 +7,12 @@ StartDLL: .block
           beq BuildDLL
 
           sta CurrentMap
+
+          .mva CurrentMapBank, NextMapBank
           
-          ;; Decompress the current map
+          ;; Decompress the (now-)current map
           ldy # 0
-          ldx # 2
+          ldx CurrentMapBank
           jsr JFarCall
 
 BuildDLL:

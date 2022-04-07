@@ -57,12 +57,12 @@ CopyAttributesLoop:
 DoneAttributes:
 
 CopySprite:
-          lda # 4
+          lda # 47
           sta SpriteXH
           lda # 0
           sta SpriteXL
           sta SpriteXFraction
-          lda # 4
+          lda # 6
           sta SpriteYH
           lda # 0
           sta SpriteYL

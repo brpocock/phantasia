@@ -3,10 +3,12 @@
 
 GenerateDrawingList:          .block
           jsr StartDLL
+
           jsr StatsDL
           jsr DialogueDL
           jsr MapSectionDL
           jsr WriteOverscanDL
+
           jsr JGetPlayerFrame
           jsr UpdateSprites
           jmp SwitchToNewDLL    ; tail call

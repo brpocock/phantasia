@@ -8,13 +8,15 @@ StartNewGame:	.block
           .mva StatsLines, #$20  ; 4 × 8
           .mva DialogueLines, # 0
 
-          .mva MapTopRow, # 2
-          .mva MapLeftColumn, # 2
-          .mva MapTopLine, # 0
+          .mva MapLeftColumn, # 0
           .mva MapLeftPixel, # 0
+          .mva MapTopRow, # 0
+          .mva MapTopLine, # 0
 
           .mva CurrentMap, #$ff
+          .mva CurrentMapBank, #$ff
           .mva NextMap, # 0
+          .mva NextMapBank, # 2
           .mva ActiveDLL, # 0
 
           .mva PlayerSkinColor, #CoLu(COLBROWN, $7)
