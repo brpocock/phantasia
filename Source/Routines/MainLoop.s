@@ -8,7 +8,7 @@ WaitForOverscan:
 
           ;; Check alarm for expiry
           lda AlarmEnabledP
-          ora AlarmV + 1
+          and AlarmV + 1
           beq AlarmDone
 
           lda AlarmSeconds
