@@ -4,7 +4,11 @@
   <property name="Base" type="bool" value="true"/>
  </properties>
  <image source="OverworldTiles.png" width="128" height="129"/>
- <tile id="1" probability="0.25"/>
+ <tile id="1" probability="0.25">
+  <properties>
+   <property name="Wade" type="bool" value="true"/>
+  </properties>
+ </tile>
  <tile id="2">
   <objectgroup draworder="index" id="2">
    <object id="1" name="BoundingBox" type="Wall" x="0" y="0" width="8" height="16"/>
@@ -106,12 +110,12 @@
  </tile>
  <tile id="27">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="-1.30559" y="-0.130559" width="4.30845" height="18.0171"/>
+   <object id="1" x="0" y="-0.130559" width="2" height="16.1306"/>
   </objectgroup>
  </tile>
  <tile id="29">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="5.02652" y="-0.783354" width="5.48348" height="18.5394"/>
+   <object id="1" x="6" y="0" width="2" height="16"/>
   </objectgroup>
  </tile>
  <tile id="30">
@@ -174,12 +178,12 @@
  </tile>
  <tile id="43">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="-1.04447" y="-0.587515" width="4.439" height="17.5602"/>
+   <object id="1" x="0" y="0" width="2" height="16"/>
   </objectgroup>
  </tile>
  <tile id="45">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="5.0918" y="-0.718074" width="5.74459" height="18.6047"/>
+   <object id="1" x="5.0918" y="0" width="2.9082" height="16"/>
   </objectgroup>
  </tile>
  <tile id="46">
@@ -242,12 +246,12 @@
  <tile id="58" probability="0.25"/>
  <tile id="59">
   <objectgroup draworder="index" id="2">
-   <object id="2" x="-4.83068" y="-0.783354" width="8.35577" height="14.492"/>
+   <object id="2" x="0" y="0" width="2" height="16"/>
   </objectgroup>
  </tile>
  <tile id="61">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="4.89596" y="-0.979192" width="6.52795" height="14.8837"/>
+   <object id="1" x="6" y="0" width="2" height="16"/>
   </objectgroup>
  </tile>
  <tile id="62">
@@ -313,25 +317,16 @@
   </properties>
  </tile>
  <tile id="88">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="-0.913913" y="13.9045" width="10.053" height="3.65565"/>
   </objectgroup>
  </tile>
  <tile id="89">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="-1.56671" y="13.9045" width="11.0322" height="3.65565"/>
   </objectgroup>
  </tile>
  <tile id="90">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="-1.24031" y="14.3615" width="13.2517" height="3.52509"/>
   </objectgroup>
@@ -355,11 +350,6 @@
    <frame tileid="92" duration="150"/>
    <frame tileid="93" duration="150"/>
   </animation>
- </tile>
- <tile id="93">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
  </tile>
  <tile id="94">
   <properties>
@@ -438,9 +428,6 @@
   </objectgroup>
  </tile>
  <tile id="107">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
@@ -453,7 +440,6 @@
   <properties>
    <property name="Dive" type="bool" value="true"/>
    <property name="Swim" type="bool" value="true"/>
-   <property name="Wade" type="bool" value="false"/>
   </properties>
   <animation>
    <frame tileid="118" duration="667"/>
@@ -463,16 +449,14 @@
    <frame tileid="108" duration="667"/>
   </animation>
  </tile>
- <tile id="109">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
- </tile>
  <tile id="110">
   <properties>
    <property name="Signpost" type="bool" value="true"/>
    <property name="Wade" type="bool" value="false"/>
   </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="4"/>
+  </objectgroup>
  </tile>
  <tile id="111">
   <properties>
@@ -498,6 +482,16 @@
   <properties>
    <property name="Ice" type="bool" value="true"/>
   </properties>
+ </tile>
+ <tile id="116">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="117">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="8" height="16"/>
+  </objectgroup>
  </tile>
  <tile id="118">
   <properties>
@@ -553,11 +547,6 @@
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="8" height="16"/>
   </objectgroup>
- </tile>
- <tile id="125">
-  <properties>
-   <property name="Wade" type="bool" value="false"/>
-  </properties>
  </tile>
  <tile id="126">
   <properties>

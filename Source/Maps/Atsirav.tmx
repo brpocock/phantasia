@@ -19,27 +19,27 @@
   </data>
  </layer>
  <objectgroup id="3" name="Objects Layer">
-  <object id="19" name="Town Hall Sign" x="204" y="280">
+  <object id="19" name="Town Hall Sign" x="212" y="280">
    <properties>
     <property name="Text" value="ATSIRAV TOWN HALL"/>
    </properties>
    <point/>
   </object>
-  <object id="20" name="Town Hall west door" x="180" y="264">
+  <object id="20" name="Town Hall west door" x="188" y="264">
    <properties>
     <property name="Entrance" value="TownHallWestDoor"/>
     <property name="Exit" value="AtsiravTownHall/WestDoor"/>
    </properties>
    <point/>
   </object>
-  <object id="21" name="Town Hall east door" x="196" y="264">
+  <object id="21" name="Town Hall east door" x="204" y="264">
    <properties>
     <property name="Entrance" value="TownHallEastDoor"/>
     <property name="Exit" value="AtsiravTownHall/EastDoor"/>
    </properties>
    <point/>
   </object>
-  <object id="22" name="Player house door" x="100" y="392">
+  <object id="22" name="Player house door" x="108" y="392">
    <properties>
     <property name="Entrance" value="PlayerHouse"/>
     <property name="Exit" value="PlayerHouse/Door"/>
