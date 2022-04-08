@@ -82,11 +82,21 @@ DoneIdle:
           beq +
           .mva SpriteAction, #ActionSwimming
 +
+          lda SpriteAction
+          beq ReadyGetFrame
+
+          lda MapAttributes + 1, y
+          and #AttrWade
+          beq +
+          .mva SpriteAction, #ActionWading
++
           lda MapAttributes + 1, y
           and #AttrClimb
           beq +
           .mva SpriteAction, #ActionClimbing
 +
+
+ReadyGetFrame:
           jsr GetPlayerFrame
 
           lda SpriteXH
@@ -134,11 +144,7 @@ ScrollMapLeft:
           dex
           bpl LeftOK
 
-          txa
-          clc
-          adc # 8
-          tax
-
+          ldx # 7
           ldy MapLeftColumn
           dey
           sty MapLeftColumn
@@ -160,11 +166,7 @@ ScrollMapRight:
           cpx # 8
           blt RightOK
 
-          txa
-          sec
-          sbc # 8
-          tax
-
+          ldx # 0
           ldy MapLeftColumn
           iny
           sty MapLeftColumn
@@ -201,7 +203,7 @@ ScrollMapDown:
           dex
           bpl DownOK
 
-          ldx #$10
+          ldx #$0f
           ldy MapTopRow
           dey
           sty MapTopRow

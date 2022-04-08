@@ -88,6 +88,8 @@ PlayerTiles:
           ;; does not need to be aligned, since they are copied to RAM
           ;; actually also does not need to be in Bank 7 in that case.
           .binary "PlayerTiles.art.bin"
+PlayerEffectsTiles: 
+          .binary "PlayerEffectsTiles.art.bin"
 ;;; 
           .warn format("Bank 7 ends at $%04x (length $%04x, %d)", *-1, *-$c001, *-$c001)
 

@@ -30,6 +30,8 @@ SetSourceWalk:
 NotIdle:
           cmp #ActionWalking
           beq SetFrameForWalking
+          cmp #ActionWading
+          beq SetFrameForWalking
           cmp #ActionSwimming
           beq SetFrameForSwimming
           cmp #ActionUseEquipment
@@ -72,7 +74,15 @@ SetFrameForWalking:
           and #$06
           lsr a
           tay
-          lda FramePattern, y
+          lda SpriteFacing
+          and #P0StickUp|P0StickDown
+          beq +
+          lda FramePatternUD, y
+          tay
+          jmp SetSourceFrame
+
++
+          lda FramePatternLR, y
           tay
 SetSourceFrame:
           cpy # 0
@@ -106,9 +116,76 @@ CopyPlayerSprite:
           dex
           bne CopyPlayerSprite
 
+          lda SpriteAction
+          cmp #ActionWading
+          bne Return
+
+WadingOverlay:
+          lda AnimationFrame
+          ldx # 0
+          and #$01
+          beq +
+          inx
++
+          jsr CopyStencil
+
+Return:
           rts
 
-FramePattern:
+CopyStencil:
+          .mvaw Source, PlayerEffectsTiles
+          txa
+          .Add16a Source
+
+          .mvaw Dest, AnimationBuffer + $1000
+          ldx # 16
+CopyStencilLoop:
+          ldy # 0
+          .rept 3
+            jsr CopyMaskedByte
+            iny
+          .next
+          jsr CopyMaskedByte
+          inc Source + 1
+          inc Dest + 1
+          dex
+          bne CopyStencilLoop
+
+          rts
+
+CopyMaskedByte:
+          lda (Source), y
+          and #$f0
+          beq NoLeft
+          lda (Source), y
+          and #$0f
+          beq LeftOnly
+
+          sta (Dest), y
+          rts
+
+LeftOnly:
+          lda (Dest), y
+          and #$0f
+          ora (Source), y
+          sta (Dest), y
+          rts
+
+NoLeft:
+          lda (Source), y
+          and #$0f
+          beq Return
+
+          lda (Dest), y
+          and #$f0
+          ora (Source), y
+          sta (Dest), y
+          rts
+
+FramePatternLR:
+          .byte 0, 2, 1, 3
+
+FramePatternUD:
           .byte 0, 2, 1, 2
 
           .bend
