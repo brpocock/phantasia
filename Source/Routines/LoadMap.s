@@ -56,13 +56,13 @@ CopyAttributesLoop:
 
 DoneAttributes:
 
-CopySprite:
-          lda # 47
+LoadPlayer:
+          lda # 47              ; XXX from Entrance code
           sta SpriteXH
           lda # 0
           sta SpriteXL
           sta SpriteXFraction
-          lda # 6
+          lda # 6               ;  XXX from Entrance code
           sta SpriteYH
           lda # 0
           sta SpriteYL
@@ -72,6 +72,7 @@ CopySprite:
           lda #<AnimationBuffer
           sta SpriteArtL
 
+LoadMapSprites:
           ldx # 0
           inx
           stx NumSprites
