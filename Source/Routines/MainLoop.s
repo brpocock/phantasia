@@ -9,8 +9,8 @@ WaitForOverscan:
 WaitForUnpaused:
           bit Paused
           bmi WaitForUnpaused
-          
-          ;; Check alarm for expiry
+
+CheckForAlarm:
           lda AlarmEnabledP
           and AlarmV + 1
           beq AlarmDone
@@ -19,6 +19,7 @@ WaitForUnpaused:
           ora AlarmFrames
           bne AlarmDone
 
+          sta AlarmEnabledP     ; A = 0
           jsr CallAlarmFunction
 
 AlarmDone:
@@ -29,7 +30,7 @@ AlarmDone:
           lda ScreenChangedP
           beq MainLoop
 
-          ;;; jsr GenerateDrawingList
+          jsr GenerateDrawingList
 
           jmp MainLoop
 
