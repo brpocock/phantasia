@@ -321,7 +321,7 @@
 
 (defun assign-exit (locale point exits)
   (let ((locale.xml (load-other-map locale)))
-    (warn "Not finding point ~s in locale ~s" point locale)
+    (warn "Not trying to find point ~s in locale ~s" point locale)
     1))
 
 (defun add-attribute-values (tile-palettes xml bytes &optional (exits nil exits-provided-p))
