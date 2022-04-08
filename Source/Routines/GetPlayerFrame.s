@@ -155,16 +155,21 @@ CopyStencilLoop:
 
 CopyMaskedByte:
           lda (Source), y
+          beq Return
+
           and #$f0
           beq NoLeft
+
           lda (Source), y
           and #$0f
           beq LeftOnly
 
+          ;; Left and right both have pixels
           sta (Dest), y
           rts
 
 LeftOnly:
+          ;; only set the left pixel
           lda (Dest), y
           and #$0f
           ora (Source), y
@@ -172,10 +177,7 @@ LeftOnly:
           rts
 
 NoLeft:
-          lda (Source), y
-          and #$0f
-          beq Return
-
+          ;; only set the right pixel
           lda (Dest), y
           and #$f0
           ora (Source), y
