@@ -175,7 +175,7 @@ BlockCopyLoop:
           dex
           bne BlockCopyLoop
           rts
-
+;;; 
 CopyStencil:
           .mvaw Source, PlayerEffectsTiles
           txa
@@ -196,39 +196,38 @@ CopyStencilLoop:
           bne CopyStencilLoop
 
           rts
-
+;;; 
 CopyMaskedByte:
           lda (Source), y
           beq Return
 
-          and #$f0
-          beq NoLeft
+HasSomething:
+          and #$cc
+          beq RightOnly
 
+HasLeft:
           lda (Source), y
-          and #$0f
+          and #$33
           beq LeftOnly
 
-          ;; Left and right both have pixels
+HasBoth:
           lda (Source), y
-          sta (Dest), y
-          rts
+          geq DoneMasked
 
 LeftOnly:
-          ;; only set the left pixel
           lda (Dest), y
-          and #$0f
+          and #$cc
           ora (Source), y
+          geq DoneMasked
+
+RightOnly:
+          lda (Dest), y
+          and #$33
+          ora (Source), y
+DoneMasked:
           sta (Dest), y
           rts
-
-NoLeft:
-          ;; only set the right pixel
-          lda (Dest), y
-          and #$f0
-          ora (Source), y
-          sta (Dest), y
-          rts
-
+;;; 
 FramePatternLR:
           .byte 0, 2, 1, 3
 
