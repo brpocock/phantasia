@@ -6,7 +6,7 @@
  <image source="OverworldTiles.png" width="128" height="129"/>
  <tile id="1" probability="0.25">
   <properties>
-   <property name="Wade" type="bool" value="true"/>
+   <property name="Wade" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="2">

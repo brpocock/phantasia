@@ -62,12 +62,19 @@ SetFrameForSwimming:
           tax
           lda AnimationFrame
           and #$04
-          beq CopyTile
+          beq +
           inx
           inx
           inx
           inx
-          gne CopyTile
++
+          .mvaw Source, PlayerTiles
+          txa
+          .Add16a Source
+
+          .mvaw Dest, AnimationBuffer + $1004
+          jsr BlockCopy
+          jmp AllReady
 
 SetFrameForWalking:
           lda AnimationFrame
@@ -78,11 +85,12 @@ SetFrameForWalking:
           and #P0StickUp|P0StickDown
           beq +
           lda FramePatternUD, y
-          tay
-          jmp SetSourceFrame
+          jmp SetSourceFrame0
 
 +
           lda FramePatternLR, y
+SetSourceFrame0:
+          ;; XXX handle not swinging the right arm when carrying a shield
           tay
 SetSourceFrame:
           cpy # 0
@@ -100,9 +108,60 @@ CopyTile:
           txa
           .Add16a Source
 
+          .mvaw Dest, AnimationBuffer + $1004
+          jsr BlockCopy
+
+          lda SpriteAction
+          cmp #ActionWading
+          bne DoneWading
+
+WadingOverlay:
+          lda AnimationFrame
+          ldx # 0
+          and #$01
+          beq +
+          ldx # 4
++
+          jsr CopyStencil
+
+DoneWading:
+          lda CurrentShield
+          beq AllReady
+
+          cmp #ShieldSmall
+          bne DoneSmallShield
+
+          lda SpriteFacing
+          and #P0StickDown | P0StickLeft | P0StickRight
+          beq DoneShield
+          .BitBit P0StickDown
+          beq +
+          ldx #$08 * 4
+          gne ReadySmallShield
++
+          .BitBit P0StickLeft
+          beq +
+          ldx #$09 * 4
+          gne ReadySmallShield
++
+          ldx #$0a * 4          ; must be facing right
+          
+ReadySmallShield:
+          jsr CopyStencil
+
+DoneSmallShield:
+DoneShield:
+          
+AllReady:
+          .mvaw Source, AnimationBuffer + $1004
           .mvaw Dest, AnimationBuffer + $1000
+          jsr BlockCopy
+Return:
+          rts
+
+BlockCopy:
           ldx # 16
-CopyPlayerSprite:
+BlockCopyLoop:
           ldy # 0
           .rept 3
             lda (Source), y
@@ -114,22 +173,7 @@ CopyPlayerSprite:
           inc Source + 1
           inc Dest + 1
           dex
-          bne CopyPlayerSprite
-
-          lda SpriteAction
-          cmp #ActionWading
-          bne Return
-
-WadingOverlay:
-          lda AnimationFrame
-          ldx # 0
-          and #$01
-          beq +
-          inx
-+
-          jsr CopyStencil
-
-Return:
+          bne BlockCopyLoop
           rts
 
 CopyStencil:
@@ -137,7 +181,7 @@ CopyStencil:
           txa
           .Add16a Source
 
-          .mvaw Dest, AnimationBuffer + $1000
+          .mvaw Dest, AnimationBuffer + $1004
           ldx # 16
 CopyStencilLoop:
           ldy # 0
@@ -165,6 +209,7 @@ CopyMaskedByte:
           beq LeftOnly
 
           ;; Left and right both have pixels
+          lda (Source), y
           sta (Dest), y
           rts
 
@@ -189,5 +234,8 @@ FramePatternLR:
 
 FramePatternUD:
           .byte 0, 2, 1, 2
+
+FramePatternRShield:
+          .byte 1, 2, 1, 2
 
           .bend

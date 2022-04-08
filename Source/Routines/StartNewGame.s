@@ -30,6 +30,8 @@ StartNewGame:	.block
           .mva PlayerName + 2, #"k"
           .mva PlayerName + 3, #"u"
 
+          .mva CurrentShield, #ShieldSmall
+
           ldx #$ff
           txs
           inx

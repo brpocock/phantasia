@@ -176,6 +176,9 @@ DialogueReplyP:     .byte ?
           HoleSum += * - $4e40
 ;;; 
           .Hole $4f40
+CurrentShield:      .byte ?
+CurrentEquip:       .byte ?
+UseItem:  .byte ?
           HoleSum += * - $4f40
 ;;; 
           .Hole $5040

@@ -91,6 +91,9 @@ PlayerTiles:
 PlayerEffectsTiles: 
           .binary "PlayerEffectsTiles.art.bin"
 ;;; 
+BitMask:
+          .byte $01, $02, $04, $08, $10, $20, $40, $80
+;;; 
           .warn format("Bank 7 ends at $%04x (length $%04x, %d)", *-1, *-$c001, *-$c001)
 
           .if * > $ff80

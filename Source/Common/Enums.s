@@ -70,3 +70,8 @@
           AttrPushHeavy = $40
           AttrPushVeryHeavy = $60
           AttrExit = $80
+;;; 
+          ShieldSmall = $01
+          ShieldLarge = $02
+          EquipKnife = $11
+          EquipSword = $12
