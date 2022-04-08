@@ -186,7 +186,7 @@
                                    (machine-palette) red green blue)
         (let ((use (position (list r g b) (machine-palette) :test 'equalp)))
           (unless (position (list red green blue) *palette-warnings* :test 'equalp)
-            (warn-once "Colour not in ~a palette: #~2,'0X~2,'0X~2,'0X; used ~x (#~2,'0X~2,'0X~2,'0X)"
+            (warn-once "Colour not in ~a palette: #~2,'0X~2,'0X~2,'0X; used $~2,'0x (#~2,'0X~2,'0X~2,'0X)"
                        (machine-short-name) red green blue
                        use r g b)
             (push (list red green blue) *palette-warnings*))
@@ -357,20 +357,20 @@ PNG image in an unsuitable format:
   (let ((shape nil)
         (colors nil))
     (loop for row from 0 below (second (array-dimensions pixels))
-       do (push (reduce #'logior
-                        (loop for bit from 0 to 7
-                           collect (if (plusp (aref pixels bit row))
-                                       (expt 2 (- 7 bit))
-                                       0)))
-                shape)
-       do (push (or
-                 (first
-                  (remove-if #'null (loop for bit from 0 to 7
-                                       for color = (aref pixels bit row)
-                                       collect (when (plusp color)
-                                                 color))))
-                 0)
-                colors))
+          do (push (reduce #'logior
+                           (loop for bit from 0 to 7
+                                 collect (if (plusp (aref pixels bit row))
+                                             (expt 2 (- 7 bit))
+                                             0)))
+                   shape)
+          do (push (or
+                    (first
+                     (remove-if #'null (loop for bit from 0 to 7
+                                             for color = (aref pixels bit row)
+                                             collect (when (plusp color)
+                                                       color))))
+                    0)
+                   colors))
     (values (reverse shape) (reverse colors))))
 
 (defun tia-player-interpret (pixels)
@@ -976,13 +976,14 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
               images)))
     (reverse images)))
 
-(defun pixels-into-palette (pixels palette)
+(defun pixels-into-palette (pixels palette &optional x0 y0 i)
   ;; expects PIXELS to be a single row
   (let* ((width (array-dimension pixels 0))
          (output (make-array (list width) :element-type '(unsigned-byte 8))))
     (dotimes (x width)
       (let ((index (position (aref pixels x 0) palette)))
-        (assert index (index) "Color value ~x at ~d not found in palette, error" (aref pixels x 0) x)
+        (assert index (index) "Color value ~x at ~d, ~d ~anot found in palette, error" (aref pixels x 0)
+                (if x0 (+ x0 x) x) (if y0 y0 "?") (if i (format nil "in image ~d " i) ""))
         (setf (aref output x) index)))
     output))
 
@@ -1007,7 +1008,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
             (let* ((byte-pixels (extract-region image
                                                 (* b 4) y
                                                 (1- (* (1+ b) 4)) y))
-                   (indices (pixels-into-palette byte-pixels palette)))
+                   (indices (pixels-into-palette byte-pixels palette (* b 4) y)))
               (push (logior
                      (ash (aref indices 0) 6)
                      (ash (aref indices 1) 4)
@@ -1035,7 +1036,8 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
             "Width for mode 160B must be modulo 2px, not ~:Dpx" width))
   (let* ((byte-width (/ width 2))
          (images (extract-regions pixels width height))
-         (bytes-lists (list))) 
+         (bytes-lists (list))
+         (i 0)) 
     (dolist (image images)
       (dotimes (b byte-width)
         (let ((bytes (list)))
@@ -1044,7 +1046,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                                 (* b 2) y
                                                 (1+ (* b 2)) y))
                    (indices (160b-palette-monkey
-                             (pixels-into-palette byte-pixels palette))))
+                             (pixels-into-palette byte-pixels palette (* b 2) y i))))
               ;; pixel:bit order = A: 3276, B: 1054
               ;;; which translates to bit:pixel order =
               ;; A1 A0 B1 B0 A3 A2 B3 B2
@@ -1060,7 +1062,8 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                 (ash (truthy (logand b #x8)) 1)
                                 (ash (truthy (logand b #x4)) 0))
                         bytes)))))
-          (push bytes bytes-lists))))
+          (push bytes bytes-lists)))
+      (incf i))
     (reverse bytes-lists)))
 
 (defmethod parse-7800-object ((mode (eql :320a)) pixels &key width height palette)
@@ -1115,7 +1118,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
             (let* ((byte-pixels (extract-region image
                                                 (* b 4) y
                                                 (1- (* (1+ b) 4)) y))
-                   (indices (pixels-into-palette byte-pixels palette)))
+                   (indices (pixels-into-palette byte-pixels palette (* b 4) y)))
               (push (logior
                      (ash (aref indices 0) 6)
                      (ash (aref indices 1) 4)
@@ -1146,7 +1149,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
             (let* ((byte-pixels (extract-region image
                                                 (* b 4) y
                                                 (1- (* (1+ b) 4)) y))
-                   (indices (pixels-into-palette byte-pixels palette))
+                   (indices (pixels-into-palette byte-pixels palette (* b 4) y))
                    (px-pair-palette (mapcar (lambda (pair)
                                               (cond
                                                 ((and (zerop (car pair))
@@ -1188,7 +1191,9 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                         palette-size last-row)))
     (let ((palette (loop for i below palette-size
                          collect (aref palette-strip i 0))))
-      (format t "~&Palette detected: ~{~x~^, ~}" palette)
+      (if (eql mode :160b)
+          (format t "~&Palette detected: $~2,'0x; ~{$~2,'0x $~2,'0x $~2,'0x~^, ~}" (first palette) (rest palette))
+          (format t "~&Palette detected: ~{$~2,'0x $~2,'0x $~2,'0x $~2,'0x~^, ~}" palette))
       palette)))
 
 (defun parse-into-7800-bytes (art-index)
