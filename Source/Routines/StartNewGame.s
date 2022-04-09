@@ -31,6 +31,9 @@ StartNewGame:	.block
           .mva PlayerName + 3, #"u"
 
           .mva CurrentShield, #ShieldSmall
+          .mva CurrentEquip, #EquipKnife
+          .mva CurrentHP, #$20
+          .mva MaxHP, #$20
 
           ldx #$ff
           txs

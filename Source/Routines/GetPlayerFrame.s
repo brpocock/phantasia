@@ -139,9 +139,14 @@ DoneWading:
           lda CurrentShield
           beq AllReady
 
+          ldy #$00
           cmp #ShieldSmall
-          bne DoneSmallShield
+          beq SmallShield
 
+LargeShield:
+          ldy #$08
+
+SmallShield:
           lda SpriteFacing
           and #P0StickDown | P0StickLeft | P0StickRight
           beq TopSmallShield
@@ -161,6 +166,15 @@ DoneWading:
 TopSmallShield:
           ldx #$0b * 4
 ReadySmallShield:
+          cpy # 0
+          beq +
+-
+          .rept 4
+            inx
+          .next
+          dey
+          bne -
++
           jsr CopyStencil
 
 DoneSmallShield:
@@ -201,19 +215,22 @@ CopyStencilLoop:
           ldy # 0
           .rept 3
             jsr CopyMaskedByte
+
             iny
           .next
           jsr CopyMaskedByte
+
           inc Source + 1
           inc Dest + 1
           dex
           bne CopyStencilLoop
 
+Return00:
           rts
 ;;; 
 CopyMaskedByte:
           lda (Source), y
-          beq ReturnFromCopyMasked
+          beq Return00
 
 HasSomething:
           and #$cc
@@ -227,7 +244,6 @@ HasLeft:
 HasBoth:
           lda (Source), y
           sta (Dest), y
-ReturnFromCopyMasked:
           rts
 
 LeftOnly:
