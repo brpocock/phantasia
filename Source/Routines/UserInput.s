@@ -64,6 +64,7 @@ DoneStick:
           ora StickY
           bne DoneIdle
 
+CountIdle:
           inc IdleTime
           lda IdleTime
           cmp # FramesPerSecond / 10

@@ -23,8 +23,6 @@ CheckForAlarm:
           jsr CallAlarmFunction
 
 AlarmDone:
-          jsr JGetPlayerFrame
-
           jsr UpdateSprites
 
           lda ScreenChangedP
