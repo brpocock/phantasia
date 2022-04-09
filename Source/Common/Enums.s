@@ -75,3 +75,8 @@
           ShieldLarge = $02
           EquipKnife = $11
           EquipSword = $12
+;;; 
+          AnimationBufferPlayerNow = AnimationBuffer + $1000
+          AnimationBufferPlayerNext = AnimationBuffer + $1004
+          AnimationBufferWeaponNow = AnimationBuffer + $1008
+          AnimationBufferWeaponNext = AnimationBUffer + $100c

@@ -88,6 +88,17 @@ SetFrameForWalking:
           jmp SetSourceFrame0
 
 +
+          lda SpriteFacing
+          and #P0StickRight
+          beq NormalLR
+
+          lda CurrentShield
+          beq NormalLR
+
+          lda FramePatternRShield, y
+          jmp SetSourceFrame0
+
+NormalLR:
           lda FramePatternLR, y
 SetSourceFrame0:
           ;; XXX handle not swinging the right arm when carrying a shield
@@ -133,7 +144,7 @@ DoneWading:
 
           lda SpriteFacing
           and #P0StickDown | P0StickLeft | P0StickRight
-          beq DoneShield
+          beq TopSmallShield
           .BitBit P0StickDown
           beq +
           ldx #$08 * 4
@@ -145,7 +156,10 @@ DoneWading:
           gne ReadySmallShield
 +
           ldx #$0a * 4          ; must be facing right
-          
+          gne ReadySmallShield
+
+TopSmallShield:
+          ldx #$0b * 4
 ReadySmallShield:
           jsr CopyStencil
 
@@ -153,8 +167,8 @@ DoneSmallShield:
 DoneShield:
           
 AllReady:
-          .mvaw Source, AnimationBuffer + $1004
-          .mvaw Dest, AnimationBuffer + $1000
+          .mvaw Source, AnimationBufferPlayerNext
+          .mvaw Dest, AnimationBufferPlayerNow
           jsr BlockCopy
 Return:
           rts
@@ -181,7 +195,7 @@ CopyStencil:
           txa
           .Add16a Source
 
-          .mvaw Dest, AnimationBuffer + $1004
+          .mvaw Dest, AnimationBufferPlayerNext
           ldx # 16
 CopyStencilLoop:
           ldy # 0
@@ -199,7 +213,7 @@ CopyStencilLoop:
 ;;; 
 CopyMaskedByte:
           lda (Source), y
-          beq Return
+          beq ReturnFromCopyMasked
 
 HasSomething:
           and #$cc
@@ -212,19 +226,21 @@ HasLeft:
 
 HasBoth:
           lda (Source), y
-          geq DoneMasked
+          sta (Dest), y
+ReturnFromCopyMasked:
+          rts
 
 LeftOnly:
           lda (Dest), y
           and #$cc
           ora (Source), y
-          geq DoneMasked
+          sta (Dest), y
+          rts
 
 RightOnly:
           lda (Dest), y
           and #$33
           ora (Source), y
-DoneMasked:
           sta (Dest), y
           rts
 ;;; 
