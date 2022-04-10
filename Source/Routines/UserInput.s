@@ -99,7 +99,8 @@ DoneIdle:
 
 ReadyGetFrame:
           jsr GetPlayerFrame
-
+;;; 
+CheckForScrolling:
           lda SpriteXH
           sec
           sbc MapLeftColumn
@@ -135,7 +136,6 @@ GoNorth:
 
 NorthSouthOK:
           rts
-
 ;;; 
 ScrollMapLeft:
           lda MapLeftColumn
