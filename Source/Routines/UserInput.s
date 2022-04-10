@@ -212,5 +212,5 @@ DownOK:
           stx MapTopLine
           inc ScreenChangedP
           rts
-          
+
           .bend
