@@ -55,22 +55,16 @@ CopyAttributesLoop:
           bne CopyAttributesLoop
 
 DoneAttributes:
-
+;;; 
 LoadPlayer:
-          lda # 47              ; XXX from Entrance code
-          sta SpriteXH
-          lda # 0
-          sta SpriteXL
-          sta SpriteXFraction
-          lda # 6               ;  XXX from Entrance code
-          sta SpriteYH
-          lda # 0
-          sta SpriteYL
-          sta SpriteYFraction
-          lda #>AnimationBuffer
-          sta SpriteArtH
-          lda #<AnimationBuffer
-          sta SpriteArtL
+          .mva SpriteXH, # 47 ; XXX from Entrance code
+          .mvy SpriteXL, # 0
+          sty SpriteXFraction
+          .mva SpriteYH, # 6 ;  XXX from Entrance code
+          sty SpriteYL
+          sty SpriteYFraction
+          .mva SpriteArtH, #>AnimationBufferPlayerNow
+          .mva SpriteArtL, #<AnimationBufferPlayerNow
 
 LoadMapSprites:
           ldx # 0
@@ -113,7 +107,7 @@ CopyExitsLoop:
           bne CopyExitsLoop
 
 DoneExits:
-
+;;; 
 DecompressMapTile:
           ;; Decompress map tile data
           ldy #MapOffsetArt
@@ -135,7 +129,7 @@ DecompressMapTileAttributes:
           sta Source + 1
           .mvaw Dest, MapTileAttributes
           jsr RLE
-
+;;; 
 CopyMapNameString:
           ldy #MapOffsetTitle
           lda (Pointer), y
@@ -149,7 +143,7 @@ CopyTitleLoop:
           sta MapNameString, x
           cpx MapNameString
           bne CopyTitleLoop
-
+;;; 
 DoneLoadMap:
           rts
 
