@@ -74,9 +74,19 @@ CountIdle:
 DoneIdle:
           lda SpriteXH
           sta CheckX
-          lda SpriteYH
-          sta CheckY
-          inc CheckY
+          lda SpriteXL
+          cmp # 4
+          blt +
+          inc CheckX
++
+          ldx SpriteYH
+          dex
+          lda SpriteYL
+          beq +
+          inx
++
+          stx CheckY
+
           jsr GetTileAttributes
           lda MapAttributes + 1, y
           and #AttrSwim
