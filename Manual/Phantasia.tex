@@ -24,7 +24,7 @@
 \else
 \ifdefined\TVPAL
 \newcommand\TV{PAL}
-\newcommand\REGION{UK and Europe (except France)}
+\newcommand\REGION{UK and Europe}
 \else
 \error{Must define a TV standard}
 \fi
@@ -147,7 +147,7 @@ To play \textit{Phantasia}, you will need:
 \item An Atari console: the Atari ProSystem 7800, or Sears
   Tele-Games Video Arcade II
 \item A TV or video display
-\item A two-button joystick controller such as the ProLine controller
+\item A compatible two- or three-button joystick or gamepad (see WRITEME).
 \item Optional,  but recommended:  A memory  device: an  AtariVox device
   with  (optional)  speakers or  headphones,  or  a MemCard  or  SaveKey
   device.
@@ -176,15 +176,24 @@ facing  up)  into  the  cartridge  slot,  and  turn  the  \textbf{Power}
   \end{center}
 \end{figure}
 
-\section{Using a Gamepad}
+\section{Compatible Controllers}
 
-A  SEGA  \ifdefined\TVNTSC{Genesis/}\fi{}MegaDrive   gamepad  (or  other
-compatible controller) may also be  used. Use the \encircle{B} button as
-the  \textbf{Left  Fire} button.  Use  the  \encircle{C} button  as  the
-\textbf{Right Fire} button.
+There  are  three  main  kinds  of controllers  that  you  can  use  for
+\textit{Phantasia}. Your  gamepad or joystick \emph{must}  be plugged in
+\emph{before} you turn on the power, or it will not work correctly.
 
-Your gamepad  \emph{must} be  plugged in \emph{before}  you turn  on the
-power, or it will not work correctly.
+First, you can  use an Atari ProLine joystick  or compatible controller.
+The left button will be button \encircle{I} and the right button will be
+button \encircle{II}.
+
+Secondly, you  can use a  SEGA \ifdefined\TVNTSC{Genesis/}\fi{}MegaDrive
+gamepad  (or other  compatible controller)  may  also be  used. Use  the
+\encircle{B} button as button  \encircle{I}. Use the \encircle{C} button
+as  button  \encircle{II}. 
+
+Third,  you  can  use  a  Joy2b+  controller.  Button  \encircle{I}  and
+\encircle{II} will work as expected. Button \encircle{III} will work the
+same as pressing the \textbf{Pause}  button on the console.
 
 \vfill
 
@@ -206,7 +215,7 @@ button to access the game menu. See WRITEME for details.
 \subsection{Reset}
 
 While  you are  playing the  game,  press the  \textbf{Reset} button  to
-access the Save or Quit option. See WRITEMe for details.
+access the Save or Quit option. See WRITEME for details.
 
 \subsection{Difficulty Switches}
 
@@ -233,11 +242,12 @@ defeating monsters while in the ``right'' position.
   \includegraphics[width=\columnwidth]{../Manual/Title\TV.png}
 \end{center}
 
-Once your  console is set  up and everything  is connected, turn  on the
-\textbf{Power} switch. You'll  see the title screen appear.  If you have
+Once  your console  is set  up and  everything is  connected, press  the
+\textbf{Power} button. You'll  see the title screen appear.  If you have
 an AtariVox device, you'll also hear the title spoken.
 
-Press the \textbf{Left Fire} button to move to the Select Slot screen.
+Press button  \encircle{II} to move to  the Select Slot screen.  If the
+second button on your controller does not seem to work, try turning the 
 
 \begin{center}
   \includegraphics[width=\columnwidth]{../Manual/SelectSlot\TV.png}
@@ -254,7 +264,7 @@ name  and   avatar  (character).  If   a  slot  is  empty,   you'll  see
 ``\texttt{BEGIN}'' instead.
 
 If you have a password, you can enter it instead by moving to the bottom
-of the screen to PASSWORD and pressing \textbf{Left Fire}. See WRITEME
+of the screen to PASSWORD and pressing button \encircle{I}. See WRITEME
 
 If someone has already \emph{won} the  game once, their name will appear
 with a crown. See New Game Plus, page~\pageref{sec:NewGamePlus}.
@@ -272,8 +282,8 @@ a private area reserved for it.
 
 \fi
 
-When you have selected the slot you want to begin (or resume), press the
-\textbf{Left Fire} button.
+When you have selected the slot you want to begin (or resume), press
+button \encircle{I}.
 
 \fi
 
@@ -281,7 +291,7 @@ When you  first choose  to begin a  new game, you  can enter  your name.
 Press  forward to  select  the  next letter;  pull  back  to select  the
 previous letter.  Press left and right  to move to the  next or previous
 position. You  can have up  to eight characters  for your name.  After eight
-characters, the cursor will turn pink. Press the \textbf{Left Fire} button
+characters, the cursor will turn pink. Press button \encircle{I}
 to  proceed. Press  the  \textbf{Right  Fire} button  to  return to  the
 \textbf{Select Slot} screen.
 
@@ -291,9 +301,9 @@ to  proceed. Press  the  \textbf{Right  Fire} button  to  return to  the
 
 Next, you'll  get to create  your avatar (character). Push  the joystick
 forward or pull back to move  between selections on the screen. Press the
-\textbf{Left Fire} button to edit a  selection, then use the joystick to
+button \encircle{I} button to edit a  selection, then use the joystick to
 make  a  choice.   Press  the  \textbf{Left  Fire}   button  to  confirm
-a selection, or \textbf{Right Fire} button to abandon your change.
+a selection, or button \encircle{II} button to abandon your change.
 
 WRITEME
 
@@ -321,7 +331,7 @@ you'll see the  current area in which you are  traveling. Guide yourself
 using the joystick.
 
 To interact  with objects  like doors  and people, walk  up to  them and
-press the \textbf{Left Fire} button.  Some items or characters may react
+press button \encircle{I}.  Some items or characters may react
 to you simply walking up to them, as well.
 
 To review your inventory, statistics,  and more, press the \textbf{Right
@@ -350,7 +360,7 @@ latest password.
 When you encounter  a person, they'll usually speak to  you. If you have
 an AtariVox  connected, you'll hear  what they have  to say out  loud as
 well.   After  you've   read  what   they   have  to   say,  press   the
-\textbf{Left Fire} button.
+button \encircle{I} button.
 
 \begin{center}
   \includegraphics[width=\columnwidth]{../Manual/Text\TV.png}
@@ -365,9 +375,9 @@ Press forward or back on the joystick to select a response.
 \end{center}
 
 If you  want to  review what the  person was asking,  you can  press the
-\textbf{Right Fire} button to ask them to repeat themself instead.
+button \encircle{II} button to ask them to repeat themself instead.
 
-When you've made your selection, press \textbf{Left Fire} to continue.
+When you've made your selection, press button \encircle{I} to continue.
 
 \section{Battling Monsters}
 
@@ -394,64 +404,52 @@ WRITEME
   \includegraphics[width=\columnwidth]{../Manual/StatsScreenshot\TV.png}
 \end{center}
 
-You can  press the \textbf{Right Fire}  button while viewing the  Map to
-view  your party's  inventory  and statistics.  Press the  \textbf{Right
-  Fire} button again to return to the previous screen.
+Some of  your character's information  is always  visible at the  top of
+the screen. To view more, press button \encircle{II}.
 
-There are three pages (screens) to view, displayed as ``tabs'' across the top of
-the screen.  While the  tabs are  highlighted, press  left and  right to
-change between pages.
+Across the top of the screen, you'll see:
 
-The first page (screen) shows your  party's statistics. Pull back on the
-joystick to highlight the name and portrait of 
+\begin{itemize}
+\item Your currently selected \textbf{equipment  item}. This is the item
+  that you will use when you press button \encircle{I}.
+\item Your currently selected \textbf{shield}.
+\item The number of crowns (currency) that you have.
+\item The number of arrows that you have.
+\item The name of the area in which you are now.
+\item Your score.
+\item Your health.
+\end{itemize}
 
-\begin{description}
-  
-\item[\texttt{ATK.}] is the Grizzard's  \emph{attack} rating. This is the
-  likelihood  that your  Grizzard  will  hit and  cause  damage when  it
-  attacks a monster. Some Moves cause more damage than others.
-  
-\item[\texttt{DEF.}] is the Grizzard's  \emph{defend} rating. This is how
-  likely your Grizzard is to avoid being hurt by a monster's Move.
+When   you   press   button   \encircle{II},  you'll   also   see   your
+inventory items. Press button \encircle{II}  again to return to the game
+play screen.
 
-\item[\texttt{HP}]  is  the  Grizzard's  \emph{hit  points}  or  health.
-  When  monsters hit  your Grizzard,  this  value will  decrease. If  it
-  reaches zero, your game is over.
+While  viewing  your  inventory,  you  can  use  the  joystick  to  move
+a selection arrow under  an item. The name of the item  at which you are
+currently  pointing will  be  displayed  at the  bottom  of the  screen.
 
-\item[\texttt{MAX}]  is   the  Grizzard's  \emph{maximum   hit  points}.
-  Your Grizzard can gain more hit points up to this amount.
-  
-\end{description}
+Inventory items come in a few basic kinds:
 
-Each of  these statistics can  be raised up to  a maximum of  99 points.
-The Attack  rating, Defend  rating, or  Maximum Hit  Points may  go up
-a bit after each monster that you defeat. The more skilled your Grizzard
-becomes, the less often its levels will go up.
-
-If you are currently in a  combat encounter, there may be Status Effects
-that could change the effectiveness  of your Moves. These are \emph{not}
-displayed on the statistics screen.
-
-\section{Status Effects}\label{sec:StatusEffects}
-
-A move can affect its target with Status Effects. There are six possible
-Status Effects:
-
-\begin{description}
-\item[\texttt{SLEEP}] A  creature can not  move on their turn.  There is
-  a 50\% chance of waking up.
-\item[\texttt{ATK UP} / \texttt{ATK DN}] Raises or lowers the creature's
-  effective Attack rating.
-\item[\texttt{DEF UP} / \texttt{DEF DN}] Raises or lowers the creature's
-  effective Defend rating.
-\item[\texttt{MUDDLE}]  A  creature will  choose  its  moves at  random.
-  There is a 50\% chance of clearing its mind.
-\end{description}
-
-These status effects last only the duration of one battle.
-
-Also, these status effects cannot be  doubled up. For example: Once your
-attack has been raised, it cannot be raised further.
+\begin{itemize}
+\item  \textbf{Equipment items}  can be  equipped and  used in  the game
+  world.  For  example,  a  dagger,  sword,  or  hammer  are  equipment.
+  Press  button   \encircle{I}  to  equip   an  item  as   your  current
+  equipment item.
+\item \textbf{Shields}  can be equipped  and are effective  whenever you
+  are  \emph{not} using  an equipment  item, for  example, when  you are
+  standing still or walking. Press button \encircle{I} to equip a shield
+  as your current  shield. Press button \encircle{I}  again to de-select
+  that shield (and  use no shield).
+\item  \textbf{Clothing} may  have  different  properties. Press  button
+  \encircle{I} to wear a different article of clothing.
+\item \textbf{Usable items} can be used  once and then vanish. A healing
+  potion is  an example of a  usable item. Press button  \encircle{I} to
+  immediately use a usable item.
+\item \textbf{Quest  items} are items that  you hold on to,  to complete
+  your missions.  Keys are an example  of a quest item.  These items are
+  used automatically when  appropriate --- for example, when  you try to
+  open a locked door, if you have the key, it will unlock.
+\end{itemize}
 
 \section{Scoring}
 
@@ -463,7 +461,7 @@ The score earned can be increased by:
 
 \begin{itemize}
 \item \ldots{}playing  in Expert  mode (by  setting the  Left Difficulty
-  Switch to the ``A'' position)
+  Switch to the ``right'' position)
 \item \ldots{}defeating the larger version of a monster
 \item  \ldots{}playing the  game  in  New Game  Plus  mode after  having
   defeated the final boss.
