@@ -5,7 +5,7 @@
 SysRAMLow:
 
 PlayerNameLength:   .byte ?
-PlayerName:         .fill 8, ?
+PlayerName:         .fill 12, ?
 PlayerGender:       .byte ?
 PlayerSkinColor:    .byte ?
 PlayerHairColor:    .byte ?

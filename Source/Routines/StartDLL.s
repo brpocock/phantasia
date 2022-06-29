@@ -28,7 +28,7 @@ BuildDLL:
           .mvaw StringsTail, StringsStart
 GotPointers:
           lda ActiveDLL
-          eor # 1
+          eor #$80
           sta ActiveDLL
 
           lda # 233
