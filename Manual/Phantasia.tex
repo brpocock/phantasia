@@ -1,35 +1,31 @@
-%
+% 
 % Phantasia printable manual
-%
+% 
 % This needs a lot of work yet.
-%
+% 
 % If you're a human, skip to "\mainmatter" to skip over the preamble.
-%
+% 
 \documentclass[10pt,twocolumn,openany,article]{memoir}
 
+\ifdefined\ATARIAGESAVE
 \setstocksize{9in}{6in}
 \settrimmedsize{\stockheight}{\dimexpr 6in-15mm}{*}
+\else
+\setstocksize{11in}{8.5in}
+\settrimmedsize{\stockheight}{\dimexpr 8.5in-15mm}{*}
+\fi
 
-\setlrmarginsandblock{.5in}{1in}{*}
-\setulmarginsandblock{.75in}{1in}{*}
+\setlrmarginsandblock{.333333in}{.5in}{*}
+\setulmarginsandblock{.75in}{.75in}{*}
 \setheadfoot{.5in}{.5in}
-\checkandfixthelayout
+\widowpenalty=10000
+\clubpenalty=10000
 
+\makeevenhead{plain}{\textit{Phantasia}}{}{}
+\makeoddhead{plain}{}{}{\textit{Phantasia}}
 
-%% TV Standard
-
-\ifdefined\TVNTSC
-\newcommand\TV{NTSC}
-\newcommand\REGION{US, Canada, Mexico, the Carribbean, Brazil, and Japan}
-\else
-\ifdefined\TVPAL
-\newcommand\TV{PAL}
-\newcommand\REGION{UK and Europe}
-\else
-\error{Must define a TV standard}
-\fi
-\fi
-
+\makeevenfoot{plain}{\thepage}{}{}
+\makeoddfoot{plain}{}{}{\thepage}
 
 \usepackage[utf8]{inputenc}
 \usepackage{babel}
@@ -39,19 +35,19 @@
 \usepackage{pdfpages}
 \tolerance=1
 \emergencystretch=\maxdimen
-%\usepackage{tgtermes}
+% \usepackage{tgtermes}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \hypersetup{
-    colorlinks,
-    linkcolor={red!50!black},
-    citecolor={blue!50!black},
-    urlcolor={blue!80!black},
-    pdftitle={Phantasia \ifdefined\DEMO{ Demo }\fi Manual for \TV},
-    pdfsubject={Phantasia videogame for the Atari 7800},
-    pdfauthor={Bruce-Robert Pocock}%,
-%    pdfkeywords={Your PDF keywords}
-  }
+  colorlinks,
+  linkcolor={black},
+  citecolor={blue!50!black},
+  urlcolor={blue!80!black},
+  pdftitle={Phantasia \ifdefined\DEMO{ Demo }\fi Manual},
+  pdfsubject={Phantasia videogame for the Atari 7800},
+  pdfauthor={Bruce-Robert Pocock}%,
+  % pdfkeywords={Your PDF keywords}
+}
 \usepackage{caption}
 \captionsetup{labelformat=empty}
 
@@ -59,7 +55,10 @@
 
 \newcommand\encircle[1]{%
   \tikz[baseline=(X.base)] 
-  \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
+  \node (X) [draw, shape=circle, inner sep=.25pt] {#1};}
+
+\setlength{\columnsep}{.333333in}
+%% \setlength\columnseprule{.5pt}
 
 \usepackage{lettrine}
 \usepackage[protrusion=true,expansion=true]{microtype}
@@ -71,20 +70,27 @@
 \title{Phantasia \ifdefined\DEMO Demo \fi Player's Guide}
 \author{Bruce-Robert Pocock}
 
-%
-%
-%
+% 
+% 
+% 
 %%% BEGIN DOCUMENT
-%
-%
-%
+% 
+% 
+% 
 
 \begin{document}
-\frontmatter
-\includepdf[height=9in,width=6in,fitpaper=true]{../Manual/Cover.png}
 
+\frontmatter
 \thispagestyle{empty}
 
+\begin{tikzpicture}[overlay, remember picture]
+  \node[anchor=north west, xshift=-4pt, yshift=4pt] 
+  at (current page.north west)
+  {\includegraphics[interpolate,width=\paperwidth,height=\paperheight]{../Manual/Cover.png}}; 
+\end{tikzpicture}
+
+
+\thispagestyle{empty}
 
 \twocolumn[
 
@@ -144,21 +150,32 @@ requires a license.
 To play \textit{Phantasia}, you will need:
 
 \begin{itemize}
+
 \item An Atari console: the Atari ProSystem 7800, or Sears
   Tele-Games Video Arcade II
 \item A TV or video display
 \item A compatible two- or three-button joystick or gamepad (see WRITEME).
+
+  \ifdefined\ATARIAGESAVE
+\item Optional: an AtariVox device with speakers or headphones
+\item The \textiit{Phantasia} game cartridge
+  \else
 \item Optional,  but recommended:  A memory  device: an  AtariVox device
   with  (optional)  speakers or  headphones,  or  a MemCard  or  SaveKey
   device.
 \item A  multi-cart with the  \textit{Phantasia} data  on it such  as the
-  \textit{Concerto} cartridge
+  \textit{Concerto} cartridge or \textit{Dragonfly}
+  \fi
 \end{itemize}
 
 \begin{figure*}[b]
   \begin{center}
     \includegraphics[width=\columnwidth]{../Manual/AtariVox.jpeg}
+    \ifdefined\ATARIAGESAVE
+    \includegraphics[width=\columnwidth]{../Manual/Atari-7800.png}
+    \else
     \includegraphics[width=\columnwidth]{../Manual/SaveKey.jpeg}
+    \fi
   \end{center}
 \end{figure*}
 
@@ -180,7 +197,7 @@ facing  up)  into  the  cartridge  slot,  and  turn  the  \textbf{Power}
 
 There  are  three  main  kinds  of controllers  that  you  can  use  for
 \textit{Phantasia}. Your  gamepad or joystick \emph{must}  be plugged in
-\emph{before} you turn on the power, or it will not work correctly.
+\emph{before} you turn on the power, or it may not work correctly.
 
 First, you can  use an Atari ProLine joystick  or compatible controller.
 The left button will be button \encircle{I} and the right button will be
@@ -204,18 +221,20 @@ same as pressing the \textbf{Pause}  button on the console.
 
 \subsection{Pause Button}
 
-Press the  \textbf{Pause} button once  to pause  the game, and  again to
-resume  playing.
+Press the  \textbf{Pause} button (or  button \encircle{III} on  a Joy2b+
+gamepad) once to pause the game, and again to resume playing.
 
 \subsection{Select}
 
-While you  are playing the  game, you  can use the  \textbf{Select}
-button to access the game menu. See WRITEME for details.
+While you are  playing the game, you can use  the \textbf{Select} button
+to access the game  menu. See ``Game Menu'', page~\pageref{sec:GameMenu}
+for details.
 
 \subsection{Reset}
 
 While  you are  playing the  game,  press the  \textbf{Reset} button  to
-access the Save or Quit option. See WRITEME for details.
+access   the   Save   or   Quit    option.   See   ``Save   or   Quit'',
+page~\pageref{sec:SaveOrQuit} for details.
 
 \subsection{Difficulty Switches}
 
@@ -225,7 +244,7 @@ or Expert position). To protect your  game from being erased, set either
 one  of   the  Difficulty   Switches  to   the  ``left''   (Beginner  or
 Novice) position.
 
-The Difficulty Switches are located next to the controller ports.
+The Difficulty Switches are located between to the controller ports.
 
 \subsubsection*{Expert Mode}
 
@@ -239,7 +258,7 @@ defeating monsters while in the ``right'' position.
 \section{Start a Game}
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/Title\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/TitleNTSC.png}
 \end{center}
 
 Once  your console  is set  up and  everything is  connected, press  the
@@ -247,24 +266,27 @@ Once  your console  is set  up and  everything is  connected, press  the
 an AtariVox device, you'll also hear the title spoken.
 
 Press button  \encircle{II} to move to  the Select Slot screen.  If the
-second button on your controller does not seem to work, try turning the 
+second button on your controller does  not seem to work, try turning the
+\textbf{Power} off, make sure the controller is plugged in securely, and
+then turn the \textbf{Power} back on.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/SelectSlot\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/SelectSlotNTSC.png}
 \end{center}
 
-Press the  \textbf{ Select} switch or  move the joystick up  and down to
+Press the  \textbf{Select} switch or  move the  joystick up and  down to
 choose   a  memory   slot\ifdefined\ATARIAGESAVE\else\footnote{Technical
   Note: The Slot  number chosen here is relative to  the three save game
   slots used by the \textit{Phantasia} game program. Each save game slot
-  actually occupies 4  blocks on your memory device.}\fi  for your game.
+  actually occupies ?? blocks on  your memory device.}\fi for your game.
 There are three  memory slots possible. If someone has  already begun to
 play \textit{Phantasia} in  a certain slot, your screen  will show their
 name  and   avatar  (character).  If   a  slot  is  empty,   you'll  see
 ``\texttt{BEGIN}'' instead.
 
 If you have a password, you can enter it instead by moving to the bottom
-of the screen to PASSWORD and pressing button \encircle{I}. See WRITEME
+of   the  screen   to   PASSWORD  and   pressing  button   \encircle{I}.
+See ``Entering a Password,'' page~\pageref{sec:EnteringAPassword}.
 
 If someone has already \emph{won} the  game once, their name will appear
 with a crown. See New Game Plus, page~\pageref{sec:NewGamePlus}.
@@ -288,7 +310,7 @@ button \encircle{I}.
 \fi
 
 When you first  choose to begin a  new game, you'll create  an avatar to
-represent you in the world of Aclypt. 
+represent you in the world of Aclypt.
 
 First, enter  a name for  your new avatar.  Press forward to  select the
 next letter;  pull back to  select the  previous letter. Press  left and
@@ -298,7 +320,7 @@ pink. Press  button \encircle{I} to proceed.  Press button \encircle{II}
 to return to the \textbf{Select Slot} screen.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/NameEntry\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/NameEntryNTSC.png}
 \end{center}
 
 Next, you'll  get to create  your avatar (character). Push  the joystick
@@ -320,7 +342,7 @@ You can choose three attributes for your avatar.
 
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/ConfirmNewGame\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/ConfirmNewGameNTSC.png}
 \end{center}
 
 \fi
@@ -332,9 +354,20 @@ Aclypt. Refer  to the  map (back  cover of this  manual) for  some ideas
 about the  geography of Aclypt. Other  characters in the game  will also
 give you advice about places you can go and things you can do.
 
-The Map screen shows your current status at the top. In the map display,
-you'll see the  current area in which you are  traveling. Guide yourself
-using the joystick.
+The Map screen shows your current status at the top.
+
+\begin{itemize}
+\item The item which you currently  have equipped. This is the item that
+  you can use by pressing button \encircle{I}.
+\item The shield (if any) which you currently have equipped.
+\item The amount of gold and silver coins which you're carrying.
+\item The name of the area in which you are now.
+\item The amount of health that you  can have (the outline) and that you
+  currently do have (the area that is filled in).
+\end{itemize}
+
+Below the status  area is the map display, where  you'll see the current
+area in which you are traveling. Guide yourself using the joystick.
 
 To interact  with objects  like doors  and people, walk  up to  them and
 press button \encircle{I}.  Some items or characters may react
@@ -344,7 +377,7 @@ To   review  your   inventory,  statistics,   and  more,   press  button
 \encircle{II}.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/Map\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/MapNTSC.png}
 \end{center}
 
 \section{Saving Your Progress}
@@ -369,7 +402,7 @@ well.   After  you've   read  what   they   have  to   say,  press   the
 button \encircle{I} button.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/Text\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/TextNTSC.png}
 \end{center}
 
 Some people will want to know what you have to say, in return. If that's
@@ -377,7 +410,7 @@ the case,  you'll be given  a choice of  possible answers to  give them.
 Press forward or  back on the joystick to select  a response.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/Inquire\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/InquireNTSC.png}
 \end{center}
 
 If you want to  review what the person was asking,  you can press button
@@ -389,10 +422,6 @@ When you've made your selection, press button \encircle{I} to continue.
 
 Monsters and other enemies plague the world of Aclypt.
 
-\begin{figure*}[ht]
-  \includegraphics[width=2\columnwidth]{../Manual/CombatControls.png}
-\end{figure*}
-
 When you encounter monsters, you can  use your equipment such as weapons
 and other gear to defeat them.
 
@@ -401,7 +430,7 @@ WRITEME
 \section{Statistics}
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/StatsScreenshot\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/StatsScreenshotNTSC.png}
 \end{center}
 
 Some of  your character's information  is always  visible at the  top of
@@ -467,9 +496,9 @@ The score earned can be increased by:
   defeated the final boss.
 \end{itemize}
 
-The score for  defeating a monster will be increased  to 2\times for any
-one of these  factors, to 3\times for  any two of these  factors, and to
-4\times if all three are true.
+The score for  defeating a monster will be increased  to $2\times$ for any
+one of these  factors, to $3\times$ for  any two of these  factors, and to
+$4\times$ if all three are true.
 
 \section{Winning the Game}
 
@@ -492,7 +521,7 @@ continue, and it'll be just as if you'd never failed in the first place.
 You'll start over from the last Inn you visited, or your own home.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/GameOver\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/GameOverNTSC.png}
 \end{center}
 
 \section{Starting Over}\label{Starting Your Adventure Over}
@@ -500,30 +529,34 @@ You'll start over from the last Inn you visited, or your own home.
 If you want to erase your progress and start again, you must:
 
 \begin{itemize}
-\item Go  to the Select Slot  screen.
-\item  Set both  of  the  Difficulty Switches  on  your  console to  the
-  ``right'' (Advanced or Expert) position.
-\item  Pull down  on your  joystick  to select  \texttt{ERASE} from  the
-  bottom of the screen, and press button \encircle{I}.
-\item Push up and down on your joystick to select which slot you want to
-  erase, and press button \encircle{I}.
-\item Confirm your selection WRITEME
+\item Go  to the Select Slot  screen, and press \textbf{Game  Select} or
+  move  the joystick  left and  right until  you see  the slot  you want
+  to erase.
+\item Set both  of the Difficulty Switches on your  console to the ``right''
+  (Advanced or Expert) position.
+\item Pull  back on the  joystick, and \emph{while holding  the joystick
+    back} press \emph{and hold} the \textbf{Fire} button.
+\item If you're \emph{sure} you want to erase your game's progress, then
+  \emph{without}  letting  go  of  the \textbf{Fire}  button,  push  the
+  joystick  forward. \ifdefined\DEMO  Your  game record  will be  erased
+  \emph{immediately}. \fi
 \end{itemize}
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/EraseSlot\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/EraseSlotNTSC.png}
 \end{center}
 
 Make sure  you want to  erase your game.  Press the joystick  forward or
 back to make your choice, and press the \textbf{Fire} button.
 
 \begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/ConfirmErase\TV.png}
+  \includegraphics[width=\columnwidth]{../Manual/ConfirmEraseNTSC.png}
 \end{center}
 
 The Left  Difficulty Switch is also  used to increase the  difficulty of
-the game. After  erasing your progress, you may want  to return the Left
-Difficulty Switch to your desired position.
+the  game.  After  erasing  your  progress,  you  may  return  the  Left
+Difficulty  Switch  to  your  desired position.  (On  SECAM,  the  Right
+Difficulty Switch is used to pause the game.)
 
 \subsection{Protecting Your Game Record}
 
@@ -532,25 +565,28 @@ Novice) position, you can't erase a game slot.
 
 \subsection{Recovering an Erased Game}
 
-If you have just erased a game's  progress, and no one has started a new
-game using the same slot yet, you may be able to un-erase it.
+If you have \emph{just} erased a game's progress, and no one has started
+a new game using the same slot yet, you may be able to un-erase it.
 
 To recover  an erased game,  follow the same steps  as if you  wanted to
 erase  a game.  Press  left and  right  on the  joystick  to select  the
 now-empty  slot  (the  screen  will say  ``\texttt{BEGIN}'').  Set  both
-Difficulty Switches to the ``right'' (Advanced or Export) position, pull
+Difficulty Switches to the ``right'' (Advanced or Expert) position, pull
 back  on  the joystick,  and  \emph{while  holding  it back},  hold  the
 \textbf{Fire} button.
 
 If your  game's progress can be  recovered, you'll see that  the slot is
-\texttt{ERASED} and you should also see your name appear. To recover the
-game's progress, press forward on the joystick. The game will immediately
-become available to resume.
+\texttt{ERASED} with your name. Press  forward on the joystick. The game
+will immediately become available to resume.
 
-Note that it  is \emph{not possible} to recover a  saved game's progress
-once  a new  game has  been  started in  the  same memory  slot. If  you
-accidentally start  a new game,  but have  not confirmed your  name yet,
-\emph{turn off the power briefly}, then try the recovery steps above.
+It is \emph{not possible} to recover  a saved game's progress once a new
+game has been started in the same memory slot. If you accidentally start
+a new  game, but have  not confirmed your  name yet, \emph{turn  off the
+  power briefly}, then try the recovery steps above.
+
+\chapter{Exploring Aclypt}
+
+\chapter{Weapons and Items}
 
 \columnbreak
 \chapter{Monsters}
@@ -577,35 +613,33 @@ On the title  screen, you'll hear the AtariVox announce  the name of the
 game. If  you don't, make  sure that the  AtariVox is connected  and the
 speakers (or headphones) are connected, powered on, and turned up.
 
-Naturally,  there are  no  voices  when playing  \ifdefined\ATARIAGESAVE
-without an AtariVox device. \else with a MemCard or SaveKey device. \fi
+Naturally,  there are  no  voices  when playing without an AtariVox device. 
 
 \pagebreak
 \chapter{Credits}
 
-{\small
 
-  The \textit{Phantasia}  videogame software, including  its audiovisual
-  components  and   this  manual,   are  copyright   \copyright{}  2022,
-  Bruce-Robert  Pocock.  All  Rights  are  Reserved  except  as  granted
-  under license.
-
-\begin{itemize}
-\item Bruce-Robert Pocock --- Programming, Manual text, Graphics,
-  Sound effects
-\end{itemize}
+\textit{Phantasia} was created by Bruce-Robert  Pocock. 
 
 \bigskip
 
 
 \subsection{Testers}
 
-}
-
 \vfill
+
+
+\begin{center}
+  \includegraphics[width=.333\columnwidth]{../Manual/BRP.png}
+\end{center}
 
 \clearpage
 \addcontentsline{toc}{chapter}{Map of Aclypt}
-%%\includepdf[height=9in,width=6in,fitpaper=true]{../Manual/AclyptMap.png}
+\thispagestyle{empty}
+\begin{tikzpicture}[overlay, remember picture]
+  \node[anchor=north west, xshift=-4pt, yshift=4pt] 
+  at (current page.north west)
+  {\includegraphics[interpolate,width=\paperwidth,height=\paperheight]{../Manual/AclyptMap.png}};
+\end{tikzpicture}
 
 \end{document}
