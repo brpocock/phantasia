@@ -6,8 +6,8 @@ publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 	@until rsync -essh --progress \
 		Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78 \
 		Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78 \
-		Dist/Phantasia.NTSC.pdf Dist/Phantasia.PAL.pdf \
-		Dist/Phantasia.Demo.NTSC.pdf Dist/Phantasia.Demo.PAL.pdf \
+		Dist/Phantasia.pdf \
+		Dist/Phantasia.Demo.pdf \
 		Dist/Phantasia.zip Dist/Phantasia.Demo.zip \
 		Dist/Phantasia.AtariAge.zip \
 		star-hope.org:star-hope.org/games/Phantasia/ ; \
@@ -18,10 +18,10 @@ game:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78
 demo:	Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78
 
 Dist/Phantasia.zip:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78 \
-		Dist/Phantasia.NTSC.pdf Dist/Phantasia.PAL.pdf
+		Dist/Phantasia.pdf
 
 Dist/Phantasia.Demo.zip:	Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78 \
-		Dist/Phantasia.Demo.NTSC.pdf Dist/Phantasia.Demo.PAL.pdf
+		Dist/Phantasia.Demo.pdf 
 
 USBMOUNT=$(shell echo \"$$(mount | grep /run/media/$$USER | grep vfat | head -n 1 | \
 		perl -pne 's#^/dev/.+ on (.+) type vfat (.*)#$$1#g')\")
@@ -37,12 +37,8 @@ concerto:	Dist/Phantasia.NTSC.a78 \
 	  echo "Patch Makefile for your $$(uname -s) OS" ; \
 	fi
 
-doc:	Dist/Phantasia.NTSC.pdf \
-	Dist/Phantasia.PAL.pdf \
-	Dist/Phantasia.Demo.NTSC.pdf \
-	Dist/Phantasia.Demo.PAL.pdf \
-	Dist/Phantasia.Demo.NTSC.pdf \
-	Dist/Phantasia.Demo.PAL.pdf
+doc:	Dist/Phantasia.pdf \
+	Dist/Phantasia.Demo.pdf \
 
 .PRECIOUS: %.s %.png %.a26 %.txt %.zip %.tar.gz
 
@@ -65,51 +61,29 @@ Source/Generated/Makefile:	bin/write-master-makefile ${SOURCES}
 	mkdir -p Source/Generated
 	$< > Source/Generated/Makefile
 
-Dist/Phantasia.NTSC-book.pdf:	Dist/Phantasia.AA.NTSC.pdf
+Dist/Phantasia-book.pdf:	Dist/Phantasia.AA.pdf
 	pdfbook2 --paper=letterpaper -o 0 -i 0 -t 0 -b 0 $<
 
-Dist/Phantasia.PAL-book.pdf:	Dist/Phantasia.AA.PAL.pdf
-	pdfbook2 --paper=letterpaper -o 0 -i 0 -t 0 -b 0 $<
-
-Dist/Phantasia.NTSC.pdf: Manual/Phantasia.tex
+Dist/Phantasia.pdf: Manual/Phantasia.tex
 	mkdir -p Object/NTSC.pdf
 	cp $< Object/NTSC.pdf/
 	ln -sf ../Manual Object/
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\TVNTSC{}\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\TVNTSC{}\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\TVNTSC{}\input{Phantasia}"
+	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\input{Phantasia}"
+	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\input{Phantasia}"
+	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\input{Phantasia}"
 	mkdir -p Dist
-	mv Object/NTSC.pdf/Phantasia.pdf Dist/Phantasia.NTSC.pdf
+	mv Object/NTSC.pdf/Phantasia.pdf Dist/Phantasia.pdf
 
-Dist/Phantasia.PAL.pdf: Manual/Phantasia.tex
-	mkdir -p Object/PAL.pdf
-	cp $< Object/PAL.pdf/
-	ln -sf ../Manual Object/
-	-cd Object/PAL.pdf ; xelatex -interaction=batchmode "\def\TVPAL{}\input{Phantasia}"
-	-cd Object/PAL.pdf ; xelatex -interaction=batchmode "\def\TVPAL{}\input{Phantasia}"
-	-cd Object/PAL.pdf ; xelatex -interaction=batchmode "\def\TVPAL{}\input{Phantasia}"
-	mkdir -p Dist
-	mv Object/PAL.pdf/Phantasia.pdf Dist/Phantasia.PAL.pdf
-
-Dist/Phantasia.Demo.NTSC.pdf: Manual/Phantasia.tex
+Dist/Phantasia.Demo.pdf: Manual/Phantasia.tex
 	mkdir -p Object/NTSC.pdf
 	cp $< Object/NTSC.pdf/
 	ln -sf ../Manual Object/
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\TVNTSC{}\def\DEMO{}\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\TVNTSC{}\def\DEMO{}\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\TVNTSC{}\def\DEMO{}\input{Phantasia}"
+	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
+	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
+	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
 	mkdir -p Dist
-	mv Object/NTSC.pdf/Phantasia.pdf Dist/Phantasia.Demo.NTSC.pdf
+	mv Object/NTSC.pdf/Phantasia.pdf Dist/Phantasia.Demo.pdf
 
-Dist/Phantasia.Demo.PAL.pdf: Manual/Phantasia.tex
-	mkdir -p Object/PAL.pdf
-	cp $< Object/PAL.pdf/
-	ln -sf ../Manual Object/
-	-cd Object/PAL.pdf ; xelatex -interaction=batchmode "\def\TVPAL{}\def\DEMO{}\input{Phantasia}"
-	-cd Object/PAL.pdf ; xelatex -interaction=batchmode "\def\TVPAL{}\def\DEMO{}\input{Phantasia}"
-	-cd Object/PAL.pdf ; xelatex -interaction=batchmode "\def\TVPAL{}\def\DEMO{}\input{Phantasia}"
-	mkdir -p Dist
-	mv Object/PAL.pdf/Phantasia.pdf Dist/Phantasia.Demo.PAL.pdf
 
 # If Make tries to second-guess us, let the default assembler be “error,”
 # because the default assembler (probably GNU gas) almost certainly
@@ -154,7 +128,7 @@ release:	all
 	-rm Dist/$(RELEASE)/*
 	-cp -v Dist/Phantasia.{Demo.,}{NTSC,PAL}.{a78,pdf} \
 		Dist/$(RELEASE) 2>/dev/null
-	cp -v Dist/Phantasia.{NTSC,PAL}-book.pdf Dist/$(RELEASE)
+	cp -v Dist/Phantasia-book.pdf Dist/$(RELEASE)
 	@cd Dist/$(RELEASE) ; \
 	for file in Phantasia.*.{a78,pdf}; do \
 		mv -v $$file $$(echo $$file | perl -pne 's(Phantasia\.(.+)\.(pdf|a78)) (Phantasia.\1.$(RELEASE).\2)'); \
