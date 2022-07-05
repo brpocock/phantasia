@@ -48,6 +48,16 @@ for my $tv (qw(NTSC PAL)) {
 \tbin/7800sign -w \$\@
 \tbin/7800header -f Source/header.demo.$tv.script \$\@\n\n";
 
+  print "\n\nDist/Phantasia.AA.$tv.a78:\t";
+  for my $bank (@banks) {
+    print "\\\n\tObject/Bank$bank.AA.$tv.o ";
+  }
+  print "
+\tmkdir -p Dist
+\tcat \$^ > \$\@
+\tbin/7800sign -w \$\@
+\tbin/7800header -f Source/header.AA.$tv.script \$\@\n\n";
+
   print "\n\nDist/Phantasia.$tv.a78:\t";
   for my $bank (@banks) {
     print "\\\n\tObject/Bank$bank.$tv.o ";
@@ -210,10 +220,21 @@ for my $tv (qw(NTSC PAL)) {
     for my $file (@files) {
       print "\\\n\t$file";
     }
+
     print "
 \tmkdir -p Object
 \t\${AS7800} -DTV=$tv \\
-\t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n";
+\t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n\n";
+
+    print "Object/Bank$bank.AA.$tv.o:\t";
+    for my $file (@files) {
+      print "\\\n\t$file";
+    }
+
+    print "
+\tmkdir -p Object
+\t\${AS7800} -DTV=$tv -DATARIAGE\\
+\t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n\n";
 
     unless (any { $_ eq $bank } @demobanks) {
       next;
@@ -226,7 +247,7 @@ for my $tv (qw(NTSC PAL)) {
     print "
 \tmkdir -p Object
 \t\${AS7800} -DTV=$tv -DDEMO=true \\
-\t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n";
+\t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n\n";
 
   } # end of bank
 } #end of TV

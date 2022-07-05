@@ -15,7 +15,7 @@ publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 		star-hope.org:star-hope.org/games/Phantasia/ ; \
 	do sleep 1; done
 
-atariage:	Dist/Phantasia.AA.NSTC.a78 Dist/Phantasia.AA.PAL.a78 \
+atariage:	Dist/Phantasia.AA.NTSC.a78 Dist/Phantasia.AA.PAL.a78 \
 		Dist/Phantasia.AA.pdf
 
 game:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78
@@ -56,6 +56,12 @@ Dist/Phantasia.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 
 Dist/Phantasia.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.PAL.a78
+
+Dist/Phantasia.AA.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.AA.NTSC.a78
+
+Dist/Phantasia.AA.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.AA.PAL.a78
 
 Dist/Phantasia.Demo.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.Demo.NTSC.a78
