@@ -7,7 +7,7 @@
 % 
 \documentclass[10pt,twocolumn,openany,article]{memoir}
 
-\ifdefined\ATARIAGESAVE
+\ifdefined\ATARIAGE
 \setstocksize{9in}{6in}
 \settrimmedsize{\stockheight}{\dimexpr 6in-15mm}{*}
 \else
@@ -30,7 +30,6 @@
 \usepackage[utf8]{inputenc}
 \usepackage{babel}
 \usepackage{stfloats}
-\usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{pdfpages}
 \tolerance=1
@@ -61,7 +60,6 @@
 %% \setlength\columnseprule{.5pt}
 
 \usepackage{lettrine}
-\usepackage[protrusion=true,expansion=true]{microtype}
 \fontfamily{pnc}
 \chapterstyle{komalike}
 
@@ -110,9 +108,8 @@ Copyright \copyright{} 2022, Bruce-Robert Pocock
 
 \bigskip
 
-This  version is  for systems  in \REGION{}  using the  \TV{} television
-standard. For Atari ProSystem 7800 (or Sears Tele-Games Video Arcade II)
-with an optional AtariVox, MemCard, or SaveKey device.
+For Atari ProSystem  7800 (or Sears Tele-Games Video Arcade  II) with an
+optional AtariVox, MemCard, or SaveKey device.
 
 \bigskip
 
@@ -156,7 +153,7 @@ To play \textit{Phantasia}, you will need:
 \item A TV or video display
 \item A compatible two- or three-button joystick or gamepad (see WRITEME).
 
-  \ifdefined\ATARIAGESAVE
+  \ifdefined\ATARIAGE
 \item Optional: an AtariVox device with speakers or headphones
 \item The \textiit{Phantasia} game cartridge
   \else
@@ -170,12 +167,9 @@ To play \textit{Phantasia}, you will need:
 
 \begin{figure*}[b]
   \begin{center}
-    \includegraphics[width=\columnwidth]{../Manual/AtariVox.jpeg}
-    \ifdefined\ATARIAGESAVE
-    \includegraphics[width=\columnwidth]{../Manual/Atari-7800.png}
-    \else
-    \includegraphics[width=\columnwidth]{../Manual/SaveKey.jpeg}
-    \fi
+    \includegraphics[width=.6667\columnwidth]{../Manual/AtariVox.jpeg}
+    \includegraphics[width=.6667\columnwidth]{../Manual/SaveKey.jpeg}
+    \includegraphics[width=.6667\columnwidth]{../Manual/Atari-7800.jpeg}
   \end{center}
 \end{figure*}
 
@@ -187,12 +181,6 @@ Finally, insert  the \textit{Phantasia}  game cartridge (with  the label
 facing  up)  into  the  cartridge  slot,  and  turn  the  \textbf{Power}
 \textbf{on}.
 
-\begin{figure}[h]
-  \begin{center}
-    \includegraphics[width=\columnwidth]{../Manual/Atari-7800.png}
-  \end{center}
-\end{figure}
-
 \section{Compatible Controllers}
 
 There  are  three  main  kinds  of controllers  that  you  can  use  for
@@ -203,10 +191,10 @@ First, you can  use an Atari ProLine joystick  or compatible controller.
 The left button will be button \encircle{I} and the right button will be
 button \encircle{II}.
 
-Secondly, you  can use a  SEGA \ifdefined\TVNTSC{Genesis/}\fi{}MegaDrive
-gamepad  (or other  compatible controller)  may  also be  used. Use  the
-\encircle{B} button as button  \encircle{I}. Use the \encircle{C} button
-as  button  \encircle{II}. 
+Secondly,  you  can  use  a SEGA  Genesis/MegaDrive  gamepad  (or  other
+compatible controller) may also be  used. Use the \encircle{B} button as
+button   \encircle{I}.   Use   the   \encircle{C}   button   as   button
+\encircle{II}.
 
 Third,  you  can  use  a  Joy2b+  controller.  Button  \encircle{I}  and
 \encircle{II} will work as expected. Button \encircle{III} will work the
@@ -214,7 +202,7 @@ same as pressing the \textbf{Pause}  button on the console.
 
 \vfill
 
-\columnbreak
+\pagebreak
 \chapter{How To Play}
 
 \section{Console Controls}
@@ -257,10 +245,6 @@ defeating monsters while in the ``right'' position.
 
 \section{Start a Game}
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/TitleNTSC.png}
-\end{center}
-
 Once  your console  is set  up and  everything is  connected, press  the
 \textbf{Power} button. You'll  see the title screen appear.  If you have
 an AtariVox device, you'll also hear the title spoken.
@@ -270,12 +254,8 @@ second button on your controller does  not seem to work, try turning the
 \textbf{Power} off, make sure the controller is plugged in securely, and
 then turn the \textbf{Power} back on.
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/SelectSlotNTSC.png}
-\end{center}
-
 Press the  \textbf{Select} switch or  move the  joystick up and  down to
-choose   a  memory   slot\ifdefined\ATARIAGESAVE\else\footnote{Technical
+choose   a  memory   slot\ifdefined\ATARIAGE\else\footnote{Technical
   Note: The Slot  number chosen here is relative to  the three save game
   slots used by the \textit{Phantasia} game program. Each save game slot
   actually occupies ?? blocks on  your memory device.}\fi for your game.
@@ -319,10 +299,6 @@ characters for your  name. After eight characters, the  cursor will turn
 pink. Press  button \encircle{I} to proceed.  Press button \encircle{II}
 to return to the \textbf{Select Slot} screen.
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/NameEntryNTSC.png}
-\end{center}
-
 Next, you'll  get to create  your avatar (character). Push  the joystick
 forward or pull back to move between selections on the screen. Press the
 button \encircle{I} button to edit a selection, then use the joystick to
@@ -340,10 +316,6 @@ You can choose three attributes for your avatar.
   your avatar's skin from among the colors shown.
 \end{itemize}
 
-
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/ConfirmNewGameNTSC.png}
-\end{center}
 
 \fi
 
@@ -376,10 +348,6 @@ to you simply walking up to them, as well.
 To   review  your   inventory,  statistics,   and  more,   press  button
 \encircle{II}.
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/MapNTSC.png}
-\end{center}
-
 \section{Saving Your Progress}
 
 The game is automatically saved to your memory device whenever you sleep
@@ -401,17 +369,9 @@ an AtariVox  connected, you'll hear  what they have  to say out  loud as
 well.   After  you've   read  what   they   have  to   say,  press   the
 button \encircle{I} button.
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/TextNTSC.png}
-\end{center}
-
 Some people will want to know what you have to say, in return. If that's
 the case,  you'll be given  a choice of  possible answers to  give them.
 Press forward or  back on the joystick to select  a response.
-
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/InquireNTSC.png}
-\end{center}
 
 If you want to  review what the person was asking,  you can press button
 \encircle{II} to ask them to repeat themself instead.
@@ -428,10 +388,6 @@ and other gear to defeat them.
 WRITEME
 
 \section{Statistics}
-
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/StatsScreenshotNTSC.png}
-\end{center}
 
 Some of  your character's information  is always  visible at the  top of
 the screen. To view more, press button \encircle{II}.
@@ -520,10 +476,6 @@ If  you fail  in  your mission,  your  game is  over.  However, you  can
 continue, and it'll be just as if you'd never failed in the first place.
 You'll start over from the last Inn you visited, or your own home.
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/GameOverNTSC.png}
-\end{center}
-
 \section{Starting Over}\label{Starting Your Adventure Over}
 
 If you want to erase your progress and start again, you must:
@@ -542,16 +494,8 @@ If you want to erase your progress and start again, you must:
   \emph{immediately}. \fi
 \end{itemize}
 
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/EraseSlotNTSC.png}
-\end{center}
-
 Make sure  you want to  erase your game.  Press the joystick  forward or
 back to make your choice, and press the \textbf{Fire} button.
-
-\begin{center}
-  \includegraphics[width=\columnwidth]{../Manual/ConfirmEraseNTSC.png}
-\end{center}
 
 The Left  Difficulty Switch is also  used to increase the  difficulty of
 the  game.  After  erasing  your  progress,  you  may  return  the  Left
@@ -588,10 +532,10 @@ a new  game, but have  not confirmed your  name yet, \emph{turn  off the
 
 \chapter{Weapons and Items}
 
-\columnbreak
+\pagebreak
 \chapter{Monsters}
 
-\columnbreak
+\pagebreak
 \chapter{Troubleshooting}
 
 \section{Sad Face Screen}

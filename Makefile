@@ -4,14 +4,19 @@ all:	game demo doc
 
 publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 	@until rsync -essh --progress \
+		Dist/Phantasia.AA.NTSC.a78 Dist/Phantasia.AA.PAL.a78 \
 		Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78 \
 		Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78 \
+		Dist/Phantasia.AA.pdf \
 		Dist/Phantasia.pdf \
 		Dist/Phantasia.Demo.pdf \
 		Dist/Phantasia.zip Dist/Phantasia.Demo.zip \
 		Dist/Phantasia.AtariAge.zip \
 		star-hope.org:star-hope.org/games/Phantasia/ ; \
 	do sleep 1; done
+
+atariage:	Dist/Phantasia.AA.NSTC.a78 Dist/Phantasia.AA.PAL.a78 \
+		Dist/Phantasia.AA.pdf
 
 game:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78
 
@@ -38,7 +43,8 @@ concerto:	Dist/Phantasia.NTSC.a78 \
 	fi
 
 doc:	Dist/Phantasia.pdf \
-	Dist/Phantasia.Demo.pdf \
+	Dist/Phantasia.AA.pdf \
+	Dist/Phantasia.Demo.pdf
 
 .PRECIOUS: %.s %.png %.a26 %.txt %.zip %.tar.gz
 
@@ -65,24 +71,34 @@ Dist/Phantasia-book.pdf:	Dist/Phantasia.AA.pdf
 	pdfbook2 --paper=letterpaper -o 0 -i 0 -t 0 -b 0 $<
 
 Dist/Phantasia.pdf: Manual/Phantasia.tex
-	mkdir -p Object/NTSC.pdf
-	cp $< Object/NTSC.pdf/
+	mkdir -p Object/pdf
+	cp $< Object/pdf/
 	ln -sf ../Manual Object/
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\input{Phantasia}"
+	-cd Object/pdf ; xelatex -interaction=batchmode Phantasia
+	-cd Object/pdf ; xelatex -interaction=batchmode Phantasia
+	-cd Object/pdf ; xelatex -interaction=batchmode Phantasia
 	mkdir -p Dist
-	mv Object/NTSC.pdf/Phantasia.pdf Dist/Phantasia.pdf
+	mv Object/pdf/Phantasia.pdf Dist/Phantasia.pdf
+
+Dist/Phantasia.AA.pdf: Manual/Phantasia.tex
+	mkdir -p Object/AA.pdf
+	cp $< Object/AA.pdf/
+	ln -sf ../Manual Object/
+	-cd Object/AA.pdf ; xelatex -interaction=batchmode "\def\ATARIAGE{}\input{Phantasia}"
+	-cd Object/AA.pdf ; xelatex -interaction=batchmode "\def\ATARIAGE{}\input{Phantasia}"
+	-cd Object/AA.pdf ; xelatex -interaction=batchmode "\def\ATARIAGE{}\input{Phantasia}"
+	mkdir -p Dist
+	mv Object/AA.pdf/Phantasia.pdf Dist/Phantasia.AA.pdf
 
 Dist/Phantasia.Demo.pdf: Manual/Phantasia.tex
-	mkdir -p Object/NTSC.pdf
-	cp $< Object/NTSC.pdf/
+	mkdir -p Object/Demo.pdf
+	cp $< Object/Demo.pdf/
 	ln -sf ../Manual Object/
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
-	-cd Object/NTSC.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
+	-cd Object/Demo.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
+	-cd Object/Demo.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
+	-cd Object/Demo.pdf ; xelatex -interaction=batchmode "\def\DEMO{}\input{Phantasia}"
 	mkdir -p Dist
-	mv Object/NTSC.pdf/Phantasia.pdf Dist/Phantasia.Demo.pdf
+	mv Object/Demo.pdf/Phantasia.pdf Dist/Phantasia.Demo.pdf
 
 
 # If Make tries to second-guess us, let the default assembler be “error,”
@@ -133,6 +149,10 @@ release:	all
 	for file in Phantasia.*.{a78,pdf}; do \
 		mv -v $$file $$(echo $$file | perl -pne 's(Phantasia\.(.+)\.(pdf|a78)) (Phantasia.\1.$(RELEASE).\2)'); \
 	done
+	@echo "AtariAge Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
+		(cd Dist; zip --archive-comment -9 \
+		$(RELEASE)/Phantasia.AtariAge.$(RELEASE).zip \
+		$(RELEASE)/Phantasia.AA>{NTSC,PAL,SECAM}.$(RELEASE).{a78,pdf} )
 	@echo "Public Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.$(RELEASE).zip \
