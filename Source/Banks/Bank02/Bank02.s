@@ -14,8 +14,10 @@ BankEntry:
 Maps:
           .word Map_Atsirav
           .word Map_Onetsur
-          
-          .include "Atsirav.s"
-          .include "Onetsur.s"
+
+Map_Atsirav:
+          .binary "Atsirav.deflate"
+Map_Onetsur:
+          .binary "Onetsur.deflate"
 
           .include "EndBank.s"

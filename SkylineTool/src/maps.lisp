@@ -592,13 +592,38 @@ after considering ~:d option~:p."
   (remove-if-not (lambda (el) (equal element (car el)))
                  (subseq xml 2)))
 
+(defun write-word (number stream)
+  (write-byte (logand number #xff) stream)
+  (write-byte (ash (logand number #xff00) -8) stream))
+
+(defun write-byte-vector (vector stream)
+  (loop for byte across vector
+        do (write-byte byte stream)))
+
+(defun minifont-char (char)
+  (let ((code (char-code char))
+        (punc " ,.?!/&+-×÷=“”’':;…☿♀⊕♂©•↑↓←→"))
+    (cond
+      ((char<= #\0 char #\9) (- code (char-code #\0)))
+      ((char<= #\a char #\z) (+ #x0a (- code (char-code #\a))))
+      ((char<= #\A char #\Z) (+ #x0a (- code (char-code #\A))))
+      ((position char punc) (+ #x24 (position char punc)))
+      (t (error "Can't encode in minifont character ~:c (~@c)" char char)))))
+
+(defun minifont-encode (string)
+  (let ((vector (make-array (list (length string)) :element-type '(unsigned-byte 8))))
+    (loop for char across string
+          for i from 0
+          do (setf (aref vector i) (minifont-char char)))
+    vector))
+
 (defun compile-map (pathname)
-  (with-open-file (*standard-output* 
-                   (make-pathname :defaults pathname
-                                  :directory '(:relative "Source/Generated/Maps/")
-                                  :type "s")
-                   :direction :output
-                   :if-exists :supersede)
+  (with-output-to-file (bin
+                        (make-pathname :defaults pathname
+                                       :directory '(:relative "Source/Generated/Maps/")
+                                       :type "bin")
+                        :element-type '(unsigned-byte 8)
+                        :if-exists :supersede)
     (format *trace-output* "~&Loading tile map from ~a" pathname)
     (let ((xml (xmls:parse-to-list (alexandria:read-file-into-string pathname))))
       (assert (equal "map" (car xml)))
@@ -622,8 +647,6 @@ after considering ~:d option~:p."
                          (> (map-layer-depth (first layers)) (map-layer-depth (second layers)))))
             (setf layers (reversef layers))))
         (assert (<= 0 (length object-groups) 1))
-        (format t ";;; This is a generated file.~%;;; Source file: ~a~2%" pathname)
-        (format t "Map_~a:     .block" (pathname-base-name pathname))
         (let ((base-tileset (first tilesets))
               (objects (first object-groups)))
           (format *trace-output* "~&Parsing map layers…")
@@ -632,60 +655,48 @@ after considering ~:d option~:p."
             (let ((width (array-dimension tile-grid 0))
                   (height (array-dimension tile-grid 1)))
               (assert (<= (* width height) 1024))
-              (format *trace-output* "~&Found grid ~d×~d tiles, ~
-~d unique attribute~:p, ~d sprite~:p, ~d unique exit~:p"
-                      width height
-                      (length attributes-table) (length sprites-table)
-                      (length exits-table))
-              (format t "~2%;;; Tile grid — ~d × ~d tiles
-GridSize:     
-Width:    .byte ~d
-Height:    .byte ~d" 
-                      width height width height)
-              (format t "~2%;;; Pointers into grid data:
-Pointers:
-     .word Art
-     .word TileAttributes
-     .word Attributes
-     .word Sprites
-     .word Exits")
-              (format t "~2%;;; Display name of locale
-           .enc \"minifont\"
-Name:     .ptext \"~a\"" 
-                      (let ((name (concatenate 'string (string-downcase (cl-change-case:sentence-case (pathname-base-name pathname))))))
-                        (subseq name 0 (min 20 (length name)))))
-              (format t "~2%Art:     ;; Tile art")
-              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
-                (dotimes (y height)
-                  #+ (or) (fresh-line *trace-output*)
-                  (dotimes (x width)
-                    (let ((cell (aref tile-grid x y 0)))
-                      #+ (or) (format *trace-output* "~2,'0x " cell)
-                      (setf (aref string (+ (* width y) x)) cell))))
-                (hex-dump-comment string)
-                (let ((compressed (rle-compress string)))
-                  (format t "~&     .word $~4,'0x" (length compressed))
-                  (hex-dump-bytes compressed)))
-              (format t "~2%TileAttributes:     ;; Tile attributes indices")
-              (let ((string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
-                (dotimes (y height)
-                  (dotimes (x width)
-                    (setf (aref string (+ (* width y) x)) (aref tile-grid x y 1))))
-                (hex-dump-comment string)
-                (let ((compressed (rle-compress string)))
-                  (format t "~&     .word $~4,'0x" (length compressed))
-                  (hex-dump-bytes compressed)))
-              (format t "~2%Attributes:     ;; Tile attributes table~&     .byte ~d" (length attributes-table))
+              (format t "~&Writing output binary data (uncompressed)…")
+              (write-byte width bin)
+              (write-byte height bin)
+              (let ((name (concatenate 'string (string-downcase
+                                                (cl-change-case:sentence-case 
+                                                 (pathname-base-name pathname))))))
+                (when (> (length name) 20)
+                  (error "Place name length is too long: “~a”" name))
+                
+                (write-word (+ 3 (length name)) bin) ; offset of start of art array
+                (write-word (+ 3 (length name) (* width height)) bin); offset of start of tile attributes array
+                (write-word (+ 3 (length name) (* 2 width height)) bin)                                        ; attributes list start
+                (write-word (+ 3 (length name) (* 2 width height)
+                               (* 6 (length attributes-table)))
+                            bin); sprites list start
+                (write-word (+ 3 (length name) (* 2 width height)
+                               (* 6 (length attributes-table))
+                               (* 6 (length sprites-table))); TODO size of spr tab entry
+                            bin); exits table start
+                
+                (write-byte (length name) bin)
+                (write-byte-vector (minifont-encode name) bin)
+                
+                (let ((art-string (make-array (list (* width height)) :element-type '(unsigned-byte 8)))
+                      (attr-string (make-array (list (* width height)) :element-type '(unsigned-byte 8))))
+                  (dotimes (y height)
+                    #+ (or) (fresh-line *trace-output*)
+                    (dotimes (x width)
+                      (let ((cell (aref tile-grid x y 0)))
+                        #+ (or) (format *trace-output* "~2,'0x " cell)
+                        (setf (aref art-string (+ (* width y) x)) cell
+                              (aref attr-string (+ (* width y) x)) (aref tile-grid x y 1)))))
+                  (write-byte-vector art-string bin)
+                  (write-byte-vector attr-string bin)))
+              
               (dolist (attr attributes-table)
-                (hex-dump-bytes attr))
-              (format t "~2%Sprites:     ;; Sprites table~&     .byte ~d" (length sprites-table))
+                (write-byte-vector attr bin))
               (dolist (sprite sprites-table)
-                (hex-dump-bytes sprite))
-              (format t "~2%Exits:     ;; Exit destination pointers~&     .byte ~d" (length exits-table))
+                (write-byte-vector sprite bin))
               (dolist (exit exits-table)
-                (hex-dump-bytes exit))))))
-      (format t "~2&      .bend")
-      (fresh-line))))
+                (write-byte-vector exit bin))))))))
+  (format t "~&Done with compile-map operation~%"))
 
 (defun rip-tiles-from-tileset (tileset images)
   (let ((i 0))

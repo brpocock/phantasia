@@ -146,7 +146,7 @@ for my $tv (qw(NTSC PAL)) {
         } elsif ('deflate' eq $ext) {
           print "$genrdir/$base.deflate:\t$genrdir/$base.bin\\
 \t\tbin/zopfli
-\tbin/zopfli --deflate --i1000 -v -c \$< > \$\@
+\tbin/zopfli --deflate --i1000 -c \$< > \$\@
 \n\n";
         } elsif ('midi' eq $ext) {
           next if $rules{ $path };
@@ -176,10 +176,14 @@ for my $tv (qw(NTSC PAL)) {
         } elsif ('tmx' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
-          print "$genrdir/$base.s:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.tsx $bankdir/*.png)
+          print "
+$genrdir/$base.deflate:\t$genrdir/$base.bin bin/zopfli
+\tbin/zopfli --deflate --i1000 -c \$< > \$\@
+
+$genrdir/$base.bin:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.tsx $bankdir/*.png)
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-map \$<\n\n";
-          push @files => "$genrdir/$base.s";
+          push @files => "$genrdir/$base.deflate";
         } elsif ('tsx' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
@@ -200,7 +204,6 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
-              push @todo => "Source/Generated/Maps/$dep.s";
             } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
               if ($bank ne 'Common' and $bank ne 'Maps') {
@@ -212,10 +215,12 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Common/$dep";
               push @todo => "Source/Routines/$dep";
               push @todo => "Source/Generated/Common/$dep.bin";
+              push @todo => "Source/Generated/Maps/$dep.bin";
             } elsif ($line =~ /\.binary "(.+)\.deflate"/) {
               my $dep = $1;
               push @todo => "$genrdir/$dep.bin";
-              push @todo => "Source/Generated/Common/$dep.bin";
+              push @todo => "Source/Generated/Common/$dep.deflate";
+              push @todo => "Source/Generated/Maps/$dep.deflate";
             }
           }
           close $text;
