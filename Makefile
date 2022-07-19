@@ -12,6 +12,7 @@ publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 		Dist/Phantasia.Demo.pdf \
 		Dist/Phantasia.zip Dist/Phantasia.Demo.zip \
 		Dist/Phantasia.AtariAge.zip \
+		Dist/Phantasia.Source.tar.gz \
 		star-hope.org:star-hope.org/games/Phantasia/ ; \
 	do sleep 1; done
 
@@ -21,6 +22,9 @@ atariage:	Dist/Phantasia.AA.NTSC.a78 Dist/Phantasia.AA.PAL.a78 \
 game:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78
 
 demo:	Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78
+
+Dist/Phantasia.Source.tar.gz:	game
+	tar zcf $@ Makefile README.md Guts.txt Source Manual
 
 Dist/Phantasia.zip:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78 \
 		Dist/Phantasia.pdf
