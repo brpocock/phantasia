@@ -116,6 +116,7 @@ for my $tv (qw(NTSC PAL)) {
           $orig_path =~ s(Generated/Bank) (Banks/Bank);
           $orig_path =~ s(\.s$) ();
           $orig_path =~ s(\.bin$) ();
+          $orig_path =~ s(\.deflate$) ();
           if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt" or
              -f "$orig_path.tmx" or -f "$orig_path.tsx") {
             unless ($seen{ $path }) {
