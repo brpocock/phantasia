@@ -15,6 +15,7 @@ Source/Generated/*
 
 bin/skyline-tool
 bin/buildapp
+bin/zopfli
 
 cfg
 *.log
