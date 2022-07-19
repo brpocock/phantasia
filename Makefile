@@ -182,3 +182,7 @@ Source/Generated/Maps/%.s:	Source/Maps/%.tmx bin/skyline-tool
 	mkdir -p Source/Generated/Maps
 	bin/skyline-tool compile-map $<
 
+bin/zopfli:
+	cd Tools/zopfli ; make zopfli
+	cp -f Tools/zopfli/zopfli bin/
+
