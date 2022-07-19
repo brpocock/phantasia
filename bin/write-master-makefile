@@ -143,6 +143,11 @@ for my $tv (qw(NTSC PAL)) {
 \tmkdir -p $genrdir
 \tbin/convert-to-speakjet \$< Source/Common/SpeakJet.dic \$\@\n\n";
           push @files => "$genrdir/$base.s";
+        } elsif ('deflate' eq $ext) {
+          print "$genrdir/$base.deflate:\t$genrdir/$base.bin\\
+\t\tbin/zopfli
+\tbin/zopfli --deflate --i1000 -v -c \$< > \$\@
+\n\n";
         } elsif ('midi' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
@@ -198,10 +203,18 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Generated/Maps/$dep.s";
             } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
+              if ($bank ne 'Common' and $bank ne 'Maps') {
+                push @todo => "$bankdir/$dep.s";
+                push @todo => "$genrdir/$dep.s";
+              }
               push @todo => "$bankdir/$dep";
               push @todo => "$genrdir/$dep.bin";
               push @todo => "Source/Common/$dep";
               push @todo => "Source/Routines/$dep";
+              push @todo => "Source/Generated/Common/$dep.bin";
+            } elsif ($line =~ /\.binary "(.+)\.deflate"/) {
+              my $dep = $1;
+              push @todo => "$genrdir/$dep.bin";
               push @todo => "Source/Generated/Common/$dep.bin";
             }
           }
