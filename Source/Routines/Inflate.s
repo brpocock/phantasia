@@ -20,19 +20,19 @@ Inflate:  .block
 
           * = InflateZP
 ;;; Pointer to compressed data
-inputPointer:       .word ?
+inputPointer       = Source
 
 ;;; Pointer to uncompressed data
-outputPointer:     .word ?
+outputPointer     = Dest
 
 ;;; Local variables
 
-getBit_buffer:      .byte ?
+getBit_buffer       = Temp
 
-getBits_base:       .byte ?
+getBits_base:       = Swap
 inflateStored_pageCounter:    .byte ?
 
-inflateCodes_sourcePointer:   .word ?
+inflateCodes_sourcePointer    = Pointer
 inflateDynamic_symbol:        .byte ?
 inflateDynamic_lastLength:    .byte ?
 inflateDynamic_tempCodes:     .byte ?

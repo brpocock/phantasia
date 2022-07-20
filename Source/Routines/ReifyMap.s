@@ -3,7 +3,8 @@
 
 ReifyMap:	.block
 
-          brk
-          rts
+          ldy CurrentMap
+          lda Maps, y
+
 
           .bend

@@ -30,7 +30,7 @@ ASFLAGS=--nostart --long-branch --case-sensitive \
 	-D DATENOW=${DATE} -D JULIANDATENOW=${JULIAN} \
 	-D BUILD=${BUILD} \
 	-Wall -Wno-shadow -Wno-leading-zeros
-AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
+AS6500=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
 
 ';
 
@@ -114,14 +114,22 @@ for my $tv (qw(NTSC PAL)) {
           $orig_path =~ s(Generated/Common) (Common);
           $orig_path =~ s(Generated/Maps) (Maps);
           $orig_path =~ s(Generated/Bank) (Banks/Bank);
-          $orig_path =~ s(\.s$) ();
-          $orig_path =~ s(\.bin$) ();
-          $orig_path =~ s(\.deflate$) ();
-          if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt" or
-             -f "$orig_path.tmx" or -f "$orig_path.tsx") {
-            unless ($seen{ $path }) {
-              ++$seen{ $path };
-              push @files => $path;
+          if ($orig_path =~ /\.s$/) {
+            $orig_path =~ s(\.s$) ();
+            if (-f "$orig_path.midi" or -f "$orig_path.txt" or -f "$orig_path.tsx") {
+              unless ($seen{ $path }) {
+                ++$seen{ $path };
+                push @files => $path;
+              }
+            }
+          }
+          if ($orig_path =~ /\.(bin|deflate)$/) {
+            $orig_path =~ s(\.(bin|deflate)$) ();
+            if (-f "$orig_path.art" or -f "$orig_path.tmx" or -f "$orig_path.tsx") {
+              unless ($seen{ $path }) {
+                ++$seen{ $path };
+                push @files => $path;
+              }
             }
           }
         }
@@ -160,8 +168,8 @@ for my $tv (qw(NTSC PAL)) {
         } elsif ('art' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
-          push @files => "$genrdir/$base.art.bin";
-          print "$genrdir/$base.art.bin:\t$bankdir/$base.art bin/skyline-tool ";
+          push @files => "$genrdir/$base.bin";
+          print "$genrdir/$base.bin:\t$bankdir/$base.art bin/skyline-tool ";
           open my $art, '<', $path or die;
           while (my $line = <$art>) {
             next if $line =~ /^\s*$/;
@@ -173,7 +181,7 @@ for my $tv (qw(NTSC PAL)) {
           print "
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-art-7800 \$\@ \$<\n\n";
-          push @files => "$genrdir/$base.art.bin";
+          push @files => "$genrdir/$base.bin";
         } elsif ('tmx' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
@@ -205,6 +213,7 @@ $genrdir/$base.bin:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.
               push @todo => "Source/Common/$dep.s";
               push @todo => "Source/Routines/$dep.s";
               push @todo => "Source/Generated/Common/$dep.s";
+              push @todo => "Source/Generated/Maps/$dep.s";
             } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
               if ($bank ne 'Common' and $bank ne 'Maps') {
@@ -242,7 +251,7 @@ $genrdir/$base.bin:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.
 
     print "
 \tmkdir -p Object
-\t\${AS7800} -DTV=$tv \\
+\t\${AS6500} -DTV=$tv \\
 \t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n\n";
 
     print "Object/Bank$bank.AA.$tv.o:\t";
@@ -252,7 +261,7 @@ $genrdir/$base.bin:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.
 
     print "
 \tmkdir -p Object
-\t\${AS7800} -DTV=$tv -DATARIAGE\\
+\t\${AS6500} -DTV=$tv -DATARIAGE\\
 \t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n\n";
 
     unless (any { $_ eq $bank } @demobanks) {
@@ -265,7 +274,7 @@ $genrdir/$base.bin:\t$bankdir/$base.tmx bin/skyline-tool \$(shell ls $bankdir/*.
     }
     print "
 \tmkdir -p Object
-\t\${AS7800} -DTV=$tv -DDEMO=true \\
+\t\${AS6500} -DTV=$tv -DDEMO=true \\
 \t   -I Source/Generated/Bank$bank -l \$\@.labels.txt -L \$\@.list.txt \$< -o \$\@\n\n";
 
   } # end of bank

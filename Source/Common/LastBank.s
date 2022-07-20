@@ -83,9 +83,9 @@ DoBeginMap:
 PlayerTiles:
           ;; does not need to be aligned, since they are copied to RAM
           ;; actually also does not need to be in Bank 7 in that case.
-          .binary "PlayerTiles.art.bin"
+          .binary "PlayerTiles.bin"
 PlayerEffectsTiles: 
-          .binary "PlayerEffectsTiles.art.bin"
+          .binary "PlayerEffectsTiles.bin"
 ;;; 
 BitMask:
           .byte $01, $02, $04, $08, $10, $20, $40, $80

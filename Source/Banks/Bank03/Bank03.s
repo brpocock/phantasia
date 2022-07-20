@@ -15,7 +15,9 @@ Maps:
           .word Map_PlayerHouse
           .word Map_AtsiravTownHall
 
-          .include "PlayerHouse.s"
-          .include "AtsiravTownHall.s"
+Map_PlayerHouse:
+          .binary "PlayerHouse.deflate"
+Map_AtsiravTownHall:
+          .binary "AtsiravTownHall.deflate"
 
           .include "EndBank.s"
