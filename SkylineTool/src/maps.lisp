@@ -359,17 +359,19 @@
   (error "Can't link to non-existing “~a” point in locale “~a”" name locale-name))
 
 (defun assign-exit (locale point exits)
-  (format *trace-output* "~&Searching locale “~a” for an entrance point “~a”" locale point)
+  (format *trace-output* "~&Searching locale “~a” for an entrance point “~a”…" locale point)
   (let ((locale.xml (load-other-map locale)))
     (destructuring-bind (locale-id x y)
         (find-entrance-by-name locale.xml point locale)
-      (or (values (position-if (lambda (exit)
-                                 (equalp exit (list locale-id x y)))
-                               exits)
-                  exits)
+      (format *trace-output* " Found at (~d, ~d)." x y)
+      (or (position-if (lambda (exit)
+                         (equalp exit (list locale-id x y)))
+                       exits)
           (progn
-            (appendf exits (list (list locale-id x y)))
-            (values (1- (length exits)) exits))))))
+            (when exits
+              (setf (cdr (last exits)) (cons (list locale-id x y) nil))
+              (setf (cdr exits) (cons (list locale-id x y) nil)))
+            (1- (length exits)))))))
 
 (defun add-attribute-values (tile-palettes xml bytes &optional (exits nil exits-provided-p))
   (labels ((set-bit (byte bit)
@@ -419,7 +421,7 @@
       (destructuring-bind (locale point) (split-sequence #\/ destination)
         (if exits-provided-p
             (set-bit 4 (logand #x1f (assign-exit locale point exits)))
-            (warn "Exit in tileset data is not supported (to ~s in ~s)" point locale))))
+            (warn "Exit in tileset data is not supported (to point ~s in locale ~s)" point locale))))
     (when-let (lock (tile-property-value "Lock" xml))
       (set-bit 3 (logand #x1f (parse-integer lock :radix 16))))
     (if-let (switch (tile-property-value "Switch" xml))
