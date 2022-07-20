@@ -154,8 +154,8 @@
                                    2)
                              :element-type 'integer))
          (attributes-table (list #(0 0 0 0 0 0)))
-         (exits-table (list))
-         (sprites-table (list)))
+         (exits-table (cons nil nil))
+         (sprites-table (cons nil nil)))
     (dotimes (y (array-dimension ground 1))
       (dotimes (x (array-dimension ground 0))
         (let* ((detailp (and detail (> (aref detail x y) 0)))
@@ -177,8 +177,7 @@
                (dotimes (x 32)
                  (format *trace-output* "~x " (tile-effective-palette output x y attributes-table))))
     (mark-palette-transitions output attributes-table)
-    #+ (or) (format *trace-output* "~&~S" attributes-table)
-    (values output attributes-table sprites-table exits-table)))
+    (values output attributes-table (rest sprites-table) (rest exits-table))))
 
 (defun map-layer-depth (layer.xml)
   (when (and (<= 3 (length layer.xml))
@@ -364,13 +363,9 @@
     (destructuring-bind (locale-id x y)
         (find-entrance-by-name locale.xml point locale)
       (format *trace-output* " Found at (~d, ~d)." x y)
-      (or (position-if (lambda (exit)
-                         (equalp exit (list locale-id x y)))
-                       exits)
+      (or (position (list locale-id x y) exits :test #'equalp)
           (progn
-            (when exits
-              (setf (cdr (last exits)) (cons (list locale-id x y) nil))
-              (setf (cdr exits) (cons (list locale-id x y) nil)))
+            (setf (cdr (last exits)) (cons (list locale-id x y) nil))
             (1- (length exits)))))))
 
 (defun add-attribute-values (tile-palettes xml bytes &optional (exits nil exits-provided-p))
@@ -420,7 +415,8 @@
       (set-bit 2 #x80)
       (destructuring-bind (locale point) (split-sequence #\/ destination)
         (if exits-provided-p
-            (set-bit 4 (logand #x1f (assign-exit locale point exits)))
+            (progn (set-bit 4 (logand #x1f (assign-exit locale point exits)))
+                   (format *trace-output* "~& Exits are now: ~s" exits))
             (warn "Exit in tileset data is not supported (to point ~s in locale ~s)" point locale))))
     (when-let (lock (tile-property-value "Lock" xml))
       (set-bit 3 (logand #x1f (parse-integer lock :radix 16))))
