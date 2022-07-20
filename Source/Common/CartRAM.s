@@ -18,7 +18,7 @@ Hole:     .macro offset
           * = \offset
           .endm
 
-          * = $4000 - 765
+          * = $7000 - 765
 InflateData:        .fill 765, ?
           
           * = $4000
