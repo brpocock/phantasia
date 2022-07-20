@@ -7,9 +7,9 @@
 
 BankEntry:
           MapStartOffset = $10
-          .include "LoadMap.s"
+          .include "ReifyMap.s"
 
-          .include "RLE.s"
+          .include "Inflate.s"
 
 Maps:
           .word Map_PlayerHouse

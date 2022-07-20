@@ -17,6 +17,10 @@ Hole:     .macro offset
 
           * = \offset
           .endm
+
+          * = $4000 - 765
+InflateData:        .fill 765, ?
+          
           * = $4000
 ;;; 
           .Hole $4040
@@ -123,8 +127,6 @@ ActiveDLL:          .byte ?
 
 MapRowEndL:          .fill NumMapRows, ?
 MapRowEndH:          .fill NumMapRows, ?
-
-MapNameString:      .fill 22, ?
 
 ScreenChangedP:     .byte ?
           HoleSum += * - $4440
@@ -255,14 +257,14 @@ NumSprites:         .byte ?
           HoleSum += * - $6f40
 ;;; 
           * = $7000
+Map:
+MapNameString:      .fill 22, ?
 MapArt:
           .fill $400, ?
 MapTileAttributes:
           .fill $400, ?
 MapAttributes:
-          .fill $500, ?
-MapExits:
-          .fill $300, ?
+          .fill $400, ?
 
 ;;; 
           .warn format("Cart RAM has $%04x (%d) bytes free at end, $%04x (%d) bytes in holes", $8000 - *, $8000 - *, HoleSum, HoleSum)

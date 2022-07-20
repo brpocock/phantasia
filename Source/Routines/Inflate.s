@@ -32,7 +32,7 @@ getBit_buffer       = Temp
 getBits_base:       = Swap
 inflateStored_pageCounter:    .byte ?
 
-inflateCodes_sourcePointer    = Pointer
+inflateCodes_sourcePointer    = Pointer2
 inflateDynamic_symbol:        .byte ?
 inflateDynamic_lastLength:    .byte ?
 inflateDynamic_tempCodes:     .byte ?
@@ -68,7 +68,7 @@ CONTROL_SYMBOLS                 =	LENGTH_SYMBOLS+DISTANCE_SYMBOLS
           * = InflateROM
 
 Entry:    
-	.mvy	getBitBuffer, #0
+	.mvy	getBit_buffer, #0
 inflate_blockLoop
 ;;; Get a bit of EOF and two bits of block type
 	sty	getBits_base
@@ -480,16 +480,16 @@ inflateDynamic_headerBase
           * = InflateData
 
 literalSymbolCodeLength:      .fill 256, ?
+
 controlSymbolCodeLength:      .fill CONTROL_SYMBOLS, ?
+allLiteralsCodeLength:        .byte ?
 
 ;;; Huffman trees
-
 nBitCode_clearFrom: 
 nBitCode_literalCount:        .fill 2 * TREE_SIZE, ?
 nBitCode_controlCount:        .fill 2 * TREE_SIZE, ?
 nBitCode_literalOffset:       .fill 2 * TREE_SIZE, ?
 nBitCode_controlOffset:       .fill 2 * TREE_SIZE, ?
-allLiteralsCodeLength:        .byte ?
 
 codeToLiteralSymbol:          .fill 256, ?
 codeToControlSymbol:          .fill CONTROL_SYMBOLS, ?

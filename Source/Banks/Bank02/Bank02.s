@@ -7,9 +7,9 @@
 
 BankEntry:
           MapStartOffset = $00
-          .include "LoadMap.s"
+          .include "ReifyMap.s"
 
-          .include "RLE.s"
+          .include "Inflate.s"
 
 Maps:
           .word Map_Atsirav
