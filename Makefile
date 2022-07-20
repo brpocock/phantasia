@@ -162,7 +162,7 @@ release:	all
 	@echo "AtariAge Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.AtariAge.$(RELEASE).zip \
-		$(RELEASE)/Phantasia.AA>{NTSC,PAL,SECAM}.$(RELEASE).{a78,pdf} )
+		$(RELEASE)/Phantasia.AA.{NTSC,PAL,SECAM}.$(RELEASE).{a78,pdf} )
 	@echo "Public Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.$(RELEASE).zip \

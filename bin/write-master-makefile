@@ -114,13 +114,23 @@ for my $tv (qw(NTSC PAL)) {
           $orig_path =~ s(Generated/Common) (Common);
           $orig_path =~ s(Generated/Maps) (Maps);
           $orig_path =~ s(Generated/Bank) (Banks/Bank);
-          $orig_path =~ s(\.s$) ();
-          $orig_path =~ s(\.bin$) ();
-          if (-f "$orig_path.art" or -f "$orig_path.midi" or -f "$orig_path.txt" or
-             -f "$orig_path.tmx" or -f "$orig_path.tsx") {
-            unless ($seen{ $path }) {
-              ++$seen{ $path };
-              push @files => $path;
+          if ($orig_path =~ /\.s$/) {
+            $orig_path =~ s(\.s$) ();
+            if (-f "$orig_path.midi" or -f "$orig_path.txt" or -f "$orig_path.tsx"
+                 or -f "$orig_path.tmx" or -f "$orig_path.tsx") {
+              unless ($seen{ $path }) {
+                ++$seen{ $path };
+                push @files => $path;
+              }
+            }
+          }
+          if ($orig_path =~ /\.(bin|deflate)$/) {
+            $orig_path =~ s(\.(bin|deflate)$) ();
+            if (-f "$orig_path.art") {
+              unless ($seen{ $path }) {
+                ++$seen{ $path };
+                push @files => $path;
+              }
             }
           }
         }
@@ -198,11 +208,21 @@ for my $tv (qw(NTSC PAL)) {
               push @todo => "Source/Generated/Maps/$dep.s";
             } elsif ($line =~ /\.binary "(.+)\.bin"/) {
               my $dep = $1;
+              if ($bank ne 'Common' and $bank ne 'Maps') {
+                push @todo => "$bankdir/$dep.s";
+                push @todo => "$genrdir/$dep.s";
+              }
               push @todo => "$bankdir/$dep";
               push @todo => "$genrdir/$dep.bin";
               push @todo => "Source/Common/$dep";
               push @todo => "Source/Routines/$dep";
               push @todo => "Source/Generated/Common/$dep.bin";
+              push @todo => "Source/Generated/Maps/$dep.bin";
+            } elsif ($line =~ /\.binary "(.+)\.deflate"/) {
+              my $dep = $1;
+              push @todo => "$genrdir/$dep.bin";
+              push @todo => "Source/Generated/Common/$dep.deflate";
+              push @todo => "Source/Generated/Maps/$dep.deflate";
             }
           }
           close $text;
