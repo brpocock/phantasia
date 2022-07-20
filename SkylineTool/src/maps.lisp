@@ -635,7 +635,8 @@ after considering ~:d option~:p."
       (unless error-code-p
         (error "Not found: expected element “~a” but ~:[there are no child elements of “~a”~;~
 only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
-               element (mapcar #'car (subseq xml 2)) (car xml)))))
+               element (mapcar #'car (subseq xml 2)) (car xml)))
+      error-code))
 
 (defun xml-matches (element xml)
   (when (and xml (< 1 (length xml)))
@@ -733,7 +734,8 @@ Name:     .ptext \"~a\""
                 (hex-dump-bytes sprite))
               (format t "~2%Exits:     ;; Exit destination pointers~&     .byte ~d" (length exits-table))
               (dolist (exit exits-table)
-                (hex-dump-bytes exit))))))
+                (destructuring-bind (locale x y) exit
+                  (format t "~&~8t.byte $~2,'0x~%~8t.word ~d, ~d" locale x y)))))))
       (format t "~2&      .bend")
       (fresh-line))))
 
