@@ -122,6 +122,7 @@
            (<= (* y 16) (parse-number (assocdr "y" (second object))) (1- (* (1+ y) 16))))))
 
 (defun find-effective-attributes (tileset x y objects attributes exits)
+  (declare (ignore tileset))
   (let ((effective-objects (remove-if-not (lambda (el)
                                             (and (equal "object" (car el))
                                                  (object-covers-tile-p x y el)))
@@ -294,23 +295,23 @@
                       (t value))))))))))
 
 (defun tile-collision-p (tile.xml test-x test-y)
-  (let* ((object-group (when (and tile.xml (< 1 (length tile.xml)))
-                         (find-if (lambda (el) (equal "objectgroup" (car el))) 
-                                  (subseq tile.xml 2))))
-         (objects (when (and object-group (< 1 (length object-group)))
-                    (remove-if (lambda (el)
-                                 (or (not (equal "object" (car el)))
-                                     (when-let (type-name (assocdr "type" (second el) nil))
-                                       (not (equalp "Wall" type-name)))))
-                               (subseq object-group 2)))))
-    (dolist (object objects) 
-      (let ((height (parse-number (assocdr "height" (second object))))
-            (width (parse-number (assocdr "width" (second object))))
-            (object-x (parse-number (assocdr "x" (second object))))
-            (object-y (parse-number (assocdr "y" (second object)))))
-        (when (and (<= object-x test-x (+ object-x width))
-                   (<= object-y test-y (+ object-y height)))
-          (return-from tile-collision-p t)))))
+  (unless (and tile.xml (< 1 (length tile.xml)))
+    (return-from tile-collision-p nil))
+  (dolist (object-group (xml-matches "objectgroup" tile.xml))
+    (let ((objects (when (and object-group (< 1 (length object-group)))
+                     (remove-if (lambda (el)
+                                  (or (not (equal "object" (car el)))
+                                      (when-let (type-name (assocdr "type" (second el) nil))
+                                        (not (equalp "Wall" type-name)))))
+                                (subseq object-group 2)))))
+      (dolist (object objects) 
+        (let ((height (parse-number (assocdr "height" (second object))))
+              (width (parse-number (assocdr "width" (second object))))
+              (object-x (parse-number (assocdr "x" (second object))))
+              (object-y (parse-number (assocdr "y" (second object)))))
+          (when (and (<= object-x test-x (+ object-x width))
+                     (<= object-y test-y (+ object-y height)))
+            (return-from tile-collision-p t))))))
   nil)
 
 (defun load-other-map (locale)
@@ -319,10 +320,56 @@
                                       :type "tmx"
                                       :defaults #p"./Source/Maps/"))))
 
+(defun find-entrance-by-name (xml name locale-name)
+  (let ((id-prop (find-if (lambda (el) 
+                            (some (lambda (kv)
+                                    (destructuring-bind (key value) kv
+                                      (and (equal key "name") (equalp value "id")))) 
+                                  (second el)))
+                          (xml-matches "property" (xml-match "properties" xml nil)))))
+    (assert id-prop (id-prop) "Cannot link to locale “~a” because the map has no ID property" locale-name)
+    (let ((locale-id (parse-integer (second (find-if (lambda (kv)
+                                                       (destructuring-bind (key value) kv
+                                                         (declare (ignore value))
+                                                         (equal key "value")))
+                                                     (second id-prop))))))
+      (dolist (group (xml-matches "objectgroup" xml))
+        (dolist (object (xml-matches "object" group))
+          (when-let (properties (xml-match "properties" object nil))
+            (dolist (prop (xml-matches "property" properties))
+              (when (and (find-if (lambda (kv) (destructuring-bind (key value) kv
+                                                 (and (equalp key "value")
+                                                      (equalp value name))))
+                                  (second prop))
+                         (find-if (lambda (kv) (destructuring-bind (key value) kv
+                                                 (and (equalp key "name")
+                                                      (equalp value "Entrance"))))
+                                  (second prop)))
+                (let ((x (parse-integer (second (find-if (lambda (kv)
+                                                           (destructuring-bind (key value) kv
+                                                             (declare (ignore value))
+                                                             (equalp key "x"))) 
+                                                         (second object)))))
+                      (y (parse-integer (second (find-if (lambda (kv)
+                                                           (destructuring-bind (key value) kv
+                                                             (declare (ignore value))
+                                                             (equalp key "y"))) 
+                                                         (second object))))))
+                  (return-from find-entrance-by-name (list locale-id x y))))))))))
+  (error "Can't link to non-existing “~a” point in locale “~a”" name locale-name))
+
 (defun assign-exit (locale point exits)
+  (format *trace-output* "~&Searching locale “~a” for an entrance point “~a”" locale point)
   (let ((locale.xml (load-other-map locale)))
-    (warn "Not trying to find point ~s in locale ~s" point locale)
-    1))
+    (destructuring-bind (locale-id x y)
+        (find-entrance-by-name locale.xml point locale)
+      (or (values (position-if (lambda (exit)
+                                 (equalp exit (list locale-id x y)))
+                               exits)
+                  exits)
+          (progn
+            (appendf exits (list (list locale-id x y)))
+            (values (1- (length exits)) exits))))))
 
 (defun add-attribute-values (tile-palettes xml bytes &optional (exits nil exits-provided-p))
   (labels ((set-bit (byte bit)
@@ -584,13 +631,18 @@ after considering ~:d option~:p."
 ~^,   $~2,'0x~^, $~2,'0x~^, $~2,'0x~^, $~2,'0x~}" 
           (coerce string 'list)))
 
-(defun xml-match (element xml)
-  (find-if (lambda (el) (equal element (car el)))
-           (subseq xml 2)))
+(defun xml-match (element xml &optional (error-code nil error-code-p))
+  (or (find-if (lambda (el) (equal element (car el)))
+               (subseq xml 2))
+      (unless error-code-p
+        (error "Not found: expected element “~a” but ~:[there are no child elements of “~a”~;~
+only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
+               element (mapcar #'car (subseq xml 2)) (car xml)))))
 
 (defun xml-matches (element xml)
-  (remove-if-not (lambda (el) (equal element (car el)))
-                 (subseq xml 2)))
+  (when (and xml (< 1 (length xml)))
+    (remove-if-not (lambda (el) (equal element (car el)))
+                   (subseq xml 2))))
 
 (defun compile-map (pathname)
   (with-open-file (*standard-output* 

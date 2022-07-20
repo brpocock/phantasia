@@ -3,5 +3,5 @@
  <properties>
   <property name="Sprites" type="bool" value="true"/>
  </properties>
- <image source="OverworldSprites.png" trans="205c20" width="128" height="129"/>
+ <image source="OverworldSprites.png" trans="ffed8f" width="128" height="129"/>
 </tileset>
