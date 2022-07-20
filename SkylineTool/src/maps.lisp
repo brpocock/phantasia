@@ -415,8 +415,7 @@
       (set-bit 2 #x80)
       (destructuring-bind (locale point) (split-sequence #\/ destination)
         (if exits-provided-p
-            (progn (set-bit 4 (logand #x1f (assign-exit locale point exits)))
-                   (format *trace-output* "~& Exits are now: ~s" exits))
+            (set-bit 4 (logand #x1f (assign-exit locale point exits)))
             (warn "Exit in tileset data is not supported (to point ~s in locale ~s)" point locale))))
     (when-let (lock (tile-property-value "Lock" xml))
       (set-bit 3 (logand #x1f (parse-integer lock :radix 16))))
