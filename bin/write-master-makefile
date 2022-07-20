@@ -164,8 +164,8 @@ for my $tv (qw(NTSC PAL)) {
         } elsif ('art' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
-          push @files => "$genrdir/$base.art.bin";
-          print "$genrdir/$base.art.bin:\t$bankdir/$base.art bin/skyline-tool ";
+          push @files => "$genrdir/$base.bin";
+          print "$genrdir/$base.bin:\t$bankdir/$base.art bin/skyline-tool ";
           open my $art, '<', $path or die;
           while (my $line = <$art>) {
             next if $line =~ /^\s*$/;
@@ -177,7 +177,7 @@ for my $tv (qw(NTSC PAL)) {
           print "
 \tmkdir -p $genrdir
 \tbin/skyline-tool compile-art-7800 \$\@ \$<\n\n";
-          push @files => "$genrdir/$base.art.bin";
+          push @files => "$genrdir/$base.bin";
         } elsif ('tmx' eq $ext) {
           next if $rules{ $path };
           ++ $rules{ $path };
