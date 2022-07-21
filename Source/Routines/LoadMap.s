@@ -57,7 +57,7 @@ CopyAttributesLoop:
 DoneAttributes:
 ;;; 
 LoadPlayer:
-          .mva SpriteXH, # 47 ; XXX from Entrance code
+          .mva SpriteXH, # 14 ; XXX from Entrance code
           .mvy SpriteXL, # 0
           sty SpriteXFraction
           .mva SpriteYH, # 6 ;  XXX from Entrance code

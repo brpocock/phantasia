@@ -21,32 +21,10 @@ MapSectionDL:       .block
 DrawMapSection:
           .mvap MapDLLStart, DLLTail
 
-          lda MapTopRow
-          sta MapNextY
-
           ldy # 0
           sty ScreenNextY
 
-          lda #<MapArt
-          sta Source
-          lda #>MapArt
-          sta Source + 1
-
-          ;; multiply row × 32 and add to Source pointer
-          lda MapTopRow
-          asl a
-          asl a
-          asl a
-          bcc +
-          inc Source + 1
-+
-          asl a
-          bcc +
-          inc Source + 1
-          clc
-+
-          adc Source
-          sta Source
+          jsr FindMapSource
 
           ldy # 0
           jsr LookUpPalette
@@ -152,5 +130,5 @@ FillSpanZeroes:
           ldy # 0
           jsr LookUpPalette
           jmp MoreMapRows
-
+          
           .bend

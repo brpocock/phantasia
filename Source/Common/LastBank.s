@@ -60,6 +60,7 @@ ReturnFromInterrupt:
           .include "TileDisplay.s"
           .include "UserInput.s"
           .include "ScrollMap.s"
+          .include "FindMapSource.s"
 ;;; 
 IBeginStats:
           .SaveRegs

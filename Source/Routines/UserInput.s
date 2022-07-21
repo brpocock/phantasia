@@ -115,14 +115,13 @@ CheckForScrolling:
           lda SpriteXH
           sec
           sbc MapLeftColumn
-          cmp # 4
+          cmp # 4               ; left margin, 4 tiles
           blt GoWestYoungMan
 
-          cmp # 16
+          cmp # 16              ; right margin, 4 tiles
           blt EastWestOK
 
           jsr ScrollMapRight
-
           jmp EastWestOK
 
 GoWestYoungMan:

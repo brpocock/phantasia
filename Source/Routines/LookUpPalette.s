@@ -9,7 +9,7 @@ LookUpPalette:      .block
           clc
           adc # 4
           sta Dest + 1
-
+WithDestReady:
           lda (Dest), y
           ;; got the attribute indirect ID, multiply by 6
           asl a

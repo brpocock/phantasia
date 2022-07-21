@@ -16,6 +16,7 @@ Hole:     .macro offset
           .fi
 
           * = \offset
+          LastHoleStart := *
           .endm
           * = $4000
 ;;; 
@@ -196,6 +197,12 @@ MapDLLStart:        .word ?
           HoleSum += * - $5140
 ;;; 
           .Hole $5240
+CrashA:   .byte ?
+CrashX:   .byte ?
+CrashY:   .byte ?
+CrashP:   .byte ?
+CrashS:   .byte ?
+CrashAddr:          .word ?
           HoleSum += * - $5240
           .Hole $5340
           HoleSum += * - $5340

@@ -5,7 +5,7 @@
       (format t "~&indirect stamp header, write mode ~d, string @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)" 
               (ash (logand #x80 (elt bytes 1)) -7)
               (+ (* #x100 (elt bytes 2)) (elt bytes 0))
-              (if (zerop (logand #x80 (elt bytes 4))) 
+              (if (< (elt bytes 4) 168) 
                   (elt bytes 4)
                   (- (elt bytes 4) #x100))
               (ash (logand (elt bytes 3) #xe0) -5)
@@ -16,7 +16,7 @@
                  (format t "extended, write mode ~d, stamp @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)"
                          (ash (logand #x80 (elt bytes 1)) -7)
                          (+ (* #x100 (elt bytes 2)) (elt bytes 0))
-                         (if (zerop (logand #x80 (elt bytes 4))) 
+                         (if (< (elt bytes 4) 168) 
                              (elt bytes 4)
                              (- (elt bytes 4) #x100))
                          (ash (logand (elt bytes 3) #xe0) -5)
@@ -25,7 +25,7 @@
                  (format t "write mode ~d, stamp @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)"
                          (ash (logand #x80 (elt bytes 1)) -7)
                          (+ (* #x100 (elt bytes 2)) (elt bytes 0))
-                         (if (zerop (logand #x80 (elt bytes 3)))
+                         (if (< (elt bytes 3) 168)
                              (elt bytes 3) 
                              (- (elt bytes 3) #x100))
                          (ash (logand (elt bytes 1) #xe0) -5)

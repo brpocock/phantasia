@@ -20,6 +20,7 @@ GamePlay:
           .include "GenerateDrawingList.s"
           .include "LookUpPalette.s"
           .include "MapSectionDL.s"
+          .include "FindMapSource.s"          
           .include "ScreenTopAssets.s"
           .include "StartDLL.s"
           .include "StatsDL.s"
