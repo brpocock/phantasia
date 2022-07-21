@@ -5,9 +5,7 @@ FindMapSource:      .block
           lda MapTopRow
           sta MapNextY
 
-          lda #<MapArt
-          sta Source
-          lda #>MapArt
+          lda # 0
           sta Source + 1
 
           ;; multiply row × 32 and add to Source pointer
@@ -15,16 +13,16 @@ FindMapSource:      .block
           asl a
           asl a
           asl a
-          bcc +
-          inc Source + 1
-+
+          rol Source + 1
           asl a
-          bcc +
-          inc Source + 1
-          clc
-+
-          adc Source
+          rol Source + 1
+          asl a
+          rol Source + 1
+          adc #<MapArt          ; carry is clear
           sta Source
+          lda Source + 1
+          adc #>MapArt          ; carry from previous ADC
+          sta Source + 1
 
           rts
 

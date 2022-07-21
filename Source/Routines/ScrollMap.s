@@ -127,49 +127,31 @@ ScrollStringsLoop:
           bne ScrollStringsLoop
 
 FindNewTile:
+          ;; Dest pointer is the start of strings space
           ;; Source pointer will be the index into the map
-          jsr FindMapSource
-
-          ;; Add the number of rows into the screen
-          ;; that we are currently drawing
+          lda MapTopRow         ; save real top
+          pha
           txa
-          asl a
-          asl a
-          asl a
-          bcc +
-          inc Source + 1
-+
-          asl a
-          bcc +
-          inc Source + 1
           clc
-+
-          adc Source
-          sta Source
+          adc MapTopRow         ; get relative position of this zone
+          sta MapTopRow
+          jsr FindMapSource     ; does not alter X nor Y
+          pla
+          sta MapTopRow
 
-          ;; Load Y with the vertical offset into the row
+          ;; save the new tile to the end of the strings buffer
           lda MapLeftColumn
           clc
-          adc # 21
-          tay
-
-          ;; FIXME do something about the palette if it changed
-
-          ;; TODO save the new tile to the end of the strings buffer
-          lda MapLeftColumn
-          clc
-          adc # 21
+          adc # 20
           tay
           lda (Source), y       ; map tile byte
+          sta Swap              ; $80 set means palette changed
           asl a                 ; needs to be ×2
-          ldy # 21              ; last byte of string buffer
+          ldy # 20              ; last byte of string buffer
           sta (Dest), y
 
-          lda # 0               ; palette is OK, we lie for now
-          sta Swap              ; We'll need the palette info later
-
           .Add16 Pointer2, # 5
-          jmp CoarseScrollIndirectStamps
+          jmp CoarseScrollOneZone
 
 EliminateFirstStamp:
           lda Pointer2
@@ -226,7 +208,7 @@ Zero5Bytes:
 
           ;; Need to iterate the indirects, fix the last one, and then
           ;; iterate any direct stamps as well.
-CoarseScrollIndirectStamps:
+CoarseScrollOneZone:
           ldy # 1
           lda (Pointer2), y
           beq CoarseScrollLastAndDone
@@ -265,7 +247,7 @@ CoarseScrollOneIndirectStamp:
           sta (Pointer2), y
 +
           .Add16 Pointer2, # 5
-          jmp CoarseScrollIndirectStamps
+          jmp CoarseScrollOneZone
 
 CoarseScrollDirectStamps:
           ldy # 1
@@ -304,6 +286,7 @@ CoarseScrollLastIndirect:
           ;; just extend the width of this one
           bit Swap
           bpl NoNewSpan
+          bmi NoNewSpan         ; FIXME
 
 AddNewSpan:
           ldy # 1               ; end of current header + 1
