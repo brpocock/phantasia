@@ -59,6 +59,7 @@ ReturnFromInterrupt:
           .include "TileDLI.s"
           .include "TileDisplay.s"
           .include "UserInput.s"
+          .include "ScrollMap.s"
 ;;; 
 IBeginStats:
           .SaveRegs
@@ -90,10 +91,10 @@ PlayerEffectsTiles:
 BitMask:
           .byte $01, $02, $04, $08, $10, $20, $40, $80
 ;;; 
-          .warn format("Bank 7 ends at $%04x (length $%04x, %d)", *-1, *-$c001, *-$c001)
+          .warn format("Bank $%02x ends at $%04x (length $%04x, %d)", BANK, *-1, *-$c001, *-$c001)
 
           .if * > $ff80
-            .error format("Overran Bank 7 ROM, must end by $ff7f, ended at $%04x", *-1)
+            .error format("Overran Bank $%02x ROM, must end by $ff7f, ended at $%04x", BANK, *-1)
           .fi
 
           .enc "Unicode"

@@ -192,7 +192,9 @@ NumSprites:         .byte ?
           HoleSum += * - $5040
 ;;; 
           .Hole $5140
+MapDLLStart:        .word ?
           HoleSum += * - $5140
+;;; 
           .Hole $5240
           HoleSum += * - $5240
           .Hole $5340

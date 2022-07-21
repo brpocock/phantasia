@@ -1,4 +1,5 @@
-
+;;; Phantasia Source/Routines/MapSectionDL.s
+;;; Copyright © 2022 Bruce-Robert Pocock
 
 MapSectionDL:       .block
           lda MapLines
@@ -18,6 +19,8 @@ MapSectionDL:       .block
           .Add16 DLLTail, # 3
 
 DrawMapSection:
+          .mvap MapDLLStart, DLLTail
+
           lda MapTopRow
           sta MapNextY
 

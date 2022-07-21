@@ -88,6 +88,7 @@ DoneIdle:
           stx CheckY
 
           jsr GetTileAttributes
+
           lda MapAttributes + 1, y
           and #AttrSwim
           beq +
@@ -163,27 +164,6 @@ LeftOK:
           stx MapLeftPixel
           inc ScreenChangedP
 Return:
-          rts
-
-ScrollMapRight:
-          lda MapWidth
-          sec
-          sbc # 20
-          cmp MapLeftColumn
-          bge Return
-
-          ldx MapLeftPixel
-          inx
-          cpx # 8
-          blt RightOK
-
-          ldx # 0
-          ldy MapLeftColumn
-          iny
-          sty MapLeftColumn
-RightOK:
-          stx MapLeftPixel
-          inc ScreenChangedP
           rts
 
 ScrollMapUp:

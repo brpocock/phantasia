@@ -17,7 +17,7 @@ StartDLL: .block
 
 BuildDLL:
           lda ActiveDLL
-          beq +
+          bpl +
           .mvaw DLLTail, AltDLL
           .mvaw DLTail, AltDLSpace
           .mvaw StringsTail, AltStringsStart
