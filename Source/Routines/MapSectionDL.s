@@ -40,13 +40,14 @@ MoreMapRows:
 
           .mvy Swap, MapLeftColumn
           .mvx SpanWidth, # 0
-          .mvap Pointer, StringsTail
           .mva MapNextX, MapLeftPixel
+          .mvap Pointer, StringsTail
+
 CopyTileSpan:
           lda SpanWidth
           cmp #$1f              ; is this string getting too long for one draw?
           bge EmitSpanMidLine
-          
+
           ldy Swap              ; current column of source
           lda (Source), y
           bpl PaletteOK
@@ -130,5 +131,5 @@ FillSpanZeroes:
           ldy # 0
           jsr LookUpPalette
           jmp MoreMapRows
-          
+
           .bend

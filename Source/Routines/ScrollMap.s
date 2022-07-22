@@ -17,26 +17,26 @@ ScrollMapRight:     .block
           ldx MapLeftPixel
           cpx # 8
           bge CoarseScroll
-
+;;; 
 FineScroll:
-          .mvap Pointer, MapDLLStart
+          .mvap DLLTail, MapDLLStart
 
           ldx #$ff
 
 FineScrollZone:
           inx
           ldy # 1
-          lda (Pointer), y
+          lda (DLLTail), y
           beq Return
 
-          sta Pointer2 + 1
+          sta DLTail + 1
           iny
-          lda (Pointer), y
-          sta Pointer2
+          lda (DLLTail), y
+          sta DLTail
 
 FineScrollStamp:
           ldy # 1
-          lda (Pointer2), y
+          lda (DLTail), y
           beq FineScrollDone
 
           ldy # 4               ; x position on 5-byte header
@@ -44,78 +44,38 @@ FineScrollStamp:
           beq +
           dey                  ; x position on 4-byte header
 +
-          lda (Pointer2), y     ; x position
+          lda (DLTail), y     ; x position
           sec
           sbc # 1
-          sta (Pointer2), y
+          sta (DLTail), y
 
           iny
           tya                   ; length of header in bytes
-          .Add16a Pointer2
+          .Add16a DLTail
 
           jmp FineScrollStamp
 
 FineScrollDone:
-          .Add16 Pointer, #3
+          .Add16 DLLTail, #3
 
           jmp FineScrollZone
 
 Return:
           cli
           rts
-
+;;; 
 CoarseScroll:
           .mvy MapLeftPixel, # 0
           inc MapLeftColumn
 
-          .mvap Pointer, MapDLLStart
-
-          ldx #$ff              ; so inx → 0 in the first loop iteration
-
-CoarseScrollZone:
-          inx                   ; zone relative to screen
-          ldy # 1               ; find start of zone DL from the DLL
-          lda (Pointer), y
-          beq Return            ; end of DLL
-
-          sta Pointer2 + 1
-          iny
-          lda (Pointer), y
-          sta Pointer2
-
-CoarseScrollFirstStamp:
-          ;; First one is always an indirect extended stamp
-          ldy # 3
-          lda (Pointer2), y     ; inverted width (& palette)
-          and #$1f
-          eor #$1f
-          sec
-          sbc # 1
-          bmi EliminateFirstStamp
-
-          eor #$1f
-          sta Temp
-          lda (Pointer2), y
-          and #$e0
-          ora Temp
-          sta (Pointer2), y     ; width & palette value
-
-          iny               ; Y = 4 = index of x position
-          lda # 0
-          sta (Pointer2), y
-
-          ldy # 0               ; pointer to strings
-          lda (Pointer2), y
-          sta Source
-          sta Dest
-          ldy # 2
-          lda (Pointer2), y
-          sta Source + 1
-          sta Dest + 1
-
-          .Add16 Source, # 1
+          .mvap DLLTail, MapDLLStart
 
 ScrollStrings:
+          ldx # 12              ; FIXME number of map rows
+
+          .mvaw Source, $2501   ; FIXME is this really constant?
+          .mvaw Dest, $2500
+ScrollStringsOuterLoop:
           ldy # 0
 ScrollStringsLoop:
           lda (Source), y
@@ -124,8 +84,56 @@ ScrollStringsLoop:
           cpy # 21              ; length of strings
           bne ScrollStringsLoop
 
+          .Add16 Source, # 21
+          .Add16 Dest, # 21
+          dex
+          bne ScrollStringsOuterLoop
+
+          ldx #$ff              ; so inx → 0 in the first loop iteration
+
+CoarseScrollZone:
+          inx                   ; zone relative to screen
+          ldy # 1               ; find start of zone DL from the DLL
+          lda (DLLTail), y
+          beq Return            ; end of DLL
+
+          sta DLTail + 1
+          iny
+          lda (DLLTail), y
+          sta DLTail
+
+CoarseScrollFirstStamp:
+          ;; First one is always an indirect extended stamp
+          ldy # 3
+          lda (DLTail), y     ; inverted width (& palette)
+          and #$1f
+          eor #$1f
+          sec
+          sbc # 1
+          bmi EliminateFirstStamp
+
+          eor #$1f
+          sta Temp
+          lda (DLTail), y
+          and #$e0
+          ora Temp
+          sta (DLTail), y     ; width & palette value
+
+          iny               ; Y = 4 = index of x position
+          lda # 0
+          sta (DLTail), y
+
+          ldy # 0               ; pointer to strings
+          lda (DLTail), y
+          sta StringsTail
+          ldy # 2
+          lda (DLTail), y
+          sta StringsTail + 1
+
+          .Add16 StringsTail, # 20
+
 FindNewTile:
-          ;; Dest pointer is the start of strings space
+          ;; StringsTail pointer is the end of strings space
           ;; Source pointer will be the index into the map
           lda MapTopRow         ; save real top
           pha
@@ -145,17 +153,38 @@ FindNewTile:
           lda (Source), y       ; map tile byte
           sta Swap              ; $80 set means palette changed
           asl a                 ; needs to be ×2
-          ldy # 20              ; last byte of string buffer
-          sta (Dest), y
+          ldy # 0               ; last byte of string buffer
+          sta (StringsTail), y
 
-          .Add16 Pointer2, # 5
-          jmp CoarseScrollOneZone
+          .Add16 DLTail, # 5
 
+          ;; Need to iterate the indirects, fix the last one, and then
+          ;; iterate any direct stamps as well.
+CoarseScrollOneZone:
+          ldy # 1
+          lda (DLTail), y
+          beq CoarseScrollLastAndDone
+
+          ;; not the end of the drawing list, is it an indirect still?
+          and #$7f              ; ignore write mode bit (only)
+          cmp #$60              ; indirect mode and no width bits
+          beq CoarseScrollOneIndirectStamp
+
+          ;; must have run into direct mode stamps, process them next
+          jsr CoarseScrollLastIndirect
+          jmp CoarseScrollDirectStamps
+
+CoarseScrollLastAndDone:
+          ;; end of the list without running into any direct mode stamps
+          ;; just fix up the last indirect and move on
+          jsr CoarseScrollLastIndirect
+          jmp CoarseScrollDone
+;;; 
 EliminateFirstStamp:
-          lda Pointer2
+          lda DLTail
           sta Dest
           sta Source
-          lda Pointer2 + 1
+          lda DLTail + 1
           sta Dest + 1
           sta Source + 1
           .Add16 Source, # 5
@@ -204,80 +233,60 @@ Zero5Bytes:
           dey
           bne -
 
-          ;; Need to iterate the indirects, fix the last one, and then
-          ;; iterate any direct stamps as well.
-CoarseScrollOneZone:
-          ldy # 1
-          lda (Pointer2), y
-          beq CoarseScrollLastAndDone
-
-          ;; not the end of the drawing list, is it an indirect still?
-          and #$7f              ; ignore write mode bit (only)
-          cmp #$60              ; indirect mode and no width bits
-          beq CoarseScrollOneIndirectStamp
-
-          ;; must have run into direct mode stamps, process them next
-          jsr CoarseScrollLastIndirect
-          jmp CoarseScrollDirectStamps
-
-CoarseScrollLastAndDone:
-          ;; end of the list without running into any direct mode stamps
-          ;; just fix up the last indirect and move on
-          jsr CoarseScrollLastIndirect
-          jmp CoarseScrollDone
-
+          jmp FindNewTile
+;;; 
 CoarseScrollOneIndirectStamp:
           ldy # 4               ; x position
-          lda (Pointer2), y
+          lda (DLTail), y
           sec
           sbc # 1
-          sta (Pointer2), y
+          sta (DLTail), y
 
           ldy # 0               ; adjust string pointer
-          lda (Pointer2), y
+          lda (DLTail), y
           sec
           sbc # 1
-          sta (Pointer2), y
+          sta (DLTail), y
           bcs +
           ldy # 2               ; borrow from high byte
-          lda (Pointer2), y
+          lda (DLTail), y
           sbc # 0               ; because carry is clear
-          sta (Pointer2), y
+          sta (DLTail), y
 +
-          .Add16 Pointer2, # 5
+          .Add16 DLTail, # 5
           jmp CoarseScrollOneZone
 
 CoarseScrollDirectStamps:
           ldy # 1
-          lda (Pointer2), y
+          lda (DLTail), y
           beq CoarseScrollDone
 
           ldy # 4               ; x pos for extended header
           and #$1f
-          beq ScrollStamp
+          beq ScrollStamp       ; is an extended header
 
           ldy # 3               ; x pos for short header
 ScrollStamp:
-          lda (Pointer2), y
+          lda (DLTail), y
           sec
           sbc # 1
-          sta (Pointer2), y
-          iny                   ; length of header
+          sta (DLTail), y
+          iny                   ; length of header = x pos + 1
           tya
-          .Add16a Pointer2
+          .Add16a DLTail
           jmp CoarseScrollDirectStamps
 
 CoarseScrollDone:
-          .Add16 Pointer, #3
+          .Add16 DLLTail, #3
 
           jmp CoarseScrollZone
 
 CoarseScrollLastIndirect:
-          ;; Pointer2 is pointing to the header AFTER the last indirect,
+          ;; DLTail is pointing to the header AFTER the last indirect,
           ;; which may be a direct stamp heador or an end header.
           ;; We know an indirect is 5 bytes long, let's just use Source
           ;; for this one.
-          .mvap Source, Pointer2
+          .mvap Source, DLTail
           .Sub16 Source, # 5
 
           ;; Did the palette change? If so, emit a new span; if not,
@@ -288,7 +297,7 @@ CoarseScrollLastIndirect:
 
 AddNewSpan:
           ldy # 1               ; end of current header + 1
-          lda (Pointer2), y       ; is there a span following?
+          lda (DLTail), y       ; is there a span following?
           beq AddSpanNow
 
           brk                   ; FIXME: need to make room
@@ -298,16 +307,16 @@ AddNewSpan:
 
 AddSpanNow:
           ;; Source = last actual header
-          ;; Pointer2 = space for new header
+          ;; DLTail = space for new header
 
           ldy # 1
           lda #$60              ; wmode = 0, indirect, extended
-          sta (Pointer2), y
+          sta (DLTail), y
 
           ldy # 3
           lda #$1f              ; width = 1 tile
           ;; FIXME, mark up palette correctly
-          sta (Pointer2), y
+          sta (DLTail), y
 
           ldy # 3               ; width/palette
           lda (Source), y
@@ -317,19 +326,19 @@ AddSpanNow:
           inc Temp
           ldy # 2               ; string pointer
           lda (Source), y
-          sta (Pointer2), y
+          sta (DLTail), y
           ldy # 0
           lda (Source), y
-          sta (Pointer2), y
-          lda (Pointer2), y
+          sta (DLTail), y
+          lda (DLTail), y
           clc
           adc Temp
-          sta (Pointer2), y
+          sta (DLTail), y
           bcc +
           ldy # 2
-          lda (Pointer2), y
+          lda (DLTail), y
           adc # 0               ; carry is set
-          sta (Pointer2), y
+          sta (DLTail), y
 +
 
           lda Temp              ; width in words
@@ -338,7 +347,7 @@ AddSpanNow:
           asl a                 ; width in pixels
           ldy # 4
           adc (Source), y
-          sta (Pointer), y      ; x position
+          sta (DLLTail), y      ; x position
 
           cli
           rts

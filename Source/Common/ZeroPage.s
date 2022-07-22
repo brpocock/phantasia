@@ -25,11 +25,12 @@ Source:
 Dest:
           .word ?
 
+          ;; Pointers to the ends of the current drawing list or DLL,
+          ;; used when building a screen or scrolling.
 DLTail:    .word ?
 StringsTail:         .word ?
 DLLTail:  .word ?
 
-          
           .if * > $100
             .error format("Overran Zero Page, must end by $ff but ran to $%04x", *-1)
           .fi
