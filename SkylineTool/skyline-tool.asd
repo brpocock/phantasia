@@ -50,6 +50,7 @@
                  (:file "graphics")
                  (:file "maps")
                  (:file "i18n-l10n")
+                 (:file "listings")
                  (:file "skylisp")
                  (:file "tmx")
                  (:file "interface")))))

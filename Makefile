@@ -110,23 +110,180 @@ Dist/Phantasia.Demo.pdf: Manual/Phantasia.tex
 	mkdir -p Dist
 	mv Object/Demo.pdf/Phantasia.pdf Dist/Phantasia.Demo.pdf
 
+Object/NTSC.labels.mame:	Object/NTSC.labels.txt
+	bin/skyline-tool labels-to-mame $< $@
+
+Object/Demo.NTSC.labels.mame:	Object/Demo.NTSC.labels.txt
+	bin/skyline-tool labels-to-mame $< $@
+
+
+Object/PAL.labels.mame:	Object/PAL.labels.txt
+	bin/skyline-tool labels-to-mame $< $@
+
+Object/Demo.PAL.labels.mame:	Object/Demo.PAL.labels.txt
+	bin/skyline-tool labels-to-mame $< $@
+
+
+Object/NTSC.labels.txt:	\
+	Object/Bank00.NTSC.o.labels.txt \
+	Object/Bank01.NTSC.o.labels.txt \
+	Object/Bank02.NTSC.o.labels.txt \
+	Object/Bank03.NTSC.o.labels.txt \
+	Object/Bank04.NTSC.o.labels.txt \
+	Object/Bank05.NTSC.o.labels.txt \
+	Object/Bank06.NTSC.o.labels.txt \
+	Object/Bank07.NTSC.o.labels.txt \
+	Object/Bank08.NTSC.o.labels.txt \
+	Object/Bank09.NTSC.o.labels.txt \
+	Object/Bank0a.NTSC.o.labels.txt \
+	Object/Bank0b.NTSC.o.labels.txt \
+	Object/Bank0c.NTSC.o.labels.txt \
+	Object/Bank0d.NTSC.o.labels.txt \
+	Object/Bank0e.NTSC.o.labels.txt \
+	Object/Bank0f.NTSC.o.labels.txt \
+	Object/Bank10.NTSC.o.labels.txt \
+	Object/Bank11.NTSC.o.labels.txt \
+	Object/Bank12.NTSC.o.labels.txt \
+	Object/Bank13.NTSC.o.labels.txt \
+	Object/Bank14.NTSC.o.labels.txt \
+	Object/Bank15.NTSC.o.labels.txt \
+	Object/Bank16.NTSC.o.labels.txt \
+	Object/Bank17.NTSC.o.labels.txt \
+	Object/Bank18.NTSC.o.labels.txt \
+	Object/Bank19.NTSC.o.labels.txt \
+	Object/Bank1a.NTSC.o.labels.txt \
+	Object/Bank1b.NTSC.o.labels.txt \
+	Object/Bank1c.NTSC.o.labels.txt \
+	Object/Bank1d.NTSC.o.labels.txt \
+	Object/Bank1e.NTSC.o.labels.txt \
+	Object/Bank1f.NTSC.o.labels.txt
+	cat $^ > $@
+
+
+Object/Demo.NTSC.labels.txt:	\
+	Object/Bank00.Demo.NTSC.o.labels.txt \
+	Object/Bank01.Demo.NTSC.o.labels.txt \
+	Object/Bank02.Demo.NTSC.o.labels.txt \
+	Object/Bank03.Demo.NTSC.o.labels.txt \
+	Object/Bank04.Demo.NTSC.o.labels.txt \
+	Object/Bank05.Demo.NTSC.o.labels.txt \
+	Object/Bank06.Demo.NTSC.o.labels.txt \
+	Object/Bank07.Demo.NTSC.o.labels.txt \
+	Object/Bank08.Demo.NTSC.o.labels.txt \
+	Object/Bank09.Demo.NTSC.o.labels.txt \
+	Object/Bank0a.Demo.NTSC.o.labels.txt \
+	Object/Bank0b.Demo.NTSC.o.labels.txt \
+	Object/Bank0c.Demo.NTSC.o.labels.txt \
+	Object/Bank0d.Demo.NTSC.o.labels.txt \
+	Object/Bank0e.Demo.NTSC.o.labels.txt \
+	Object/Bank0f.Demo.NTSC.o.labels.txt \
+	Object/Bank10.Demo.NTSC.o.labels.txt \
+	Object/Bank11.Demo.NTSC.o.labels.txt \
+	Object/Bank12.Demo.NTSC.o.labels.txt \
+	Object/Bank13.Demo.NTSC.o.labels.txt \
+	Object/Bank14.Demo.NTSC.o.labels.txt \
+	Object/Bank15.Demo.NTSC.o.labels.txt \
+	Object/Bank16.Demo.NTSC.o.labels.txt \
+	Object/Bank17.Demo.NTSC.o.labels.txt \
+	Object/Bank18.Demo.NTSC.o.labels.txt \
+	Object/Bank19.Demo.NTSC.o.labels.txt \
+	Object/Bank1a.Demo.NTSC.o.labels.txt \
+	Object/Bank1b.Demo.NTSC.o.labels.txt \
+	Object/Bank1c.Demo.NTSC.o.labels.txt \
+	Object/Bank1d.Demo.NTSC.o.labels.txt \
+	Object/Bank1e.Demo.NTSC.o.labels.txt \
+	Object/Bank1f.Demo.NTSC.o.labels.txt
+	cat $^ > $@
+
+Object/PAL.labels.txt:	\
+	Object/Bank00.PAL.o.labels.txt \
+	Object/Bank01.PAL.o.labels.txt \
+	Object/Bank02.PAL.o.labels.txt \
+	Object/Bank03.PAL.o.labels.txt \
+	Object/Bank04.PAL.o.labels.txt \
+	Object/Bank05.PAL.o.labels.txt \
+	Object/Bank06.PAL.o.labels.txt \
+	Object/Bank07.PAL.o.labels.txt \
+	Object/Bank08.PAL.o.labels.txt \
+	Object/Bank09.PAL.o.labels.txt \
+	Object/Bank0a.PAL.o.labels.txt \
+	Object/Bank0b.PAL.o.labels.txt \
+	Object/Bank0c.PAL.o.labels.txt \
+	Object/Bank0d.PAL.o.labels.txt \
+	Object/Bank0e.PAL.o.labels.txt \
+	Object/Bank0f.PAL.o.labels.txt \
+	Object/Bank10.PAL.o.labels.txt \
+	Object/Bank11.PAL.o.labels.txt \
+	Object/Bank12.PAL.o.labels.txt \
+	Object/Bank13.PAL.o.labels.txt \
+	Object/Bank14.PAL.o.labels.txt \
+	Object/Bank15.PAL.o.labels.txt \
+	Object/Bank16.PAL.o.labels.txt \
+	Object/Bank17.PAL.o.labels.txt \
+	Object/Bank18.PAL.o.labels.txt \
+	Object/Bank19.PAL.o.labels.txt \
+	Object/Bank1a.PAL.o.labels.txt \
+	Object/Bank1b.PAL.o.labels.txt \
+	Object/Bank1c.PAL.o.labels.txt \
+	Object/Bank1d.PAL.o.labels.txt \
+	Object/Bank1e.PAL.o.labels.txt \
+	Object/Bank1f.PAL.o.labels.txt
+	cat $^ > $@
+
+
+Object/Demo.PAL.labels.txt:	\
+	Object/Bank00.Demo.PAL.o.labels.txt \
+	Object/Bank01.Demo.PAL.o.labels.txt \
+	Object/Bank02.Demo.PAL.o.labels.txt \
+	Object/Bank03.Demo.PAL.o.labels.txt \
+	Object/Bank04.Demo.PAL.o.labels.txt \
+	Object/Bank05.Demo.PAL.o.labels.txt \
+	Object/Bank06.Demo.PAL.o.labels.txt \
+	Object/Bank07.Demo.PAL.o.labels.txt \
+	Object/Bank08.Demo.PAL.o.labels.txt \
+	Object/Bank09.Demo.PAL.o.labels.txt \
+	Object/Bank0a.Demo.PAL.o.labels.txt \
+	Object/Bank0b.Demo.PAL.o.labels.txt \
+	Object/Bank0c.Demo.PAL.o.labels.txt \
+	Object/Bank0d.Demo.PAL.o.labels.txt \
+	Object/Bank0e.Demo.PAL.o.labels.txt \
+	Object/Bank0f.Demo.PAL.o.labels.txt \
+	Object/Bank10.Demo.PAL.o.labels.txt \
+	Object/Bank11.Demo.PAL.o.labels.txt \
+	Object/Bank12.Demo.PAL.o.labels.txt \
+	Object/Bank13.Demo.PAL.o.labels.txt \
+	Object/Bank14.Demo.PAL.o.labels.txt \
+	Object/Bank15.Demo.PAL.o.labels.txt \
+	Object/Bank16.Demo.PAL.o.labels.txt \
+	Object/Bank17.Demo.PAL.o.labels.txt \
+	Object/Bank18.Demo.PAL.o.labels.txt \
+	Object/Bank19.Demo.PAL.o.labels.txt \
+	Object/Bank1a.Demo.PAL.o.labels.txt \
+	Object/Bank1b.Demo.PAL.o.labels.txt \
+	Object/Bank1c.Demo.PAL.o.labels.txt \
+	Object/Bank1d.Demo.PAL.o.labels.txt \
+	Object/Bank1e.Demo.PAL.o.labels.txt \
+	Object/Bank1f.Demo.PAL.o.labels.txt
+	cat $^ > $@
+
 
 # If Make tries to second-guess us, let the default assembler be “error,”
 # because the default assembler (probably GNU gas) almost certainly
 # neither understands 65xx mnemonics nor 64tass macros and things.
 AS=error
+A7800=a7800 a7800dev -debug -debugger_font 'Source Code Pro' 
 
-emu:	Dist/Phantasia.NTSC.a78
-	a7800 a7800dev -debug -cart $$(pwd)/$<
+emu:	Dist/Phantasia.NTSC.a78 Object/NTSC.labels.mame
+	$(A7800) -debugscript $$(pwd)/Object/NTSC.labels.mame -cart $$(pwd)/$<
 
-emu-pal:	Dist/Phantasia.PAL.a78
-	a7800 a7800pdev -debug -cart  $$(pwd)/$<
+emu-pal:	Dist/Phantasia.PAL.a78 Object/PAL.labels.mame
+	$(A7800) -debugscript $$(pwd)/Object/PAL.labels.mame -cart $$(pwd)/$<
 
-emu-demo:	Dist/Phantasia.Demo.NTSC.a78
-	a7800 a7800dev -debug -cart  $$(pwd)/$<
+emu-demo:	Dist/Phantasia.Demo.NTSC.a78 Object/Demo.NTSC.labels.mame
+	$(A7800) -debugscript $$(pwd)/Object/Demo.NTSC.labels.mame -cart $$(pwd)/$<
 
-emu-demo-pal:	Dist/Phantasia.Demo.PAL.a78
-	a7800 a7800pdev -debug -cart  $$(pwd)/$<
+emu-demo-pal:	Dist/Phantasia.Demo.PAL.a78 Object/Demo.PAL.labels.mame
+	$(A7800) -debugscript $$(pwd)/Object/Demo.PAL.labels.mame -cart $$(pwd)/$<
 
 quickclean:
 	rm -rf Object Dist Source/Generated

@@ -20,7 +20,8 @@
         :compile-tileset 'compile-tileset
         :collect-assets 'collect-assets
         :compile-critters 'compile-critters
-        :compile-art-7800 'compile-art-7800))
+        :compile-art-7800 'compile-art-7800
+        :labels-to-mame 'labels-to-mame))
 
 (defun debug-myself-in-emacs ()
   (let ((swank (find-package :swank)))
