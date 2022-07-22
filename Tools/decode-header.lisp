@@ -6,35 +6,32 @@
      (progn (format t "~&  end of drawing list.")
             nil))
     ((= #x60 (logand #xe0 (elt bytes 1)))
-     (progn (format t "~&  indirect stamp header, write mode ~d, string @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)" 
+     (progn (format t "~&  indirect stamp header, write mode ~d, string @ $~4,'0x, x = ~d, palette ~d, width ~d" 
                     (ash (logand #x80 (elt bytes 1)) -7)
                     (+ (* #x100 (elt bytes 2)) (elt bytes 0))
                     (if (< (elt bytes 4) 168) 
                         (elt bytes 4)
                         (- (elt bytes 4) #x100))
                     (ash (logand (elt bytes 3) #xe0) -5)
-                    (1+ (logxor #x1f (logand #x1f (elt bytes 3))))
-                    (* 8 (1+ (logxor #x1f (logand #x1f (elt bytes 3)))))) 
+                    (1+ (logxor #x1f (logand #x1f (elt bytes 3))))) 
             5))
     (t (progn (format t "~&  direct stamp header, ")
               (if (= 0 (logand #x1f (elt bytes 1)))
-                  (format t "extended, write mode ~d, stamp @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)"
+                  (format t "extended, write mode ~d, stamp @ $~4,'0x, x = ~d, palette ~d, width ~d"
                           (ash (logand #x80 (elt bytes 1)) -7)
                           (+ (* #x100 (elt bytes 2)) (elt bytes 0))
                           (if (< (elt bytes 4) 168) 
                               (elt bytes 4)
                               (- (elt bytes 4) #x100))
                           (ash (logand (elt bytes 3) #xe0) -5)
-                          (1+ (logxor #x1f (logand #x1f (elt bytes 3))))
-                          (* 8 (1+ (logxor #x1f (logand #x1f (elt bytes 3))))))
-                  (format t "stamp @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)"
+                          (1+ (logxor #x1f (logand #x1f (elt bytes 3)))))
+                  (format t "stamp @ $~4,'0x, x = ~d, palette ~d, width ~d"
                           (+ (* #x100 (elt bytes 2)) (elt bytes 0))
                           (if (< (elt bytes 3) 168)
                               (elt bytes 3) 
                               (- (elt bytes 3) #x100))
                           (ash (logand (elt bytes 1) #xe0) -5)
-                          (1+ (logxor #x1f (logand #x1f (elt bytes 1))))
-                          (* 8 (1+ (logxor #x1f (logand #x1f (elt bytes 1)))))))
+                          (1+ (logxor #x1f (logand #x1f (elt bytes 1))))))
               4))))
 
 (defun string->hex (string)
@@ -52,12 +49,13 @@
         (format t "~&End of Drawing-list List")
         nil)
       (progn
-        (format t "~&Drawing list @ $~4,'0x~@[, with DLI~]~@[, 16 high holey DMA~]~@[, 8 high holey DMA~], offset ~d~@[, INVALID~]"
+        (format t "~&Drawing list @ $~4,'0x~@[~*, with DLI~]~
+~@[,~* 16 high holey DMA~]~@[~*, 8 high holey DMA~], offset ~d~@[~*, INVALID~]"
                 (logior (ash (elt bytes 1) 8) (elt bytes 2))
                 (plusp (logand #x80 (elt bytes 0)))
                 (plusp (logand #x40 (elt bytes 0)))
                 (plusp (logand #x20 (elt bytes 0)))
-                (logand #x0f (elt bytes 0))
+                (1+ (logand #x0f (elt bytes 0)))
                 (plusp (logand #x10 (elt bytes 0))))
         (logior (ash (elt bytes 1) 8) (elt bytes 2)))))
 
