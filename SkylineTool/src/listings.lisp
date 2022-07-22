@@ -15,7 +15,8 @@
                                          ((every #'digit-char-p address)
                                           (parse-integer address))
                                          (t nil)))
-                     (setf (gethash addr comments) (cffi:translate-camelcase-name label)))))
+                     (setf (gethash addr comments)
+                           (substitute #\Space #\- (cffi:translate-camelcase-name label))))))
         (loop for addr being the hash-keys of comments
               for label = (gethash addr comments)
               do (format mame "comadd ~8,'0x, ~a~%" addr (string-trim " " label)))))
