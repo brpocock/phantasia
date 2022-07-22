@@ -5,6 +5,8 @@
 
 ;;; 
 ScrollMapRight:     .block
+          sei
+
           lda MapWidth
           sec
           sbc # 20              ; width of screen
@@ -19,15 +21,14 @@ ScrollMapRight:     .block
 FineScroll:
           .mvap Pointer, MapDLLStart
 
-          lda MapLines
-          .rept 4
-            lsr a
-          .next
-          tax                   ; zones to update
+          ldx #$ff
 
 FineScrollZone:
+          inx
           ldy # 1
           lda (Pointer), y
+          beq Return
+
           sta Pointer2 + 1
           iny
           lda (Pointer), y
@@ -57,9 +58,10 @@ FineScrollStamp:
 FineScrollDone:
           .Add16 Pointer, #3
 
-          dex
-          bne FineScrollZone
+          jmp FineScrollZone
 
+Return:
+          cli
           rts
 
 CoarseScroll:
@@ -75,15 +77,11 @@ CoarseScrollZone:
           ldy # 1               ; find start of zone DL from the DLL
           lda (Pointer), y
           beq Return            ; end of DLL
+
           sta Pointer2 + 1
           iny
           lda (Pointer), y
           sta Pointer2
-
-          bne CoarseScrollFirstStamp
-
-Return:
-          rts
 
 CoarseScrollFirstStamp:
           ;; First one is always an indirect extended stamp
@@ -305,7 +303,7 @@ AddSpanNow:
           ldy # 1
           lda #$60              ; wmode = 0, indirect, extended
           sta (Pointer2), y
-          
+
           ldy # 3
           lda #$1f              ; width = 1 tile
           ;; FIXME, mark up palette correctly
@@ -342,6 +340,7 @@ AddSpanNow:
           adc (Source), y
           sta (Pointer), y      ; x position
 
+          cli
           rts
 
 NoNewSpan:
@@ -361,6 +360,7 @@ NoNewSpan:
           ora Temp
           sta (Source), y       ; width += 1, palette unchanged.
 
+          cli
           rts
           .bend
 ;;; 
