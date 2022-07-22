@@ -1,3 +1,12 @@
+(defun header->string (header mem)
+  (cond 
+    ((zerop (elt header 1)) nil)
+    ((= #x60 (logand #xe0 (elt header 1)))
+     (let ((string (+ (* #x100 (elt header 2)) (elt header 0)))
+           (width (1+ (logxor #x1f (logand #x1f (elt header 3))))))
+       (subseq mem string (+ string width))))
+    (t nil)))
+
 (defun decode-header (&rest bytes)
   (check-type bytes cons)
   (assert (member (length bytes) '(4 5)))
@@ -64,23 +73,32 @@
     (loop for i from 0 below (length bytes) by 3
           do (apply #'decode-dll-entry (subseq bytes i (+ 3 i))))))
 
-(defun decode-drawing-list (mem)
-  (loop with dl-entry = 0
-        for dl-increment = (apply #'decode-header (coerce (subseq mem dl-entry (+ 5 dl-entry)) 'list))
+(defun hex-dump (bytes)
+  (when bytes
+    (format t "~{~&    > ~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~^~
+~19t~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~^~
+~32t~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~^~
+~46t~2,'0x~^ ~2,'0x~^ ~2,'0x~^ ~2,'0x~}" (coerce bytes 'list))))
+
+(defun decode-drawing-list (mem &key (offset 0))
+  (loop with dl-entry = offset
+        for header = (coerce (subseq mem dl-entry (+ 5 dl-entry)) 'list)
+        for dl-increment = (apply #'decode-header header)
         while dl-increment
-        do (incf dl-entry dl-increment)))
+        do (progn (hex-dump (header->string header mem))
+                  (incf dl-entry dl-increment))))
 
 (defun decode-dll-deeply (mem &optional (start-address 0))
   (loop for dll-address from start-address by 3
         for dll-pointer = (apply #'decode-dll-entry (coerce (subseq mem dll-address (+ 3 dll-address)) 'list))
         while dll-pointer
-        do (decode-drawing-list (subseq mem dll-pointer))))
+        do (decode-drawing-list mem :offset dll-pointer)))
 
 (defun load-dump-into-mem (dump-file)
   (let ((mem (make-array (expt 2 16) :element-type '(unsigned-byte 8))))
     (with-input-from-file (dump dump-file :element-type '(unsigned-byte 8))
       (loop for byte = (read-byte dump nil nil)
-            for i from 0
+            for i from 0 below #x10000
             while byte
             do (setf (aref mem i) byte)))
     mem))
