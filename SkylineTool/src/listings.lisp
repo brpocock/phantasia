@@ -15,11 +15,12 @@
                                          ((every #'digit-char-p address)
                                           (parse-integer address))
                                          (t nil)))
-                     (setf (gethash addr comments)
-                           (cond
-                             ((string= (string-upcase label) label)
-                              (string-downcase label))
-                             (t (string-downcase (cffi:translate-camelcase-name label))))))))
+                     (when (>= addr #x1000)
+                       (setf (gethash addr comments)
+                             (cond
+                               ((string= (string-upcase label) label)
+                                (string-downcase label))
+                               (t (string-downcase (cffi:translate-camelcase-name label)))))))))
         (loop for addr being the hash-keys of comments
               for label = (gethash addr comments)
               do (format mame "comadd ~8,'0x, ~a~%" addr (string-trim " " label)))))
