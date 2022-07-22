@@ -22,8 +22,7 @@
                          (ash (logand (elt bytes 3) #xe0) -5)
                          (1+ (logxor #x1f (logand #x1f (elt bytes 3))))
                          (* 8 (1+ (logxor #x1f (logand #x1f (elt bytes 3))))))
-                 (format t "write mode ~d, stamp @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)"
-                         (ash (logand #x80 (elt bytes 1)) -7)
+                 (format t "stamp @ $~4,'0x, x = ~d, palette ~d, width ~d (~d)"
                          (+ (* #x100 (elt bytes 2)) (elt bytes 0))
                          (if (< (elt bytes 3) 168)
                              (elt bytes 3) 
