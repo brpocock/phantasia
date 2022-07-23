@@ -5,8 +5,6 @@
 
 ;;; 
 ScrollMapRight:     .block
-          sei
-
           lda MapWidth
           sec
           sbc # 20              ; width of screen
@@ -61,7 +59,6 @@ FineScrollDone:
           jmp FineScrollZone
 
 Return:
-          cli
           rts
 ;;; 
 CoarseScroll:
@@ -132,31 +129,7 @@ CoarseScrollFirstStamp:
 
           .Add16 StringsTail, # 20
 
-FindNewTile:
-          ;; StringsTail pointer is the end of strings space
-          ;; Source pointer will be the index into the map
-          lda MapTopRow         ; save real top
-          pha
-          txa
-          clc
-          adc MapTopRow         ; get relative position of this zone
-          sta MapTopRow
-          jsr FindMapSource     ; does not alter X nor Y
-          pla
-          sta MapTopRow
-
-          ;; save the new tile to the end of the strings buffer
-          lda MapLeftColumn
-          clc
-          adc # 20
-          tay
-          lda (Source), y       ; map tile byte
-          sta Swap              ; $80 set means palette changed
-          asl a                 ; needs to be ×2
-          ldy # 0               ; last byte of string buffer
-          sta (StringsTail), y
-
-          .Add16 DLTail, # 5
+          jsr FindNewTile
 
           ;; Need to iterate the indirects, fix the last one, and then
           ;; iterate any direct stamps as well.
@@ -194,33 +167,64 @@ ShiftNextHeader:
           lda (Source), y
           beq EndOfShiftingStamps
 
+          sta (Source), y
           and #$1f
-          beq Shift5Bytes
-
-Shift4Bytes:
-          ldy # 0
--
-          lda (Source), y
-          sta (Dest), y
-          iny
-          cpy # 4
-          bne -
-
-          .Add16 Source, # 4
-          .Add16 Dest, # 4
-          jmp ShiftNextHeader
+          bne Shift4Bytes
 
 Shift5Bytes:
-          ldy # 0
--
+          lda (Source), y
+          and #$20             ; indirect mode?
+          beq Shift5Direct
+
+          dey                   ; Y = 0
+          lda (Source), y       ; fix string pointer
+          sec
+          sbc # 1
+          sta (Source), y
+          ldy # 2
+          lda (Source), y
+          sbc # 0               ; carry from prior SBC
+          sta (Source), y
+
+Shift5Common:
+          ldy # 3               ; palette & width
           lda (Source), y
           sta (Dest), y
-          iny
-          cpy # 5
-          bne -
+
+          iny                   ; Y = 4, x position
+          lda (Source), y
+          sec
+          sbc # 1
+          sta (Dest), y
 
           .Add16 Source, # 5
           .Add16 Dest, # 5
+          jmp ShiftNextHeader
+
+Shift5Direct:
+          dey                   ; Y = 0, pointer low byte
+          lda (Source), y
+          sta (Source), y
+          ldy # 2               ; pointer high byte
+          lda (Source), y
+          sta (Source), y
+          jmp Shift5Common
+
+Shift4Bytes:
+-
+          lda (Source), y
+          sta (Dest), y
+          iny
+          cpy # 3
+          bne -
+
+          lda (Source), y
+          sec
+          sbc # 1
+          sta (Dest), y
+
+          .Add16 Source, # 4
+          .Add16 Dest, # 4
           jmp ShiftNextHeader
 
 EndOfShiftingStamps:
@@ -229,11 +233,12 @@ Zero5Bytes:
           ldy # 5
           lda # 0
 -
-          sta (Source), y
+          sta (Dest), y
           dey
           bne -
 
-          jmp FindNewTile
+          jsr FindNewTile
+          jmp CoarseScrollDone
 ;;; 
 CoarseScrollOneIndirectStamp:
           ldy # 4               ; x position
@@ -349,7 +354,6 @@ AddSpanNow:
           adc (Source), y
           sta (DLLTail), y      ; x position
 
-          cli
           rts
 
 NoNewSpan:
@@ -369,7 +373,6 @@ NoNewSpan:
           ora Temp
           sta (Source), y       ; width += 1, palette unchanged.
 
-          cli
           rts
           .bend
 ;;; 
@@ -396,3 +399,33 @@ FoundLastStamp:
           rts
 
           .bend
+;;; 
+FindNewTile:        .block
+          ;; StringsTail pointer is the end of strings space
+          ;; Source pointer will be the index into the map
+          lda MapTopRow         ; save real top
+          pha
+          txa
+          clc
+          adc MapTopRow         ; get relative position of this zone
+          sta MapTopRow
+          jsr FindMapSource     ; does not alter X nor Y
+          pla
+          sta MapTopRow
+
+          ;; save the new tile to the end of the strings buffer
+          lda MapLeftColumn
+          clc
+          adc # 20
+          tay
+          lda (Source), y       ; map tile byte
+          sta Swap              ; $80 set means palette changed
+          asl a                 ; needs to be ×2
+          ldy # 0               ; last byte of string buffer
+          sta (StringsTail), y
+
+          .Add16 DLTail, # 5
+
+          rts
+          .bend
+          
