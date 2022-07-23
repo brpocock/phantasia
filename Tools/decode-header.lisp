@@ -106,3 +106,19 @@
 (defun decode-dll-from-dump (dump-file start-address)
   (decode-dll-deeply (load-dump-into-mem dump-file) start-address))
 
+(defun pathname-string (pathname)
+  (format nil "~a" pathname))
+
+(defun compare-dlls-from-dumps (dump1 dump2 start-address)
+  (let ((dump1.txt (make-pathname :defaults dump1
+                                  :directory "/tmp/"
+                                  :type "txt"))
+        (dump2.txt (make-pathname :defaults dump2
+                                  :directory "/tmp/"
+                                  :type "txt")))
+    (with-output-to-file (*standard-output* dump1.txt :if-exists :supersede)
+      (decode-dll-from-dump dump1 start-address))
+    (with-output-to-file (*standard-output* dump2.txt :if-exists :supersede)
+      (decode-dll-from-dump dump2 start-address))
+    (sb-ext:run-program "/usr/bin/meld" (list (pathname-string dump1.txt)
+                                              (pathname-string dump2.txt)))))
