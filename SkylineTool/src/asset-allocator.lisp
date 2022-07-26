@@ -233,11 +233,10 @@
 
 (defun write-art-generation (pathname)
   (format t "~%
-Object/Assets/~a.o: ~{~a/~}~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
+Object/Assets/~a.o: Source/Art/~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
 	mkdir -p Object/Assets
 	bin/skyline-tool compile-art-7800 $@ $<"
           (pathname-name pathname)
-          (rest (pathname-directory pathname))
           (pathname-name pathname)
           (mapcar #'second 
                   (read-7800-art-index pathname))))
@@ -257,11 +256,10 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
   (error "Cannot find a possible source for included file ~a.s in bank ~(~2,'0x~)" name *bank*))
 
 (defun find-included-binary-file (name)
-  (dolist (path (include-paths-for-current-bank))
-    (let ((possible-file (make-pathname :directory '(:relative "Source" "Art") :name name :type "art")))
-      (when (probe-file possible-file)
-        (return-from find-included-binary-file
-          (make-pathname :directory '(:relative "Object" "Assets") :name name :type "o")))))
+  (let ((possible-file (make-pathname :directory '(:relative "Source" "Art") :name name :type "art")))
+    (when (probe-file possible-file)
+      (return-from find-included-binary-file
+        (make-pathname :directory '(:relative "Object" "Assets") :name name :type "o"))))
   (let ((possible-file (make-pathname :directory '(:relative "Source" "Maps") :name name :type "tsx")))
     (when (probe-file possible-file)
       (return-from find-included-binary-file
@@ -271,15 +269,15 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
 (defun recursive-read-deps (source-file)
   (unless (equal (pathname-type source-file) "o")
     (with-input-from-file (source source-file)
-      (let ((includes (remove-if 
-                       #'null
-                       (loop for line = (read-line source nil nil)
-                             while line
-                             for included = (included-file line)
-                             for binary = (included-binary-file line)
-                             append (list 
-                                     (when included (find-included-file included))
-                                     (when binary (find-included-binary-file binary)))))))
+      (let ((includes (loop for line = (read-line source nil nil)
+                            while line
+                            for included = (included-file line)
+                            for binary = (included-binary-file line)
+                            for file = (cond 
+                                         (included (find-included-file included))
+                                         (binary (find-included-binary-file binary))
+                                         (t nil))
+                            when file collect file)))
         (remove-duplicates
          (flatten (append (list source-file) includes
                           (mapcar #'recursive-read-deps includes)))
