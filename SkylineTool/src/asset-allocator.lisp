@@ -1,6 +1,7 @@
 (in-package :skyline-tool)
 
 (defvar *bank*)
+(defvar *last-bank*)
 
 (defun parse-assets-line (line)
   (destructuring-bind (asset &optional builds-string) (split-sequence #\space line :remove-empty-subseqs t)
@@ -87,7 +88,7 @@
                           assets)))))))
 
 (defun best-permutation (permutations)
-  (loop with optimal-count = nil
+  (loop with optimal-count = most-positive-fixnum
         with optimal-assets = nil
         for sequence being the hash-keys of permutations
         for banks = (gethash sequence permutations)
@@ -95,9 +96,7 @@
         when (< bank-count optimal-count)
           do (setf optimal-count bank-count
                    optimal-assets banks)
-        finally (if optimal-count
-                    (return optimal-assets)
-                    (error "No permutation can be allocated"))))
+        finally (return optimal-assets)))
 
 (defun size-of-banks ()
   (ecase *machine*
@@ -112,12 +111,15 @@
         for tentative-bank = (let ((tentative-bank (copy-hash-table bank-assets)))
                                (setf (gethash asset tentative-bank) asset-size)
                                tentative-bank)
+        when (zerop asset-size)
+          do (error "Asset is zero length: ~a" asset)
         if (< (bank-size tentative-bank) (size-of-banks))
           do (setf bank-assets tentative-bank)
-        else do (progn 
-                  (setf (gethash bank banks) bank-assets
-                        bank (1+ bank)))
-        finally (setf (gethash sequence permutations) banks)))
+        else
+          do (setf (gethash bank banks) bank-assets
+                   bank (1+ bank))
+        finally (setf (gethash bank banks) bank-assets
+                      (gethash sequence permutations) banks)))
 
 (defun find-best-allocation (assets &key build sound video)
   (let ((file-sizes (make-hash-table :test 'equal)))
@@ -128,19 +130,23 @@
       (map-permutations (rcurry #'try-allocation-sequence file-sizes permutations)
                         (hash-table-keys file-sizes))
       (let ((best (best-permutation permutations)))
-        (unless (< (length (hash-table-keys best))
-                   (ecase *machine*
-                     (7800 (cond
-                             ((equal build "Demo") 8)
-                             (t 12)))))
-          (error "Best-case arrangement takes ~:d memory banks" (length (hash-table-keys best))))
-        best))))
+        (when (zerop (length (hash-table-keys best)))
+          (error "Could not find any assets to allocate?"))
+        (let ((available-banks (- (number-of-banks build sound video)
+                                  (first-assets-bank)
+                                  1)))
+          (unless (< (length (hash-table-keys best)) available-banks)
+            (error "Best-case arrangement takes ~:d memory bank~:p (out of ~:d available)"
+                   (length (hash-table-keys best)) available-banks)))
+        best)
+      )))
 
 (define-constant +all-builds+ '("AA" "Public" "Demo")
   :test #'equalp)
 
-(define-constant +all-sounds+ '("TIA" "POKEY")
-  :test #'equalp)
+(defun all-sound-chips-for-build (build)
+  (cond ((equal "AA" build) '("YM"))
+        (t '("TIA" "POKEY" "YM"))))
 
 (define-constant +all-video+ '("NTSC" "PAL")
   :test #'equalp)
@@ -152,22 +158,42 @@
                                           :type "s"))
           return bank))
 
+(defun allocation-list-name (bank build sound video)
+  (make-pathname :directory '(:relative "Source" "Generated")
+                 :name (format nil "Bank~(~2,'0x~).~a.~a.~a"
+                               bank
+                               build sound video)
+                 :type "list"))
+
 (defun allocate-assets (build &optional (*machine* 7800))
   (assert (member build +all-builds+ :test 'equal) (build)
           "BUILD must be one of ~{~a~^ or ~} not “~a”" +all-builds+ build)
   (let ((assets-list (all-assets-for-build build)))
-    (dolist (sound +all-sounds+)
+    (dolist (sound (all-sound-chips-for-build build))
       (dolist (video +all-video+)
-        (loop with allocation =  (find-best-allocation assets-list :build build :sound sound :video video)
-              for bank being the hash-keys of allocation
+        (format *trace-output* "~&Writing asset list files for ~a ~a ~a: Bank"
+                build sound video)
+        (loop with allocation =  (find-best-allocation assets-list
+                                                       :build build :sound sound :video video)
+              for bank-offset being the hash-keys of allocation
+              for bank = (+ (first-assets-bank) bank-offset)
               for assets = (gethash bank allocation)
-              do (with-output-to-file (allocation-file (make-pathname :directory '(:relative "Source" "Generated")
-                                                                      :name (format nil "Bank~(~2,'0x~).~a.~a.~a"
-                                                                                    (+ (first-assets-bank) bank)
-                                                                                    build sound video)
-                                                                      :type "list")
+              do (with-output-to-file (allocation-file (allocation-list-name 
+                                                        bank build sound video)
                                                        :if-exists :supersede)
-                   (format allocation-file "~{~a~%~}" assets)))))))
+                   (format *trace-output* " ~(~2,'0x~)" bank)
+                   (format allocation-file "~{~a~%~}" assets))
+              finally (when (< (+ (length (hash-table-keys allocation)) (first-assets-bank))
+                               (1- (number-of-banks build sound video)))
+                        (format *trace-output* "~&… and blank asset lists for: Bank")
+                        (loop for bank from (+ (first-assets-bank)
+                                               (length (hash-table-keys allocation)))
+                                below (1- (number-of-banks build sound video))
+                              do (with-output-to-file (allocation-file
+                                                       (allocation-list-name bank build sound video)
+                                                       :if-exists :supersede)
+                                   (format *trace-output* " ~(~2,'0x~)" bank)
+                                   (fresh-line allocation-file)))))))))
 
 (defun number-of-banks (build sound video)
   (declare (ignore sound video))
@@ -186,10 +212,16 @@
       (aref match 0))))
 
 (defun include-paths-for-current-bank ()
-  (let ((bank (format nil "Bank~(~2,'0x~)" *bank*)))
-    (list (list :relative "Source" "Banks" bank)
-          (list :relative "Source" "Common")
-          (list :relative "Source" "Routines"))))
+  (let* ((bank (if (= *bank* *last-bank*)
+                   "LastBank"
+                   (format nil "Bank~(~2,'0x~)" *bank*)))
+         (includes (list (list :relative "Source" "Common")
+                         (list :relative "Source" "Routines")
+                         (list :relative "Object" "Assets"))))
+    (if (probe-file (make-pathname :directory (list :relative "Source" "Banks" bank)
+                                   :name bank :type "s"))
+        (append includes (list (list :relative "Source" "Banks" bank)))
+        includes)))
 
 (defun generated-path (path)
   (cond 
@@ -201,11 +233,12 @@
 
 (defun write-art-generation (path name)
   (format t "~%
-Object/Assets/~a.o: ~{~a/~}~a.art \\~{~%~10t~{~a/~}~a.png \\~}~%~10tbin/skyline-tool
+Object/Assets/~a.o: ~{~a/~}~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
 	mkdir -p Object/Assets
 	bin/skyline-tool compile-art-7800 $@ $<"
           name (rest path) name 
-          (read-7800-art-index (make-pathname :directory path :name name :type "art"))))
+          (mapcar #'second 
+                  (read-7800-art-index (make-pathname :directory path :name name :type "art")))))
 
 (defun write-tsx-generation (pathname)
   (format t "~%
@@ -246,7 +279,10 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
                              append (list 
                                      (when included (find-included-file included))
                                      (when binary (find-included-binary-file binary)))))))
-        (flatten (append includes (mapcar #'recursive-read-deps includes)))))))
+        (remove-duplicates
+         (flatten (append (list source-file) includes
+                          (mapcar #'recursive-read-deps includes)))
+         :test #'equal)))))
 
 (defun all-assets ()
   (loop for (dir . type) in '(("Maps" . "tmx") ("Songs" . "midi") ("Scripts" . "scup"))
@@ -329,16 +365,17 @@ Object/Bank~(~2,'0x~).~a.~a.~a.o: Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s \\
             (mapcar (lambda (path) (format nil "~{~a~^/~}" (rest path))) 
                     (include-paths-for-current-bank)))))
 
-(defun write-bank-makefile (bank-source &key build sound video)
+(defun write-bank-makefile (bank-source &key build sound video bank)
   (format t "~%
 Object/Bank~(~2,'0x~).~a.~a.~a.o:~{ \\~&~20t~a~}
 	mkdir -p Object
-	${AS7800} -DTV=~a -DMUSIC=~a ~a \\~{~%	-I ~a \\~}
+	${AS7800} -DTV=~a -DMUSIC=~a ~a ~a \\~{~%	-I ~a \\~}
 		-l $@.labels.txt -L $@.list.txt $< -o $@"
           *bank* build sound video (recursive-read-deps bank-source)
           video sound (cond ((equal build "AA") "-DATARIAGE")
                             ((equal build "Demo") "-DDEMO")
                             (t ""))
+          (if bank (format nil "-DBANK=~d" bank) "")
           (mapcar (lambda (path) (format nil "~{~a~^/~}" (rest path))) 
                   (include-paths-for-current-bank))))
 
@@ -349,7 +386,7 @@ Dist/~a.~a.~a.~a.a78: \\~
 	mkdir -p Dist
 	cat $^ > $@
 	bin/7800sign -w $@
-	bin/7800header -f Source/header.~a.~a.~a.script $@
+	bin/7800header -f Source/Generated/header.~a.~a.~a.script $@
 "
           "Phantasia" ; TODO game title
           build sound video
@@ -369,6 +406,31 @@ Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s: \\~{~%~10t~a~^ \\~}
           build sound video
           (all-assets-for-build build) 
           build))
+
+(defun write-header-script (&key build sound video)
+  (with-output-to-file (script (make-pathname :directory '(:relative "Source" "Generated")
+                                              :name (format nil "header.~a.~a.~a"
+                                                            build sound video)
+                                              :type "script")
+                               :if-exists :supersede)
+    (format script "name ~a (BRPocock, ~d)
+set tv~(~a~)
+set supergameram
+set 7800joy1
+unset 7800joy2
+set savekey
+set composite~@[
+set pokey@440
+~]~@[
+set ym2151@460
+~]save
+exit
+"
+            "Phantasia" ; TODO
+            (nth-value 6 (decode-universal-time (get-universal-time)))
+            video
+            (equal sound "POKEY")
+            (equal sound "YM"))))
 
 (defun write-master-makefile ()
   (with-output-to-file (*standard-output* "Source/Generated/Makefile" :if-exists :supersede)
@@ -396,25 +458,30 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
                                                :type "tsx")))
       (write-tsx-generation tileset))
     (dolist (build +all-builds+)
-      (dolist (sound +all-sounds+)
+      (dolist (sound (all-sound-chips-for-build build))
         (dolist (video +all-video+)
-          (write-makefile-top-line :build build :sound sound :video video)
-          (dotimes (*bank* (number-of-banks build sound video))
-            (let ((bank-source (make-pathname :directory (list :relative "Source" "Banks" (format nil "Bank~(~2,'0x~)" *bank*))
-                                              :name (format nil "Bank~(~2,'0x~)" *bank*)
-                                              :type "s")))
-              (cond
-                ((= *bank* (1- (number-of-banks build sound video)))
-                 (write-bank-makefile (make-pathname :directory (list :relative "Source" "Banks" "LastBank")
-                                                     :name "LastBank" :type "s")
-                                      :build build :sound sound :video video))
-                ((probe-file bank-source)
-                 (write-bank-makefile bank-source
-                                      :build build :sound sound :video video))
-                (t (write-asset-bank-makefile *bank*
-                                              :build build :sound sound :video video))))))))))
+          (let ((*last-bank* (1- (number-of-banks build sound video))))
+            (write-makefile-top-line :build build :sound sound :video video)
+            (write-header-script :build build :sound sound :video video)
+            (dotimes (*bank* (number-of-banks build sound video))
+              (let ((bank-source (make-pathname
+                                  :directory (list :relative "Source" "Banks"
+                                                   (format nil "Bank~(~2,'0x~)" *bank*))
+                                  :name (format nil "Bank~(~2,'0x~)" *bank*)
+                                  :type "s")))
+                (cond
+                  ((probe-file bank-source)
+                   (write-bank-makefile bank-source
+                                        :build build :sound sound :video video))
+                  ((= *bank* *last-bank*)
+                   (write-bank-makefile (make-pathname
+                                         :directory (list :relative "Source" "Banks" "LastBank")
+                                         :name "LastBank" :type "s")
+                                        :build build :sound sound :video video :bank *bank*))
+                  (t (write-asset-bank-makefile *bank*
+                                                :build build :sound sound :video video)))))))))))
 
-(defun write-asset-source (kind predicate assets)
+(defun write-asset-source (kind predicate assets source)
   (if (some predicate assets)
       (progn
         (format source ".include \"Load~a.s\"~2%~as:" kind kind)
@@ -429,27 +496,27 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
          (outfile (make-pathname :directory (list :relative "Source" "Generated")
                                  :name basename
                                  :type "s"))
-         (assets (with-input-from-file (list (make-pathname :directory (list :relative "Source" "Generated")
-                                                            :name basename
-                                                            :type "list"))
+         (assets (with-input-from-file (list (allocation-list-name bank build sound video))
                    (loop for asset = (read-line list nil nil)
+                         while asset
                          collect asset))))
     (ensure-directories-exist outfile)
     
     (with-output-to-file (source outfile :if-exists :supersede)
-      (format source ";;; Bank ~2,'0x file (generated by Skyline Tool)
+      (format source ";;; Bank ~(~2,'0x~) file (generated by Skyline Tool)
 
-~10tBANK = $~2,'0x
+~10tBANK = $~(~2,'0x~)
 
 ~10t.include \"StartBank.s\"
 
 VLoadMap: jmp LoadMap
 VLoadSong: jmp LoadSong
 VLoadScript: jmp LoadScript
-~2%")
-      (write-asset-source "Map" #'map-asset-p assets)
-      (write-asset-source "Song" #'song-asset-p assets)
-      (write-asset-source "Script" #'script-asset-p assets)
+~2%"
+              bank bank)
+      (write-asset-source "Map" #'map-asset-p assets source)
+      (write-asset-source "Song" #'song-asset-p assets source)
+      (write-asset-source "Script" #'script-asset-p assets source)
       (dolist (asset assets)
         (format source "~a:~%~10t.binary\"~a\"" 
                 (asset->symbol-name asset)

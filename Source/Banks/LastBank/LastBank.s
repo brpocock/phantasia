@@ -1,6 +1,8 @@
 ;;; Phantasia Source/Common/LastBank.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
+          .include "StartBank.s"
+
           * = $c000
           .offs $c000
 
@@ -85,9 +87,9 @@ DoBeginMap:
 PlayerTiles:
           ;; does not need to be aligned, since they are copied to RAM
           ;; actually also does not need to be in Bank 7 in that case.
-          .binary "PlayerTiles.bin"
+          .binary "PlayerTiles.o"
 PlayerEffectsTiles: 
-          .binary "PlayerEffectsTiles.bin"
+          .binary "PlayerEffectsTiles.o"
 ;;; 
 BitMask:
           .byte $01, $02, $04, $08, $10, $20, $40, $80

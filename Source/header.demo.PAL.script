@@ -1,9 +1,0 @@
-name Phantasia Demo (BRPocock, 2022)
-set tvpal
-set supergameram
-set 7800joy1
-unset 7800joy2
-set savekey
-set composite
-save
-exit

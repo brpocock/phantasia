@@ -964,15 +964,16 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                :element-type '(unsigned-byte 8)
                                :if-exists :supersede)
     (let ((page-length (length (first bytes-lists))))
-      (format t "~&~A: Writing ~:D pages, each of which is ~:D bytes (out of 256 possible) …"
+      (format *trace-output* "~&~A: Writing ~:D pages, each of which is ~:D bytes (out of 256 possible) …"
               index-out (length bytes-lists) page-length)
+      (finish-output *trace-output*)
       (dolist (bytes-list bytes-lists)
         (dolist (byte bytes-list)
           (write-byte byte binary))
         (when (< page-length #x100)
           (dotimes (i (- #x100 page-length))
             (write-byte 0 binary))))
-      (format t " … done.~%"))))
+      (format *trace-output* " done.~%"))))
 
 (defun interleave-7800-bytes (bytes-lists)
   ;; Interleave and reverse bytes
@@ -1211,15 +1212,15 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
     (let ((palette (loop for i below palette-size
                          collect (aref palette-strip i 0))))
       (if (eql mode :160b)
-          (format t "~&Palette detected: $~2,'0x; ~{$~2,'0x $~2,'0x $~2,'0x~^, ~}" (first palette) (rest palette))
-          (format t "~&Palette detected: ~{$~2,'0x $~2,'0x $~2,'0x $~2,'0x~^, ~}" palette))
+          (format *trace-output* "~&Palette detected: $~2,'0x; ~{$~2,'0x $~2,'0x $~2,'0x~^, ~}" (first palette) (rest palette))
+          (format *trace-output* "~&Palette detected: ~{$~2,'0x $~2,'0x $~2,'0x $~2,'0x~^, ~}" palette))
       palette)))
 
 (defun parse-into-7800-bytes (art-index)
   (let ((bytes (list)))
     (dolist (art-item art-index)
       (destructuring-bind (mode png-name width-px height-px) art-item
-        (format t "~&~A: parsing in mode ~A …" png-name mode)
+        (format *trace-output* "~&~A: parsing in mode ~A …" png-name mode)
         (let* ((png (png-read:read-png-file png-name))
                (height (png-read:height png))
                (width (png-read:width png))
@@ -1231,12 +1232,12 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
           (appendf bytes
                    (parse-7800-object mode palette-pixels :width width-px :height height-px
                                                           :palette palette)))
-        (format t " … Done.")))
+        (format *trace-output* " … Done.")))
     (reverse bytes)))
 
 (defun read-7800-art-index (index-in)
   (let ((png-list (list)))
-    (format t "~&~A: reading art index …" index-in)
+    (format *trace-output* "~&~A: reading art index …" index-in)
     (with-input-from-file (index index-in)
       (loop for line = (read-line index nil)
             while line
@@ -1257,7 +1258,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                                       (parse-integer width-px) 
                                       (parse-integer height-px))
                                 png-list))))))))
-    (format t " … done. Got ~:D PNG files to read." (length png-list))
+    (format *trace-output* " done. Got ~:D PNG files to read." (length png-list))
     (reverse png-list)))
 
 (defun compile-art-7800 (index-out index-in)

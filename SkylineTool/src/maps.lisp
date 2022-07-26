@@ -602,12 +602,13 @@
         (*rle-options* 0)
         (*rle-best-full* (1+ (length source))))
     (format *trace-output* "~& Compressing ~:d byte~:p …" (length source))
+    (finish-output *trace-output*)
     (unwind-protect
          (let ((rle (rle-compress-fully source nil)))
-           (format *trace-output* " into ~:d byte~:p using RLE (~d%), ~
+           (format *trace-output* " into ~:d byte~:p using RLE (-~d%), ~
 after considering ~:d option~:p."
                    (length rle)
-                   (round (* 100 (/ (length rle) (length source))))
+                   (round (- 100 (* 100 (/ (length rle) (length source)))))
                    *rle-options*)
            (if (> (length rle) (1+ (length source)))
                (prog1 
