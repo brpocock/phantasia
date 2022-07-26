@@ -601,11 +601,12 @@
   (let ((lparallel:*kernel* (lparallel:make-kernel 8))
         (*rle-options* 0)
         (*rle-best-full* (1+ (length source))))
+    (format *trace-output* "~& Compressing ~:d byte~:p …" (length source))
     (unwind-protect
          (let ((rle (rle-compress-fully source nil)))
-           (format *trace-output* "~& Compressed ~:d byte~:p into ~:d byte~:p using RLE (~d%), ~
+           (format *trace-output* " into ~:d byte~:p using RLE (~d%), ~
 after considering ~:d option~:p."
-                   (length source) (length rle)
+                   (length rle)
                    (round (* 100 (/ (length rle) (length source))))
                    *rle-options*)
            (if (> (length rle) (1+ (length source)))
@@ -702,6 +703,7 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
             (format *trace-output* "~&Parsing map layers…")
             (multiple-value-bind (tile-grid attributes-table sprites-table exits-table)
                 (parse-tile-grid layers objects base-tileset)
+              (format *trace-output* "~&Ready to write binary output…")
               (let* ((width (array-dimension tile-grid 0))
                      (height (array-dimension tile-grid 1))
                      (name-full (concatenate 'string (string-downcase 
