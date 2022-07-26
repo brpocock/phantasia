@@ -32,9 +32,9 @@
                :trivial-gray-streams
                :xmls
                )
-
+  
   :encoding :utf-8
-
+  
   :serial t
   
   :components
@@ -53,4 +53,5 @@
                  (:file "listings")
                  (:file "skylisp")
                  (:file "tmx")
+                 (:file "asset-allocator")
                  (:file "interface")))))

@@ -4,9 +4,12 @@ all:	game demo doc
 
 publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 	@until rsync -essh --progress \
-		Dist/Phantasia.AA.NTSC.a78 Dist/Phantasia.AA.PAL.a78 \
-		Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78 \
-		Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78 \
+		Dist/Phantasia.AA.TIA.NTSC.a78 Dist/Phantasia.AA.TIA.PAL.a78 \
+		Dist/Phantasia.AA.POKEY.NTSC.a78 Dist/Phantasia.AA.POKEY.PAL.a78 \
+		Dist/Phantasia.Public.TIA.NTSC.a78 Dist/Phantasia.Public.TIA.PAL.a78 \
+		Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78 \
+		Dist/Phantasia.Demo.TIA.NTSC.a78 Dist/Phantasia.Demo.TIA.PAL.a78 \
+		Dist/Phantasia.Demo.POKEY.NTSC.a78 Dist/Phantasia.Demo.POKEY.PAL.a78 \
 		Dist/Phantasia.AA.pdf \
 		Dist/Phantasia.pdf \
 		Dist/Phantasia.Demo.pdf \
@@ -16,12 +19,15 @@ publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 		star-hope.org:star-hope.org/games/Phantasia/ ; \
 	do sleep 1; done
 
-atariage:	Dist/Phantasia.AA.NTSC.a78 Dist/Phantasia.AA.PAL.a78 \
+atariage:	Dist/Phantasia.AA.TIA.NTSC.a78 Dist/Phantasia.AA.TIA.PAL.a78 \
+		Dist/Phantasia.AA.POKEY.NTSC.a78 Dist/Phantasia.AA.POKEY.PAL.a78 \
 		Dist/Phantasia.AA.pdf
 
-game:	Dist/Phantasia.NTSC.a78 Dist/Phantasia.PAL.a78
+game:	Dist/Phantasia.Public.TIA.NTSC.a78 Dist/Phantasia.Public.TIA.PAL.a78 \
+          Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78
 
-demo:	Dist/Phantasia.Demo.NTSC.a78 Dist/Phantasia.Demo.PAL.a78
+demo:	Dist/Phantasia.Demo.TIA.NTSC.a78 Dist/Phantasia.Demo.TIA.PAL.a78 \
+	Dist/Phantasia.Demo.POKEY.NTSC.a78 Dist/Phantasia.Demo.POKEY.PAL.a78
 
 Dist/Phantasia.Source.tar.gz:	game
 	tar zcf $@ Makefile README.md Guts.txt Source Manual
@@ -55,27 +61,45 @@ doc:	Dist/Phantasia.pdf \
 SOURCES=$(shell find Source -name \*.s -o -name \*.txt -o -name \*.png -o -name \*.midi \
 		-a -not -name .\#\*)
 
-Dist/Phantasia.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.NTSC.a78
+Dist/Phantasia.Public.TIA.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.PAL.a78
+Dist/Phantasia.Public.TIA.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.AA.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.AA.NTSC.a78
+Dist/Phantasia.AA.TIA.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.AA.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.AA.PAL.a78
+Dist/Phantasia.AA.TIA.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.Demo.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.Demo.NTSC.a78
+Dist/Phantasia.Demo.TIA.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.Demo.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile Dist/Phantasia.Demo.PAL.a78
+Dist/Phantasia.Demo.TIA.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
 
-Source/Generated/Makefile:	bin/write-master-makefile ${SOURCES}
+Dist/Phantasia.Public.POKEY.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
+
+Dist/Phantasia.Public.POKEY.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
+
+Dist/Phantasia.AA.POKEY.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
+
+Dist/Phantasia.AA.POKEY.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
+
+Dist/Phantasia.Demo.POKEY.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
+
+Dist/Phantasia.Demo.POKEY.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+	$(MAKE) -f Source/Generated/Makefile $@
+
+Source/Generated/Makefile:	bin/skyline-tool ${SOURCES}
 	mkdir -p Source/Generated
-	$< > Source/Generated/Makefile
+	bin/skyline-tool write-master-makefile
 
 Dist/Phantasia-book.pdf:	Dist/Phantasia.AA.pdf
 	pdfbook2 --paper=letterpaper -o 0 -i 0 -t 0 -b 0 $<
@@ -266,11 +290,11 @@ Object/Demo.PAL.labels.txt:	\
 	Object/Bank1f.Demo.PAL.o.labels.txt
 	cat $^ > $@
 
-
 # If Make tries to second-guess us, let the default assembler be “error,”
 # because the default assembler (probably GNU gas) almost certainly
 # neither understands 65xx mnemonics nor 64tass macros and things.
 AS=error
+
 A7800=a7800 a7800dev -debug -debugger_font 'Source Code Pro' 
 
 emu:	Dist/Phantasia.NTSC.a78 Object/NTSC.labels.mame

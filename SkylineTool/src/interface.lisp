@@ -8,6 +8,7 @@
   (list :--help 'about-skyline-tool
         :-h 'about-skyline-tool
         :help 'about-skyline-tool
+        :allocate-assets 'allocate-assets
         :build-banking 'build-banking
         :burn-rom 'click.adventuring.skyline.eprom::burn-rom
         :compile-index 'compile-index
@@ -21,7 +22,9 @@
         :collect-assets 'collect-assets
         :compile-critters 'compile-critters
         :compile-art-7800 'compile-art-7800
-        :labels-to-mame 'labels-to-mame))
+        :labels-to-mame 'labels-to-mame
+        :write-asset-bank 'write-asset-bank
+        :write-master-makefile 'write-master-makefile))
 
 (defun debug-myself-in-emacs ()
   (let ((swank (find-package :swank)))
