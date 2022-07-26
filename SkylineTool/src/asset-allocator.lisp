@@ -343,13 +343,14 @@ Object/Bank~(~2,'0x~).~a.~a.~a.o:~{ \\~&~20t~a~}
 
 (defun write-makefile-top-line (&key sound video build)
   (format t "~%
-Dist/Phantasia.~a.~a.~a.a78: \\~
+Dist/~a.~a.~a.~a.a78: \\~
 ~{~%~10tObject/Bank~(~2,'0x~).~a.~a.~a.o~^ \\~}
 	mkdir -p Dist
 	cat $^ > $@
 	bin/7800sign -w $@
 	bin/7800header -f Source/header.~a.~a.~a.script $@
 "
+          "Phantasia" ; TODO game title
           build sound video
           (loop for bank below (number-of-banks build sound video)
                 appending (list bank build sound video))
