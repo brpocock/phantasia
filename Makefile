@@ -144,20 +144,6 @@ Dist/Phantasia.Demo.pdf: Manual/Phantasia.tex
 	mkdir -p Dist
 	mv Object/Demo.pdf/Phantasia.pdf Dist/Phantasia.Demo.pdf
 
-Object/NTSC.labels.mame:	Object/NTSC.labels.txt
-	bin/skyline-tool labels-to-mame $< $@
-
-Object/Demo.NTSC.labels.mame:	Object/Demo.NTSC.labels.txt
-	bin/skyline-tool labels-to-mame $< $@
-
-
-Object/PAL.labels.mame:	Object/PAL.labels.txt
-	bin/skyline-tool labels-to-mame $< $@
-
-Object/Demo.PAL.labels.mame:	Object/Demo.PAL.labels.txt
-	bin/skyline-tool labels-to-mame $< $@
-
-
 Object/NTSC.labels.txt:	\
 	Object/Bank00.NTSC.o.labels.txt \
 	Object/Bank01.NTSC.o.labels.txt \
@@ -307,17 +293,17 @@ AS=error
 
 A7800=a7800 a7800dev -debug -debugger_font 'Source Code Pro' 
 
-emu:	Dist/Phantasia.Public.YM.NTSC.a78 Object/Public.YM.NTSC.labels.mame
-	$(A7800) -debugscript $$(pwd)/Object/Public.YM.NTSC.labels.mame -cart $$(pwd)/$<
+emu:	Dist/Phantasia.Public.YM.NTSC.a78
+	$(A7800) -cart $$(pwd)/$<
 
-emu-pal:	Dist/Phantasia.Public.YM.PAL.a78 Object/Public.YM.PAL.labels.mame
-	$(A7800) -debugscript $$(pwd)/Object/Public.YM.PAL.labels.mame -cart $$(pwd)/$<
+emu-pal:	Dist/Phantasia.Public.YM.PAL.a78
+	$(A7800) -cart $$(pwd)/$<
 
-emu-demo:	Dist/Phantasia.Demo.YM.NTSC.a78 Object/Demo.YM.NTSC.labels.mame
-	$(A7800) -debugscript $$(pwd)/Object/Demo.YM.NTSC.labels.mame -cart $$(pwd)/$<
+emu-demo:	Dist/Phantasia.Demo.YM.NTSC.a78
+	$(A7800) -cart $$(pwd)/$<
 
-emu-demo-pal:	Dist/Phantasia.Demo.YM.PAL.a78 Object/Demo.YM.PAL.labels.mame
-	$(A7800) -debugscript $$(pwd)/Object/Demo.YM.PAL.labels.mame -cart $$(pwd)/$<
+emu-demo-pal:	Dist/Phantasia.Demo.YM.PAL.a78
+	$(A7800) -cart $$(pwd)/$<
 
 quickclean:
 	rm -rf Object Dist Source/Generated

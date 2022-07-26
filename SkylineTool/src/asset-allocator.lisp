@@ -258,7 +258,6 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
   (dolist (path (include-paths-for-current-bank))
     (let ((possible-file (make-pathname :directory path :name name :type "art")))
       (when (probe-file possible-file)
-        (write-art-generation path name)
         (return-from find-included-binary-file
           (make-pathname :directory '(:relative "Object" "Assets") :name name :type "o")))))
   (let ((possible-file (make-pathname :directory '(:relative "Source" "Maps") :name name :type "tsx")))
@@ -457,6 +456,10 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
                                                :name :wild
                                                :type "tsx")))
       (write-tsx-generation tileset))
+    (dolist (art (directory (make-pathname :directory (list :relative "Source" :wild)
+                                           :name :wild
+                                           :type "art")))
+      (write-art-generation art))
     (dolist (build +all-builds+)
       (dolist (sound (all-sound-chips-for-build build))
         (dolist (video +all-video+)
