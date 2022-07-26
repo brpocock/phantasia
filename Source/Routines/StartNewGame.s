@@ -37,7 +37,7 @@ StartNewGame:	.block
 
           ldx #$ff
           txs
-          inx
+          inx                   ; X = 0
           ldy # 0
           jmp JFarJump
 

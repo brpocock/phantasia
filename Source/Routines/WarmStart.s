@@ -14,7 +14,8 @@ WarmStart:	.block
           .mvx s, #$ff          ; smash stack, if any
           .mva GameMode, #ModeTitleScreen
 
+          ;; Y = 0
           .BankSwitch # 2
-          jmp JLoadMap
+          jmp $8000             ; start of title screen
 
           .bend

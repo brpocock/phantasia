@@ -177,12 +177,15 @@
                                                        :build build :sound sound :video video)
               for bank-offset being the hash-keys of allocation
               for bank = (+ (first-assets-bank) bank-offset)
-              for assets = (gethash bank allocation)
+              for assets = (gethash bank-offset allocation)
+              unless assets
+                do (error "No assets assigned to bank ~(~2,'0x~)" bank)
               do (with-output-to-file (allocation-file (allocation-list-name 
                                                         bank build sound video)
                                                        :if-exists :supersede)
-                   (format *trace-output* " ~(~2,'0x~)" bank)
-                   (format allocation-file "~{~a~%~}" assets))
+                   (format *trace-output* " ~(~2,'0x~) (~:d asset~:p) " 
+                           bank (length (hash-table-keys assets)))
+                   (format allocation-file "~{~a~%~}" (hash-table-keys assets)))
               finally (when (< (+ (length (hash-table-keys allocation)) (first-assets-bank))
                                (1- (number-of-banks build sound video)))
                         (format *trace-output* "~&… and blank asset lists for: Bank")
@@ -295,7 +298,8 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
 
 (defun asset->object-name (asset-indicator)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
-    (format nil "Object/~a/~a.o" kind name)))
+    (declare (ignore kind))
+    (format nil "~a.o" name)))
 
 (defun asset->symbol-name (asset-indicator)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
@@ -544,7 +548,7 @@ VLoadScript: jmp LoadScript
       (write-asset-source "Song" #'song-asset-p assets source)
       (write-asset-source "Script" #'script-asset-p assets source)
       (dolist (asset assets)
-        (format source "~a:~%~10t.binary\"~a\"" 
+        (format source "~&~a:~%~10t.binary \"~a\"" 
                 (asset->symbol-name asset)
                 (asset->object-name asset)))
-      (format source "~10t.include \"EndBank.s\"~%"))))
+      (format source "~&~10t.include \"EndBank.s\"~%"))))
