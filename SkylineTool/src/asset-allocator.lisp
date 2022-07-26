@@ -484,14 +484,37 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
                   (t (write-asset-bank-makefile *bank*
                                                 :build build :sound sound :video video)))))))))))
 
+(defmethod get-asset-id ((kind (eql :map)) asset)
+  (find-locale-id-from-xml 
+   (xmls:parse-to-list 
+    (alexandria:read-file-into-string 
+     (make-pathname :directory '(:relative "Source" "Maps")
+                    :name asset :type "tmx")))))
+
+(defmethod get-asset-id ((kind (eql :script)) asset)
+  (with-input-from-file (script (make-pathname :directory'(:relative "Source" "Scripts")
+                                               :name asset :type "scup"))
+    (loop for line = (read-line script nil nil)
+          while line
+          do (when-let (scene-text (search "Scene " line))
+               (return-from get-asset-id (parse-integer (subseq line (+ 6 scene-text))
+                                                        :junk-allowed t))))
+    (error "Script file ~a has no Scene # declaration" asset)))
+
+(defmethod get-asset-id ((kind (eql :song)) asset)
+  (warn "TODO: Get asset ID from song file somehow (needed for ~a)" asset)
+  0)
+
 (defun write-asset-source (kind predicate assets source)
   (if (some predicate assets)
       (progn
-        (format source ".include \"Load~a.s\"~2%~as:" kind kind)
+        (format source "~&~10t.include \"Load~a.s\"~2%~as:" kind kind)
+        (format source "~&~as:" kind)
         (dolist (asset (remove-if-not predicate assets))
+          (format source "~&~10t.byte ~d" (get-asset-id (make-symbol (string-upcase kind)) asset))
           (format source "~&~10t.word ~a" (asset->symbol-name asset)))
         (format source "~2%"))
-      (format source "Load~a: rts~2%" kind)))
+      (format source "Load~a:~&~10tsec~&~10trts~2%" kind)))
 
 (defun write-asset-bank (bank-hex build sound video)
   (let* ((bank (parse-integer bank-hex :radix 16))

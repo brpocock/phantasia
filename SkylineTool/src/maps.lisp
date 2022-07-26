@@ -319,42 +319,45 @@
                                       :type "tmx"
                                       :defaults #p"./Source/Maps/"))))
 
-(defun find-entrance-by-name (xml name locale-name)
+(defun find-locale-id-from-xml (xml)
   (let ((id-prop (find-if (lambda (el) 
                             (some (lambda (kv)
                                     (destructuring-bind (key value) kv
                                       (and (equal key "name") (equalp value "id")))) 
                                   (second el)))
                           (xml-matches "property" (xml-match "properties" xml nil)))))
-    (assert id-prop (id-prop) "Cannot link to locale “~a” because the map has no ID property" locale-name)
-    (let ((locale-id (parse-integer (second (find-if (lambda (kv)
-                                                       (destructuring-bind (key value) kv
-                                                         (declare (ignore value))
-                                                         (equal key "value")))
-                                                     (second id-prop))))))
-      (dolist (group (xml-matches "objectgroup" xml))
-        (dolist (object (xml-matches "object" group))
-          (when-let (properties (xml-match "properties" object nil))
-            (dolist (prop (xml-matches "property" properties))
-              (when (and (find-if (lambda (kv) (destructuring-bind (key value) kv
-                                                 (and (equalp key "value")
-                                                      (equalp value name))))
-                                  (second prop))
-                         (find-if (lambda (kv) (destructuring-bind (key value) kv
-                                                 (and (equalp key "name")
-                                                      (equalp value "Entrance"))))
-                                  (second prop)))
-                (let ((x (parse-integer (second (find-if (lambda (kv)
-                                                           (destructuring-bind (key value) kv
-                                                             (declare (ignore value))
-                                                             (equalp key "x"))) 
-                                                         (second object)))))
-                      (y (parse-integer (second (find-if (lambda (kv)
-                                                           (destructuring-bind (key value) kv
-                                                             (declare (ignore value))
-                                                             (equalp key "y"))) 
-                                                         (second object))))))
-                  (return-from find-entrance-by-name (list locale-id x y))))))))))
+    (assert id-prop (id-prop) "Cannot find an ID property from map data")
+    (parse-integer (second (find-if (lambda (kv)
+                                      (destructuring-bind (key value) kv
+                                        (declare (ignore value))
+                                        (equal key "value")))
+                                    (second id-prop))))))
+
+(defun find-entrance-by-name (xml name locale-name)
+  (let ((locale-id (find-locale-id-from-xml xml)))
+    (dolist (group (xml-matches "objectgroup" xml))
+      (dolist (object (xml-matches "object" group))
+        (when-let (properties (xml-match "properties" object nil))
+          (dolist (prop (xml-matches "property" properties))
+            (when (and (find-if (lambda (kv) (destructuring-bind (key value) kv
+                                               (and (equalp key "value")
+                                                    (equalp value name))))
+                                (second prop))
+                       (find-if (lambda (kv) (destructuring-bind (key value) kv
+                                               (and (equalp key "name")
+                                                    (equalp value "Entrance"))))
+                                (second prop)))
+              (let ((x (parse-integer (second (find-if (lambda (kv)
+                                                         (destructuring-bind (key value) kv
+                                                           (declare (ignore value))
+                                                           (equalp key "x"))) 
+                                                       (second object)))))
+                    (y (parse-integer (second (find-if (lambda (kv)
+                                                         (destructuring-bind (key value) kv
+                                                           (declare (ignore value))
+                                                           (equalp key "y"))) 
+                                                       (second object))))))
+                (return-from find-entrance-by-name (list locale-id x y)))))))))
   (error "Can't link to non-existing “~a” point in locale “~a”" name locale-name))
 
 (defun assign-exit (locale point exits)

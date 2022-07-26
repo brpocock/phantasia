@@ -23,3 +23,8 @@
           JReturnFromInterrupt = $c01e
           JGetPlayerFrame = $c021
           JBeginStats = $c024
+
+;;; asset banks have these entries
+          JLoadMap = $8000
+          JLoadSong = $8003
+          JLoadScript = $8006

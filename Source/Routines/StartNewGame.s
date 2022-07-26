@@ -16,7 +16,7 @@ StartNewGame:	.block
           .mva CurrentMap, #$ff
           .mva CurrentMapBank, #$ff
           .mva NextMap, # 0
-          .mva NextMapBank, # 2
+          .mva NextMapBank, # 3 ; FIXME look it up
           .mva ActiveDLL, # 0
 
           .mva PlayerSkinColor, #CoLu(COLBROWN, $7)
@@ -24,7 +24,7 @@ StartNewGame:	.block
           .mva PlayerClothesColor, #CoLu(COLPURPLE, $7)
 
           .enc "minifont"
-          .mva PlayerNameLength, 4
+          .mva PlayerNameLength, 4 ; FIXME
           .mva PlayerName, #"b"
           .mva PlayerName + 1, #"a"
           .mva PlayerName + 2, #"k"

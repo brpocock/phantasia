@@ -3,16 +3,20 @@
 
 LoadMap:  .block
           lda CurrentMap
-          .if 0 != MapStartOffset
-            sec
-            sbc #MapStartOffset
-          .fi
-          asl a
-          tay
+          ldy # 0
 
-          lda Maps, y
-          sta Pointer
+FindMap:
+          cmp Maps, y
+          beq FoundMap
+          iny
+          iny
+          iny
+          jmp FindMap
+
+FoundMap:
           lda Maps + 1, y
+          sta Pointer
+          lda Maps + 2, y
           sta Pointer + 1
 
 CopyMapDimensions:

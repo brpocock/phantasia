@@ -1,7 +1,7 @@
 ;;; Phantasia Source/Source/Banks/Bank06/Bank06.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
-          BANK = 06
+          BANK = $02
 
           .include "StartBank.s"
 

@@ -15,6 +15,6 @@ WarmStart:	.block
           .mva GameMode, #ModeTitleScreen
 
           .BankSwitch # 2
-          jmp $8000
+          jmp JLoadMap
 
           .bend
