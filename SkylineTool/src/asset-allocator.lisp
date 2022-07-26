@@ -458,7 +458,7 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
                                                :name :wild
                                                :type "tsx")))
       (write-tsx-generation tileset))
-    (dolist (art (directory (make-pathname :directory (list :relative "Source" :wild)
+    (dolist (art (directory (make-pathname :directory (list :relative "Source" "Banks" :wild)
                                            :name :wild
                                            :type "art")))
       (write-art-generation art))
