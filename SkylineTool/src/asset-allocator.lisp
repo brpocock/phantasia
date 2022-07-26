@@ -45,13 +45,13 @@
          (format nil "~a" name)))))
 
 (defun song-asset-p (asset)
-  (zerop (position "Songs/" asset)))
+  (eql 0 (position "Songs/" asset)))
 
 (defun script-asset-p (asset)
-  (zerop (position "Scripts/" asset)))
+  (eql 0 (position "Scripts/" asset)))
 
 (defun map-asset-p (asset)
-  (zerop (position "Maps/" asset)))
+  (eql 0 (position "Maps/" asset)))
 
 (defun song-asset-loader-size ()
   (ecase *machine* 
@@ -110,7 +110,8 @@
         for asset in sequence
         for asset-size = (gethash asset file-sizes)
         for tentative-bank = (let ((tentative-bank (copy-hash-table bank-assets)))
-                               (setf (gethash asset tentative-bank) asset-size))
+                               (setf (gethash asset tentative-bank) asset-size)
+                               tentative-bank)
         if (< (bank-size tentative-bank) (size-of-banks))
           do (setf bank-assets tentative-bank)
         else do (progn 
@@ -151,7 +152,7 @@
                                           :type "s"))
           return bank))
 
-(defun allocate-assets (build)
+(defun allocate-assets (build &optional (*machine* 7800))
   (assert (member build +all-builds+ :test 'equal) (build)
           "BUILD must be one of ~{~a~^ or ~} not “~a”" +all-builds+ build)
   (let ((assets-list (all-assets-for-build build)))
