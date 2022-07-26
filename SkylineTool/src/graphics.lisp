@@ -1237,7 +1237,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
 
 (defun read-7800-art-index (index-in)
   (let ((png-list (list)))
-    (format *trace-output* "~&~A: reading art index …" index-in)
+    (format *trace-output* "~&~A: reading art index …" (enough-namestring index-in))
     (with-input-from-file (index index-in)
       (loop for line = (read-line index nil)
             while line
