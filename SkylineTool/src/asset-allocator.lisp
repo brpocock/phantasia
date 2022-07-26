@@ -231,14 +231,16 @@
      (append (list :relative "Source" "Generated") (subseq path 3)))
     (t (error "Don't know how to find a generated path from ~a" path))))
 
-(defun write-art-generation (path name)
+(defun write-art-generation (pathname)
   (format t "~%
 Object/Assets/~a.o: ~{~a/~}~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
 	mkdir -p Object/Assets
 	bin/skyline-tool compile-art-7800 $@ $<"
-          name (rest path) name 
+          (pathname-name pathname)
+          (rest (pathname-directory pathname))
+          (pathname-name pathname)
           (mapcar #'second 
-                  (read-7800-art-index (make-pathname :directory path :name name :type "art")))))
+                  (read-7800-art-index pathname))))
 
 (defun write-tsx-generation (pathname)
   (format t "~%
