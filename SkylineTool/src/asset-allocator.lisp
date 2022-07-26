@@ -42,7 +42,7 @@
     (existing-object-file
      (if (equal kind "Songs")
          (format nil "Song.~a.~a.~a" name sound video)
-         (format nil "~a.~a" (subseq kind 0 (length kind)) name)))))
+         (format nil "~a" name)))))
 
 (defun song-asset-p (asset)
   (zerop (position "Songs/" asset)))
@@ -53,23 +53,38 @@
 (defun map-asset-p (asset)
   (zerop (position "Maps/" asset)))
 
+(defun song-asset-loader-size ()
+  (ecase *machine* 
+    (7800 256)))
+
+(defun script-asset-loader-size ()
+  (ecase *machine*
+    (7800 256)))
+
+(defun map-asset-loader-size ()
+  (ecase *machine*
+    (7800 1024)))
+
+(defun general-overhead-size ()
+  (ecase *machine*
+    (7800 1024)))
+
 (defun bank-size (asset-size-hash)
   (let ((assets (hash-table-keys asset-size-hash)))
     (reduce 
      #'+
      (remove-if #'null
                 (flatten
-                 (list (when (some #'song-asset-p assets) 
-                         (ecase *machine* 
-                           (7800 256)))
-                       (when (some #'script-asset-p assets)
-                         (ecase *machine*
-                           (7800 256)))
-                       (when (some #'map-asset-p assets)
-                         (ecase *machine*
-                           (7800 1024)))
-                       (loop for asset in assets
-                             collecting (gethash asset asset-size-hash))))))))
+                 (list 
+                  (general-overhead-size)
+                  (when (some #'song-asset-p assets) 
+                    (song-asset-loader-size))
+                  (when (some #'script-asset-p assets)
+                    (script-asset-loader-size))
+                  (when (some #'map-asset-p assets)
+                    (map-asset-loader-size)                         )
+                  (mapcar (lambda (asset) (gethash asset asset-size-hash)) 
+                          assets)))))))
 
 (defun best-permutation (permutations)
   (loop with optimal-count = nil
@@ -84,6 +99,10 @@
                     (return optimal-assets)
                     (error "No permutation can be allocated"))))
 
+(defun size-of-banks ()
+  (ecase *machine*
+    (7800 #x4000)))
+
 (defun try-allocation-sequence (sequence file-sizes permutations)
   (loop with banks = (make-hash-table :test 'equal)
         with bank = 0
@@ -92,8 +111,7 @@
         for asset-size = (gethash asset file-sizes)
         for tentative-bank = (let ((tentative-bank (copy-hash-table bank-assets)))
                                (setf (gethash asset tentative-bank) asset-size))
-        if (< (bank-size tentative-bank) (ecase *machine*
-                                           (7800 #x4000)))
+        if (< (bank-size tentative-bank) (size-of-banks))
           do (setf bank-assets tentative-bank)
         else do (progn 
                   (setf (gethash bank banks) bank-assets
@@ -281,7 +299,12 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
 (defun write-asset-bank-makefile (bank &key build sound video)
   (let ((all-assets (all-assets-for-build build)))
     (format t "~%
-Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s: Source/Assets.index bin/skyline-tool \\~{~%~10t~a~^ \\~}
+Source/Generated/Bank~(~2,'0x~).~a.~a.~a.list: Source/Assets.index \\
+~10tbin/skyline-tool \\~{~%~10t~a~^ \\~}
+	bin/skyline-tool allocate-assets ~a
+
+Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s: Source/Assets.index Source/Generated/Bank~(~2,'0x~).~a.~a.~a.list \\
+~10tbin/skyline-tool \\~{~%~10t~a~^ \\~}
 	bin/skyline-tool write-asset-bank ~x ~a ~a ~a
 
 Object/Bank~(~2,'0x~).~a.~a.~a.o: Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s \\
@@ -289,6 +312,10 @@ Object/Bank~(~2,'0x~).~a.~a.~a.o: Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s \\
 	mkdir -p Object
 	${AS7800} -DTV=~a -DMUSIC=~a ~a \\~{~%-I ~a \\~}
 		-l $@.labels.txt -L $@.list.txt $< -o $@"
+            bank build sound video
+            (mapcar #'asset->object-name all-assets)
+            build
+            bank build sound video
             bank build sound video
             (mapcar #'asset->object-name all-assets)
             bank build sound video

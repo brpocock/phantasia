@@ -146,11 +146,11 @@ file  (bin/skyline-tool),  though;  in   order  to  make  these  changes
 effective for next time, you should run Make (which will run Buildapp).
 ")
             (compile-file (make-pathname
-                           :directory '(:relative "src" "tool" "skyline-tool")
+                           :directory '(:relative "SkylineTool")
                            :name "setup" :type "lisp")
                           :print nil)
             (load (make-pathname
-                   :directory '(:relative "src" "tool" "skyline-tool") 
+                   :directory '(:relative "SkylineTool" ) 
                    :name "setup" :type "fasl"))
             (go do-over))
           (quit-completely ()
@@ -166,7 +166,7 @@ Supply a list of verb(s) to see detailed documentation"
  Skyline-Tool
  ————————————
 
-Copyright © 2014-2017
+Copyright © 2014-2022
  Bruce-Robert Pocock (brpocock@star-hope.org)
  Most Rights Reserved.  See COPYING for details.
 
