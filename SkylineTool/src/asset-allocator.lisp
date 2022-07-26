@@ -258,7 +258,7 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
 
 (defun find-included-binary-file (name)
   (dolist (path (include-paths-for-current-bank))
-    (let ((possible-file (make-pathname :directory path :name name :type "art")))
+    (let ((possible-file (make-pathname :directory '(:relative "Source" "Art") :name name :type "art")))
       (when (probe-file possible-file)
         (return-from find-included-binary-file
           (make-pathname :directory '(:relative "Object" "Assets") :name name :type "o")))))
