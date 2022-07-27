@@ -107,7 +107,7 @@ Dist/Phantasia.Demo.YM.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skylin
 Dist/Phantasia.Demo.YM.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile $@
 
-Source/Generated/Makefile:	bin/skyline-tool ${SOURCES}
+Source/Generated/Makefile:	bin/skyline-tool
 	mkdir -p Source/Generated
 	bin/skyline-tool write-master-makefile
 

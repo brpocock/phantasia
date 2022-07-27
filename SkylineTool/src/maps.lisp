@@ -648,6 +648,9 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                    (subseq xml 2))))
 
 (defun write-word (number stream)
+  (assert (<= 0 number #xffff) (number)
+          "Cannot write 16-bit word-sized data with number #x~x (~:d); range is 0 - #xffff (65,535)"
+          number number)
   (write-byte (logand #x00ff number) stream)
   (write-byte (ash (logand #xff00 number) -8) stream))
 
@@ -732,39 +735,61 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                         width height
                         (length attributes-table) (length sprites-table)
                         (length exits-table))
+                ;; offset 0, width
                 (write-byte width object)
+                ;; offset 1, height
                 (write-byte height object)
-                (write-word (length name) object)
-                (write-word (+ (length name)
+                ;; offset 2-3, offset of art map
+                (write-word (+ 16 1 (length name))
+                            object)
+                ;; offset 4-5, offset of attributes map
+                (write-word (+ 16 1 (length name)
                                2 (length compressed-art))
                             object)
-                (write-word (+ (length name)
+                ;; offset 6-7, offset of attributes list
+                (write-word (+ 16 1 (length name)
                                2 (length compressed-art) 
                                2 (length compressed-attributes))
                             object)
-                (write-word (+ (length name)  
+                ;; offset 8-9, offset of sprites list
+                (write-word (+ 16 1 (length name)
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
-                               (* 5 (length attributes-table)))
+                               1 (* 6 (length attributes-table)))
                             object)
-                (write-word (+ (length name)  
+                ;; offset 10-11, offset of exits list
+                (write-word (+ 16 1 (length name)
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
-                               (* 5 (length attributes-table))
-                               (* 16 (length sprites-table))) 
+                               1 (* 6 (length attributes-table))
+                               1 (* 16 (length sprites-table))) 
                             object)
+                ;; offset 12-15, padding before name
+                (write-bytes #(0 0 0 0) object)
+                ;; offset 16, name (Pascal string)
                 (write-byte (length name) object)
                 (write-bytes (unicode->minifont name) object)
+                ;; compressed art map
                 (write-word (length compressed-art) object)
                 (write-bytes compressed-art object)
+                ;; compressed attributes map
                 (write-word (length compressed-attributes) object)
                 (write-bytes compressed-attributes object)
+                ;; attributes list
                 (write-byte (length attributes-table) object)
+                (assert (every (lambda (attr) (= 6 (length attr))) attributes-table)
+                        (attributes-table)
+                        "All attributes table entries must be precisely 6 bytes: ~%~s" attributes-table)
                 (dolist (attr attributes-table)
                   (write-bytes attr object))
+                ;; sprites list
                 (write-byte (length sprites-table) object)
+                (assert (every (lambda (sprite) (= 8 (length sprite))) sprites-table)
+                        (sprites-table)
+                        "All sprites table entries must be precisely 5 bytes: ~%~s" sprites-table)
                 (dolist (sprite sprites-table)
                   (write-bytes sprite object))
+                ;; exits list
                 (write-byte (length exits-table) object)
                 (dolist (exit exits-table)
                   (destructuring-bind (locale x y) exit

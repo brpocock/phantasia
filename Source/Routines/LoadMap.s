@@ -28,12 +28,13 @@ CopyMapDimensions:
           lda (Pointer), y
           sta MapHeight
 CopyMapAttributesTable:
-          ldy # MapOffsetAttributes
+          ldy #MapOffsetAttributes
           lda (Pointer), y
           sta Source
           iny
           lda (Pointer), y
           sta Source + 1
+          .AddWord Source, Pointer
           .mvaw Dest, MapAttributes - 1
 
           ldy # 0
@@ -61,10 +62,10 @@ CopyAttributesLoop:
 DoneAttributes:
 ;;; 
 LoadPlayer:
-          .mva SpriteXH, # 14 ; XXX from Entrance code
+          .mva SpriteXH, # 14 ; TODO from Entrance code
           .mvy SpriteXL, # 0
           sty SpriteXFraction
-          .mva SpriteYH, # 6 ;  XXX from Entrance code
+          .mva SpriteYH, # 6 ;  TODO from Entrance code
           sty SpriteYL
           sty SpriteYFraction
           .mva SpriteArtH, #>AnimationBufferPlayerNow
@@ -86,6 +87,7 @@ CopyMapExits:
           iny
           lda (Pointer), y
           sta Source + 1
+          .AddWord Source, Pointer
 
           .mvaw Dest, MapExits - 1
 
@@ -120,6 +122,8 @@ DecompressMapTile:
           iny
           lda (Pointer), y
           sta Source + 1
+          .AddWord Source, Pointer
+
           .mvaw Dest, MapArt
           jsr RLE
 
@@ -131,6 +135,8 @@ DecompressMapTileAttributes:
           iny
           lda (Pointer), y
           sta Source + 1
+          .AddWord Source, Pointer
+
           .mvaw Dest, MapTileAttributes
           jsr RLE
 ;;; 
@@ -149,6 +155,7 @@ CopyTitleLoop:
           bne CopyTitleLoop
 ;;; 
 DoneLoadMap:
+          clc
           rts
 
           .bend

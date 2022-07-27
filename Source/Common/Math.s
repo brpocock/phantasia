@@ -33,6 +33,18 @@ _cc:
           .bend
           .endm
 
+AddWord:  .macro a, b
+          .block
+          clc
+          lda \a
+          adc \b
+          sta \a
+          lda \a + 1
+          adc \b + 1
+          sta \a + 1
+          .bend
+          .endm
+          
 Inc16cc .macro address
           .block
           inc \address

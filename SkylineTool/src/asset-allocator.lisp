@@ -46,29 +46,29 @@
          (format nil "~a" name)))))
 
 (defun song-asset-p (asset)
-  (eql 0 (position "Songs/" asset)))
+  (eql 0 (search "Songs/" asset)))
 
 (defun script-asset-p (asset)
-  (eql 0 (position "Scripts/" asset)))
+  (eql 0 (search "Scripts/" asset)))
 
 (defun map-asset-p (asset)
-  (eql 0 (position "Maps/" asset)))
+  (eql 0 (search "Maps/" asset)))
 
 (defun song-asset-loader-size ()
   (ecase *machine* 
-    (7800 256)))
+    (7800 256)))  ; FIXME
 
 (defun script-asset-loader-size ()
   (ecase *machine*
-    (7800 256)))
+    (7800 256)))  ; FIXME
 
 (defun map-asset-loader-size ()
   (ecase *machine*
-    (7800 1024)))
+    (7800 1024)))  ; FIXME
 
 (defun general-overhead-size ()
   (ecase *machine*
-    (7800 1024)))
+    (7800 1024)))  ; FIXME
 
 (defun bank-size (asset-size-hash)
   (let ((assets (hash-table-keys asset-size-hash)))
@@ -83,7 +83,7 @@
                   (when (some #'script-asset-p assets)
                     (script-asset-loader-size))
                   (when (some #'map-asset-p assets)
-                    (map-asset-loader-size)                         )
+                    (map-asset-loader-size))
                   (mapcar (lambda (asset) (gethash asset asset-size-hash)) 
                           assets)))))))
 
@@ -299,7 +299,7 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
 (defun asset->object-name (asset-indicator)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
     (declare (ignore kind))
-    (format nil "~a.o" name)))
+    (format nil "Object/Assets/~a.o" name)))
 
 (defun asset->symbol-name (asset-indicator)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
@@ -512,24 +512,32 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
 (defun write-asset-source (kind predicate assets source)
   (if (some predicate assets)
       (progn
+        (when (equal "Map" kind)
+          (format source "~&~10t.include \"RLE.s\""))
         (format source "~&~10t.include \"Load~a.s\"~2%~as:" kind kind)
-        (format source "~&~as:" kind)
         (dolist (asset (remove-if-not predicate assets))
-          (format source "~&~10t.byte ~d" (get-asset-id (make-symbol (string-upcase kind)) asset))
+          (format source "~&~10t.byte ~d" (get-asset-id (make-keyword (string-upcase kind)) 
+                                                        (subseq asset (position #\/ asset))))
           (format source "~&~10t.word ~a" (asset->symbol-name asset)))
         (format source "~2%"))
       (format source "Load~a:~&~10tsec~&~10trts~2%" kind)))
 
+(defun last-segment (string char)
+  (if-let (position (position char string :from-end t))
+    (subseq string (1+ position))
+    string))
+
 (defun write-asset-bank (bank-hex build sound video)
-  (let* ((bank (parse-integer bank-hex :radix 16))
-         (basename (format nil "Bank~(~2,'0x~).~a.~a.~a" bank build sound video))
+  (let* ((*bank* (parse-integer bank-hex :radix 16))
+         (basename (format nil "Bank~(~2,'0x~).~a.~a.~a" *bank* build sound video))
          (outfile (make-pathname :directory (list :relative "Source" "Generated")
                                  :name basename
                                  :type "s"))
-         (assets (with-input-from-file (list (allocation-list-name bank build sound video))
+         (assets (with-input-from-file (list (allocation-list-name *bank* build sound video))
                    (loop for asset = (read-line list nil nil)
                          while asset
                          collect asset))))
+    (format *trace-output* "~& Bank ~(~2,'0x~) assets: ~s" *bank* assets)
     (ensure-directories-exist outfile)
     
     (with-output-to-file (source outfile :if-exists :supersede)
@@ -543,12 +551,12 @@ VLoadMap: jmp LoadMap
 VLoadSong: jmp LoadSong
 VLoadScript: jmp LoadScript
 ~2%"
-              bank bank)
+              *bank* *bank*)
       (write-asset-source "Map" #'map-asset-p assets source)
       (write-asset-source "Song" #'song-asset-p assets source)
       (write-asset-source "Script" #'script-asset-p assets source)
       (dolist (asset assets)
         (format source "~&~a:~%~10t.binary \"~a\"" 
                 (asset->symbol-name asset)
-                (asset->object-name asset)))
-      (format source "~&~10t.include \"EndBank.s\"~%"))))
+                (last-segment (asset->object-name asset) #\/)))
+      (format source "~3&~10t.include \"EndBank.s\"~%"))))
