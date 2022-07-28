@@ -930,6 +930,32 @@ Music:~:*
             for notes = (gethash symbol catalog)
             do (write-song-data-to-binary notes object sound-chip)))))
 
+(defun compile-music-2600 (source-out-name in-file-name)
+  (let ((catalog (make-hash-table))
+        (comments-catalog (make-hash-table))) 
+    (with-output-to-file (source-out source-out-name :if-exists :supersede :if-does-not-exist :create)
+      (format *trace-output* "~&Writing ~a…" source-out-name)
+      (format source-out ";;; Music compiled from ~a;
+;;; do not bother editing (generated file will be overwritten)" 
+              in-file-name) 
+      (dolist (output-coding '(:NTSC :PAL))
+        (format *trace-output* "Music encoded for ~a TV standard…" output-coding)
+        (when (eql :NTSC output-coding)
+          (format source-out "~%	.if TV == NTSC~2%"))
+        (when (eql :PAL output-coding)
+          (format source-out "~%	.else ; PAL or SECAM"))
+        (import-song-to-catalog
+         :song-file-name in-file-name
+         :output-coding output-coding
+         :catalog catalog
+         :comments-catalog comments-catalog)
+        (loop for symbol being the hash-keys of catalog
+              for notes = (gethash symbol catalog)
+              do (write-song-data-to-file (string symbol) notes source-out)))
+      (format source-out "~2%	.fi~%"))
+    (format *trace-output* "~&… done.~%")
+    (finish-output)))
+
 (defun compile-music (source-out-name in-file-name 
                       &optional (machine-type$ "2600") 
                                 (sound-chip "TIA")
@@ -937,31 +963,7 @@ Music:~:*
   (let ((*machine* (parse-integer machine-type$)))
     (format *trace-output* "~&Writing music from playlist ~a…" in-file-name)
     (ecase *machine*
-      (2600
-       (let ((catalog (make-hash-table))
-             (comments-catalog (make-hash-table))) 
-         (with-output-to-file (source-out source-out-name :if-exists :supersede :if-does-not-exist :create)
-           (format *trace-output* "~&Writing ~a…" source-out-name)
-           (format source-out ";;; Music compiled from ~a;
-;;; do not bother editing (generated file will be overwritten)" 
-                   in-file-name) 
-           (dolist (output-coding '(:NTSC :PAL))
-             (format *trace-output* "Music encoded for ~a TV standard…" output-coding)
-             (when (eql :NTSC output-coding)
-               (format source-out "~%	.if TV == NTSC~2%"))
-             (when (eql :PAL output-coding)
-               (format source-out "~%	.else ; PAL or SECAM"))
-             (import-song-to-catalog
-              :song-file-name in-file-name
-              :output-coding output-coding
-              :catalog catalog
-              :comments-catalog comments-catalog)
-             (loop for symbol being the hash-keys of catalog
-                   for notes = (gethash symbol catalog)
-                   do (write-song-data-to-file (string symbol) notes source-out)))
-           (format source-out "~2%	.fi~%"))
-         (format *trace-output* "~&… done.~%")
-         (finish-output)))
+      (2600 (compile-music-2600 source-out-name in-file-name))
       (7800 (compile-music-7800 source-out-name in-file-name 
                                 (make-keyword (string-upcase sound-chip))
                                 (make-keyword (string-upcase output-coding)))))))
