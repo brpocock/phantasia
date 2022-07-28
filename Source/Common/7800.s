@@ -176,6 +176,12 @@ PSKCTL   = $F    ; Serial Port control
 
           NTSC = $be
           PAL = $ef
+
+;;; Sound chips
+
+          TIA = $de
+          POKEY = $ad
+          YM = $1e
           
 ;;; Color Constants
 

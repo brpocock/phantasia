@@ -139,9 +139,12 @@
 (define-constant +all-builds+ '("AA" "Public" "Demo")
   :test #'equalp)
 
+(define-constant +all-sounds+ '("TIA" "POKEY" "YM")
+  :test #'equalp)
+
 (defun all-sound-chips-for-build (build)
   (cond ((equal "AA" build) '("YM"))
-        (t '("TIA" "POKEY" "YM"))))
+        (t +all-sounds+)))
 
 (define-constant +all-video+ '("NTSC" "PAL")
   :test #'equalp)
@@ -350,11 +353,16 @@ Object/Assets/Tileset.~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png 
                                          :type "s")))
     (ensure-directories-exist source-pathname)
     (with-output-to-file (source source-pathname :if-exists :supersede)
-      (format source
-              ";; This is a generated file~%~10t.binary format(\"Song.~a.%s.%s.o\", MUSIC, TV)"
-              basename))
-    (dolist (video '("NTSC" "PAL"))
-      (dolist (sound '("TIA" "POKEY" "YM"))
+      (format source ";; This is a generated file~2%" basename)
+      (dolist (video +all-video+)
+        (dolist (sound +all-sounds+)
+          (format source "~%          .if MUSIC == ~a && TV == ~a
+            .binary \"Song.~a.~a.~a.o\"
+          .fi~%"
+                  video sound basename sound video)
+          )))
+    (dolist (video +all-video+)
+      (dolist (sound +all-sounds+)
         (format t "~%
 ~a: ~a \\
           Source/Assets.index bin/skyline-tool
