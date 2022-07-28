@@ -404,10 +404,9 @@
 
 (defgeneric midi-to-sound-binary (output-coding machine-type midi-notes sound-chip)
   (:method (output-coding machine-type midi-notes sound-chip)
-    (warn "No handler for output coding ~a (machine ~a, sound chip ~a); ~
+    (error "No handler for output coding ~a (machine ~a, sound chip ~a); ~
 skipping MIDI music with ~:d note~:p"
-          output-coding machine-type sound-chip (length midi-notes))
-    #()))
+           output-coding machine-type sound-chip (length midi-notes))))
 
 (defun best-tia-ntsc-note-for (freq &optional (voice 1))
   (let ((notes (mapcar #'first
@@ -426,7 +425,15 @@ skipping MIDI music with ~:d note~:p"
       (list voice freq-code (frequency-distance freq (elt notes freq-code))))))
 
 (defun best-pokey-note-for (freq tv-type)
-  (let ((notes (list :TODO)))
+  (let ((notes (list ))); TODO
+    (when-let (freq-code (position (first (sort (copy-list notes) #'<
+                                                :key (curry #'frequency-distance freq)))
+                                   notes
+                                   :test #'=))
+      (list voice freq-code (frequency-distance freq (elt notes freq-code))))))
+
+(defun best-yamaha-note-for (freq tv-type)
+  (let ((notes (list ))); TODO
     (when-let (freq-code (position (first (sort (copy-list notes) #'<
                                                 :key (curry #'frequency-distance freq)))
                                    notes
@@ -492,6 +499,27 @@ skipping MIDI music with ~:d note~:p"
                      (aref array i 4) (elt note 4)))          ;comment
       array)))
 
+(defun array<-yamaha-notes-list (list output-coding)
+  (labels ((nearest (&rest set)
+             (first (sort set #'< :key #'third))))
+    (let ((array (make-array (list (length list) 5))))
+      (loop for note in list
+            for i from 0
+            for (control freq) 
+              = 
+              (if-let (note (elt note 2))
+                (best-yamaha-note-for note output-coding)
+                (list nil nil))
+            do (setf (aref array i 0) (when (elt note 0)
+                                        (floor (max (/ (elt note 0) +midi-duration-divisor+)
+                                                    1))) ; duration
+                     (aref array i 1) control ;control
+                     (aref array i 2) freq    ;frequency
+                     (aref array i 3) (when (elt note 3)
+                                        (floor (elt note 3))) ; volume
+                     (aref array i 4) (elt note 4)))          ;comment
+      array)))
+
 (defun midi-translate-notes (notes)
   (let ((volume 8)
         (output (list)))
@@ -511,6 +539,9 @@ skipping MIDI music with ~:d note~:p"
                  (:text (push (make-array 5 :initial-contents (list nil nil nil nil info))
                               output)))))
     (reverse output)))
+
+(defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :ym)))
+  (array<-yamaha-notes-list (midi-translate-notes (car midi-notes)) output-coding))
 
 (defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :pokey)))
   (array<-pokey-notes-list (midi-translate-notes (car midi-notes)) output-coding))
@@ -781,6 +812,36 @@ Gathered text:~{~% • ~a~}"
                                    0))
                               object)))))
 
+(defmethod write-song-data-to-binary (notes object (sound-chip (eql :POKEY)))
+  (loop for i below (array-dimension notes 0)
+        do (let ((duration (aref notes i 0))
+                 (control (aref notes i 1))
+                 (frequency (aref notes i 2))
+                 (volume (aref notes i 3))
+                 (comment (aref notes i 4)))
+             (unless (or (symbolp comment) (emptyp comment))
+               (format *trace-output* "~&;;; ~a" comment))
+             (if (or (null duration) (< duration +midi-duration-divisor+))
+                 (when (= i (1- (array-dimension notes 0)))
+                   (write-bytes #(0 0 0 0 1) object))
+                 (write-bytes #(0 1 2 3 4); TODO
+                              object)))))
+
+(defmethod write-song-data-to-binary (notes object (sound-chip (eql :YM)))
+  (loop for i below (array-dimension notes 0)
+        do (let ((duration (aref notes i 0))
+                 (control (aref notes i 1))
+                 (frequency (aref notes i 2))
+                 (volume (aref notes i 3))
+                 (comment (aref notes i 4)))
+             (unless (or (symbolp comment) (emptyp comment))
+               (format *trace-output* "~&;;; ~a" comment))
+             (if (or (null duration) (< duration +midi-duration-divisor+))
+                 (when (= i (1- (array-dimension notes 0)))
+                   (write-bytes #(0 0 0 0 1) object))
+                 (write-bytes #(0 1 2 3 4); TODO
+                              object)))))
+
 (defun assigned-song-bank-and-title (assignment)
   (list (car assignment)
         (assembler-label-name
@@ -865,7 +926,6 @@ Music:~:*
        :output-coding output-coding
        :catalog catalog
        :comments-catalog comments-catalog)
-      (write-bytes #(0 0 0 0 0 0 0 0) object)  ; TODO remove this
       (loop for symbol being the hash-keys of catalog
             for notes = (gethash symbol catalog)
             do (write-song-data-to-binary notes object sound-chip)))))
