@@ -201,14 +201,14 @@
    (tile-attributes :accessor tile-attributes
                     :initform (make-array (list 128 6) :element-type '(unsigned-byte 8)))))
 
-(defun load-tileset-image (pathname)
-  (format *trace-output* "~&Loading tileset image from ~a" pathname)
+(defun load-tileset-image (pathname$)
+  (format *trace-output* "~&Loading tileset image from ~a" pathname$)
   (let* ((png (png-read:read-png-file 
-               (make-pathname 
-                :name (subseq pathname 0
-                              (position #\. pathname :from-end t))
-                :type (subseq pathname (1+ (position #\. pathname :from-end t)))
-                :defaults #p"./Source/Maps/")))
+               (let ((pathname (parse-namestring pathname$))) 
+                 (make-pathname 
+                  :name (pathname-name pathname)
+                  :type (pathname-type pathname)
+                  :defaults #p"./Source/Maps/"))))
          (height (png-read:height png))
          (width (png-read:width png))
          (α (png-read:transparency png))
@@ -451,8 +451,11 @@
 
 (defun load-tileset (xml-reference)
   (let* ((pathname (if (consp xml-reference)
-                       (make-pathname :name (assocdr "source" (second xml-reference))
-                                      :defaults #p"./Source/Maps/")
+                       (let ((pathname 
+                               (parse-namestring (assocdr "source" (second xml-reference)))))
+                         (make-pathname :name (pathname-name pathname)
+                                        :type (pathname-type pathname)
+                                        :defaults #p"./Source/Maps/"))
                        xml-reference))
          (gid (if (consp xml-reference)
                   (parse-integer (assocdr "firstgid" (second xml-reference)))
@@ -675,7 +678,7 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
     mini-string))
 
 (defun compile-map (pathname)
-  (let ((outfile (make-pathname :defaults pathname
+  (let ((outfile (make-pathname :name (format nil "Map.~a" (pathname-name pathname))
                                 :directory '(:relative "Object" "Assets")
                                 :type "o")))
     (ensure-directories-exist outfile)
@@ -820,8 +823,8 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                   (palette-index (aref image (+ (- 3 x) (* 4 half)) (- 15 y)) palette))))))))
 
 (defun compile-tileset (pathname)
-  (let ((outfile (make-pathname :defaults pathname
-                                :directory '(:relative "Object" "Assets")
+  (let ((outfile (make-pathname :directory '(:relative "Object" "Assets")
+                                :name (format nil "Tileset.~a" (pathname-name pathname))
                                 :type "o")))
     (ensure-directories-exist outfile)
     (with-output-to-file (object outfile

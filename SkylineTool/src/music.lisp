@@ -357,12 +357,12 @@
   
   "NTSC and PAL/SECAM sound values for each frequency code")
 
-(defgeneric midi-to-sound-binary (output-coding machine-type midi-file-name)
-  (:method (output-coding machine-type midi-notes)
-    (warn "No handler for output coding ~a (machine ~a); ~
+(defgeneric midi-to-sound-binary (output-coding machine-type midi-notes sound-chip)
+  (:method (output-coding machine-type midi-notes sound-chip)
+    (warn "No handler for output coding ~a (machine ~a, sound chip ~a); ~
 skipping MIDI music with ~:d note~:p"
-          output-coding machine-type (length midi-notes))
-    (make-array '(0 4))))
+          output-coding machine-type sound-chip (length midi-notes))
+    #()))
 
 (defun best-tia-ntsc-note-for (freq &optional (voice 1))
   (let ((notes (mapcar #'first
@@ -389,26 +389,28 @@ skipping MIDI music with ~:d note~:p"
     (let ((array (make-array (list (length list) 5))))
       (loop for note in list
             for i from 0
-            for (control freq) = 
-                               (if-let (note (elt note 2))
-                                 (ecase output-coding
-                                   (:ntsc
-                                    (nearest (null-if-zero-note (best-tia-ntsc-note-for note 4))
-                                             (null-if-zero-note (best-tia-ntsc-note-for note 5))
-                                             (null-if-zero-note (best-tia-ntsc-note-for note 2))
-                                             (null-if-zero-note (best-tia-ntsc-note-for note 6))
-                                             (null-if-zero-note (best-tia-ntsc-note-for note 8))
-                                             (list 0 0 most-positive-fixnum)))
-                                   (:pal
-                                    (nearest (null-if-zero-note (best-tia-pal-note-for note 4))
-                                             (null-if-zero-note (best-tia-pal-note-for note 5))
-                                             (null-if-zero-note (best-tia-pal-note-for note 2))
-                                             (null-if-zero-note (best-tia-ntsc-note-for note 6))
-                                             (null-if-zero-note (best-tia-ntsc-note-for note 8))
-                                             (list 0 0 most-positive-fixnum))))
-                                 (list nil nil))
+            for (control freq) 
+              = 
+              (if-let (note (elt note 2))
+                (ecase output-coding
+                  (:ntsc
+                   (nearest (null-if-zero-note (best-tia-ntsc-note-for note 4))
+                            (null-if-zero-note (best-tia-ntsc-note-for note 5))
+                            (null-if-zero-note (best-tia-ntsc-note-for note 2))
+                            (null-if-zero-note (best-tia-ntsc-note-for note 6))
+                            (null-if-zero-note (best-tia-ntsc-note-for note 8))
+                            (list 0 0 most-positive-fixnum)))
+                  (:pal
+                   (nearest (null-if-zero-note (best-tia-pal-note-for note 4))
+                            (null-if-zero-note (best-tia-pal-note-for note 5))
+                            (null-if-zero-note (best-tia-pal-note-for note 2))
+                            (null-if-zero-note (best-tia-ntsc-note-for note 6))
+                            (null-if-zero-note (best-tia-ntsc-note-for note 8))
+                            (list 0 0 most-positive-fixnum))))
+                (list nil nil))
             do (setf (aref array i 0) (when (elt note 0)
-                                        (floor (max (/ (elt note 0) +midi-duration-divisor+) 1))) ; duration
+                                        (floor (max (/ (elt note 0) +midi-duration-divisor+)
+                                                    1))) ; duration
                      (aref array i 1) control ;control
                      (aref array i 2) freq    ;frequency
                      (aref array i 3) (when (elt note 3)
@@ -430,18 +432,18 @@ skipping MIDI music with ~:d note~:p"
                                                               volume
                                                               (nth-value 2 (key<-midi-key (getf info :key)))))
                         output))
-                 (:rest (push (make-array 5 :initial-contents (list (getf info :duration) 0 0 0 "rest"))
+                 (:rest (push (make-array 5 :initial-contents (list (getf info :duration) 0 0 0 nil))
                               output))
                  (:text (push (make-array 5 :initial-contents (list nil nil nil nil info))
                               output)))))
     (reverse output)))
 
 (defmethod midi-to-sound-binary ((output-coding (eql :ntsc))
-                                 (machine-type (eql 2600)) midi-notes)
+                                 machine-type midi-notes (sound (eql :tia)))
   (array<-tia-notes-list (midi-translate-notes (car midi-notes)) output-coding))
 
 (defmethod midi-to-sound-binary ((output-coding (eql :pal))
-                                 (machine-type (eql 2600)) midi-notes)
+                                 machine-type midi-notes (sound (eql :tia)))
   (array<-tia-notes-list (midi-translate-notes (car midi-notes)) output-coding))
 
 (defun collect-midi-texts (midi)
@@ -507,7 +509,8 @@ Gathered text:~{~% • ~a~}"
       (map 'list (lambda (track) (midi-track-decode track parts/quarter))
            real-tracks))))
 
-(defun import-music-for-playlist (output-coding line catalog comments-catalog)
+(defun import-music-for-playlist (output-coding line catalog comments-catalog
+                                  &key sound-chip)
   (when (or (not (find #\= line))
             (char= #\; (first-elt (string-trim #(#\Space #\Tab) line))))
     (return-from import-music-for-playlist nil))
@@ -520,7 +523,8 @@ Gathered text:~{~% • ~a~}"
       (multiple-value-bind (numbers comments)
           (midi-to-sound-binary output-coding
                                 *machine*
-                                (read-midi midi-file-name))
+                                (read-midi midi-file-name)
+                                sound-chip)
         (format *trace-output* "~& - Generated ~:d sound values…" (first (array-dimensions numbers)))
         (when (plusp (first (array-dimensions numbers)))
           (setf (gethash symbol-name catalog) numbers
@@ -684,6 +688,26 @@ Gathered text:~{~% • ~a~}"
              (finish-output source-file)))
   (format source-file "~2%;;; end of ~a" (assembler-label-name title)))
 
+(defmethod write-song-data-to-binary (notes object (sound-chip (eql :TIA)))
+  (loop for i below (array-dimension notes 0)
+        do (let ((duration (aref notes i 0))
+                 (control (aref notes i 1))
+                 (frequency (aref notes i 2))
+                 (volume (aref notes i 3))
+                 (comment (aref notes i 4)))
+             (unless (or (symbolp comment) (emptyp comment))
+               (format *trace-output* "~&;;; ~a" comment))
+             (if (or (null duration) (< duration +midi-duration-divisor+))
+                 (when (= i (1- (array-dimension notes 0)))
+                   (write-bytes #(0 0 0 0 1) object))
+                 (write-bytes (vector
+                               volume control frequency 
+                               (round (min (max 1 (/ duration +midi-duration-divisor+)) #xff))
+                               (if (= i (1- (array-dimension notes 0))) ; last note
+                                   1
+                                   0))
+                              object)))))
+
 (defun assigned-song-bank-and-title (assignment)
   (list (car assignment)
         (assembler-label-name
@@ -744,49 +768,70 @@ Music:~:*
                                  song-file-name 
                                  output-coding
                                  catalog
-                                 comments-catalog)
-  (import-music-for-playlist output-coding 
+                                 comments-catalog
+                                 (sound-chip "TIA"))
+  (import-music-for-playlist output-coding
                              (format nil
                                      "Song_~a=~a" 
                                      (pathname-name song-file-name) song-file-name)
-                             catalog comments-catalog)
+                             catalog comments-catalog
+                             :sound-chip sound-chip)
   (format *trace-output* "~&Collected ~r song~:p~
-~:*~[~:; in “~a” coding~]."
-          (hash-table-count catalog) output-coding))
+~:*~[~:; in “~a” coding~] for ~a."
+          (hash-table-count catalog) output-coding sound-chip))
 
-(defun compile-music (source-out-name in-file-name &optional machine-type$)
-  (let ((*machine* (if machine-type$ (parse-integer machine-type$) 2600))
-        (catalog (make-hash-table))
+(defun compile-music-7800 (object-name midi-name sound-chip output-coding)
+  (let ((catalog (make-hash-table))
         (comments-catalog (make-hash-table)))
+    (with-output-to-file (object object-name :element-type '(unsigned-byte 8)
+                                             :if-exists :supersede :if-does-not-exist :create)
+      (format *trace-output* "~&Writing ~a…" object-name)
+      (import-song-to-catalog
+       :song-file-name midi-name
+       :sound-chip sound-chip
+       :output-coding output-coding
+       :catalog catalog
+       :comments-catalog comments-catalog)
+      (write-bytes #(0 0 0 0 0 0 0 0) object)  ; TODO remove this
+      (loop for symbol being the hash-keys of catalog
+            for notes = (gethash symbol catalog)
+            do (write-song-data-to-binary notes object sound-chip)))))
+
+(defun compile-music (source-out-name in-file-name 
+                      &optional (machine-type$ "2600") 
+                                (sound-chip "TIA")
+                                (output-coding "NTSC"))
+  (let ((*machine* (parse-integer machine-type$)))
     (format *trace-output* "~&Writing music from playlist ~a…" in-file-name)
-    (with-output-to-file (source-out source-out-name :if-exists :supersede :if-does-not-exist :create)
-      (format *trace-output* "~&Writing ~a…" source-out-name)
-      (format source-out ";;; Music compiled from ~a;
+    (ecase *machine*
+      (2600
+       (let ((catalog (make-hash-table))
+             (comments-catalog (make-hash-table))) 
+         (with-output-to-file (source-out source-out-name :if-exists :supersede :if-does-not-exist :create)
+           (format *trace-output* "~&Writing ~a…" source-out-name)
+           (format source-out ";;; Music compiled from ~a;
 ;;; do not bother editing (generated file will be overwritten)" 
-              in-file-name) 
-      (dolist (output-coding '(:NTSC :PAL))
-        (format *trace-output* "Music encoded for ~a TV standard…" output-coding)
-        (when (eql :NTSC output-coding)
-          (format source-out "~%	.if TV == NTSC~2%"))
-        (when (eql :PAL output-coding)
-          (format source-out "~%	.else ; PAL or SECAM"))
-        (import-song-to-catalog
-         :song-file-name in-file-name
-         :output-coding output-coding
-         :catalog catalog
-         :comments-catalog comments-catalog)
-        (loop for symbol being the hash-keys of catalog
-              for notes = (gethash symbol catalog)
-              do (write-song-data-to-file (string symbol) notes source-out)))
-      (format source-out "~2%	.fi~%"))
-    (format *trace-output* "~&… done.~%")
-    (finish-output))
-  
-  (defgeneric midi-to-sound-binary (output-coding machine-type midi-file-name)
-    (:method (output-coding machine-type midi-file-name)
-      (warn "No handler for output coding ~a (machine ~a); skipping ~a" 
-            output-coding machine-type midi-file-name)
-      #())))
+                   in-file-name) 
+           (dolist (output-coding '(:NTSC :PAL))
+             (format *trace-output* "Music encoded for ~a TV standard…" output-coding)
+             (when (eql :NTSC output-coding)
+               (format source-out "~%	.if TV == NTSC~2%"))
+             (when (eql :PAL output-coding)
+               (format source-out "~%	.else ; PAL or SECAM"))
+             (import-song-to-catalog
+              :song-file-name in-file-name
+              :output-coding output-coding
+              :catalog catalog
+              :comments-catalog comments-catalog)
+             (loop for symbol being the hash-keys of catalog
+                   for notes = (gethash symbol catalog)
+                   do (write-song-data-to-file (string symbol) notes source-out)))
+           (format source-out "~2%	.fi~%"))
+         (format *trace-output* "~&… done.~%")
+         (finish-output)))
+      (7800 (compile-music-7800 source-out-name in-file-name 
+                                (make-keyword (string-upcase sound-chip))
+                                (make-keyword (string-upcase output-coding)))))))
 
 (defun midi-track-decode (track parts/quarter)
   (declare (ignore parts/quarter))

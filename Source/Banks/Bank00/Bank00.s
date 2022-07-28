@@ -30,11 +30,11 @@ GamePlay:
 ;;; 
           * = $a000
 Font:
-          .binary "UI.o"
+          .binary "Art.UI.o"
           DrawUI = Font + 64
 ;;; 
           .align $1000
 Items:
-          .binary "Items.o"
+          .binary "Art.Items.o"
 ;;; 
           .include "EndBank.s"

@@ -6,10 +6,10 @@
           .include "StartBank.s"
 
 Tileset:
-          .binary "OverworldTiles.o"
+          .binary "Tileset.OverworldTiles.o"
 
           .align $2000
 Sprites:
-          .binary "OverworldSprites.o"
+          .binary "Tileset.OverworldSprites.o"
 
           .include "EndBank.s"

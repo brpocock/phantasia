@@ -22,10 +22,10 @@ BankEntry:
 
           .align $800, 0
 Font:
-          .binary "Font.o"
+          .binary "Art.Font.o"
 
           .align $800, 0
 BigFont:
-          .binary "BigFont.o"
+          .binary "Art.BigFont.o"
 
           .include "EndBank.s"

@@ -29,21 +29,12 @@
           collect asset))
 
 (defun existing-object-file (file-name)
-  (let ((object-pathname (make-pathname :directory '(:relative "Object" "Assets")
-                                        :type "o"
-                                        :name file-name)))
-    (assert (probe-file object-pathname) (file-name)
-            "Object file not found: “~a”" object-pathname)
-    object-pathname))
+  (assert (probe-file file-name) (file-name)
+          "Object file not found: “~a”" file-name)
+  file-name)
 
 (defun asset-file (asset &key sound video)
-  (destructuring-bind (kind name) (split-sequence #\/ asset)
-    (assert (member kind '("Songs" "Maps" "Scripts") :test #'equal) (asset)
-            "Asset indicator must be a song, map, or script, not “~a”" asset)
-    (existing-object-file
-     (if (equal kind "Songs")
-         (format nil "Song.~a.~a.~a" name sound video)
-         (format nil "~a" name)))))
+  (existing-object-file (asset->object-name asset :sound sound :video video)))
 
 (defun song-asset-p (asset)
   (eql 0 (search "Songs/" asset)))
@@ -102,17 +93,20 @@
   (ecase *machine*
     (7800 #x4000)))
 
-(defun try-allocation-sequence (sequence file-sizes permutations)
+(defun try-allocation-sequence (sequence file-sizes permutations &key sound video)
   (loop with banks = (make-hash-table :test 'equal)
         with bank = 0
         with bank-assets = (make-hash-table :test 'equal)
         for asset in sequence
-        for asset-size = (gethash asset file-sizes)
+        for asset-file = (asset-file asset :sound sound :video video)
+        for asset-size = (gethash asset-file file-sizes)
         for tentative-bank = (let ((tentative-bank (copy-hash-table bank-assets)))
                                (setf (gethash asset tentative-bank) asset-size)
                                tentative-bank)
+        when (null asset-size)
+          do (error "Did not get size of “~a” (for ~a)" asset-file asset)
         when (zerop asset-size)
-          do (error "Asset is zero length: ~a" asset)
+          do (error "Asset file is empty: “~a” (for ~a)" asset-file asset)
         if (< (bank-size tentative-bank) (size-of-banks))
           do (setf bank-assets tentative-bank)
         else
@@ -124,11 +118,13 @@
 (defun find-best-allocation (assets &key build sound video)
   (let ((file-sizes (make-hash-table :test 'equal)))
     (dolist (asset assets)
-      (setf (gethash asset file-sizes) 
-            (ql-util:file-size (asset-file asset :sound sound :video video))))
+      (let ((asset-file (asset-file asset :sound sound :video video)))
+        (setf (gethash asset-file file-sizes) (ql-util:file-size asset-file))))
     (let ((permutations (make-hash-table :test 'equal)))
-      (map-permutations (rcurry #'try-allocation-sequence file-sizes permutations)
-                        (hash-table-keys file-sizes))
+      (map-permutations (lambda (sequence) 
+                          (try-allocation-sequence sequence file-sizes permutations
+                                                   :sound sound :video video))
+                        assets)
       (let ((best (best-permutation permutations)))
         (when (zerop (length (hash-table-keys best)))
           (error "Could not find any assets to allocate?"))
@@ -138,8 +134,7 @@
           (unless (< (length (hash-table-keys best)) available-banks)
             (error "Best-case arrangement takes ~:d memory bank~:p (out of ~:d available)"
                    (length (hash-table-keys best)) available-banks)))
-        best)
-      )))
+        best))))
 
 (define-constant +all-builds+ '("AA" "Public" "Demo")
   :test #'equalp)
@@ -220,7 +215,8 @@
                    (format nil "Bank~(~2,'0x~)" *bank*)))
          (includes (list (list :relative "Source" "Common")
                          (list :relative "Source" "Routines")
-                         (list :relative "Object" "Assets"))))
+                         (list :relative "Object" "Assets")
+                         (list :relative "Source" "Generated" "Assets"))))
     (if (probe-file (make-pathname :directory (list :relative "Source" "Banks" bank)
                                    :name bank :type "s"))
         (append includes (list (list :relative "Source" "Banks" bank)))
@@ -236,7 +232,7 @@
 
 (defun write-art-generation (pathname)
   (format t "~%
-Object/Assets/~a.o: Source/Art/~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
+Object/Assets/Art.~a.o: Source/Art/~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
 	mkdir -p Object/Assets
 	bin/skyline-tool compile-art-7800 $@ $<"
           (pathname-name pathname)
@@ -246,12 +242,16 @@ Object/Assets/~a.o: Source/Art/~a.art \\~{~%~10t~a \\~}~%~10tbin/skyline-tool
 
 (defun write-tsx-generation (pathname)
   (format t "~%
-Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10tbin/skyline-tool
+Object/Assets/Tileset.~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10tbin/skyline-tool
 	mkdir -p Object/Assets
 	bin/skyline-tool compile-tileset $<"
           (pathname-name pathname)))
 
 (defun find-included-file (name)
+  (when (eql 0 (search "Song." name))
+    (return-from find-included-file 
+      (make-pathname :directory '(:relative "Source" "Generated" "Assets")
+                     :name name :type "s")))
   (dolist (path (include-paths-for-current-bank))
     (let ((possible-file (make-pathname :directory path :name name :type "s")))
       (when (probe-file possible-file)
@@ -259,14 +259,20 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
   (error "Cannot find a possible source for included file ~a.s in bank ~(~2,'0x~)" name *bank*))
 
 (defun find-included-binary-file (name)
-  (let ((possible-file (make-pathname :directory '(:relative "Source" "Art") :name name :type "art")))
-    (when (probe-file possible-file)
-      (return-from find-included-binary-file
-        (make-pathname :directory '(:relative "Object" "Assets") :name name :type "o"))))
-  (let ((possible-file (make-pathname :directory '(:relative "Source" "Maps") :name name :type "tsx")))
-    (when (probe-file possible-file)
-      (return-from find-included-binary-file
-        (make-pathname :directory '(:relative "Object" "Assets") :name name :type "o"))))
+  (when (eql 0 (search "Art." name))
+    (let ((possible-file (make-pathname :directory '(:relative "Source" "Art") 
+                                        :name (subseq name 4) :type "art")))
+      (when (probe-file possible-file)
+        (return-from find-included-binary-file
+          (make-pathname :directory '(:relative "Object" "Assets") 
+                         :name name :type "o")))))
+  (when (eql 0 (search "Tileset." name))
+    (let ((possible-file (make-pathname :directory '(:relative "Source" "Maps")
+                                        :name (subseq name 8) :type "tsx")))
+      (when (probe-file possible-file)
+        (return-from find-included-binary-file
+          (make-pathname :directory '(:relative "Object" "Assets")
+                         :name name :type "o")))))
   (error "Cannot find a possible source for included binary file ~a.o in bank ~(~2,'0x~)" name *bank*))
 
 (defun recursive-read-deps (source-file)
@@ -296,14 +302,25 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
                                              :name :wild
                                              :type type)))))
 
-(defun asset->object-name (asset-indicator)
+(defun asset->object-name (asset-indicator &key sound video)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
-    (declare (ignore kind))
-    (format nil "Object/Assets/~a.o" name)))
+    (if (equal kind "Songs")
+        (format nil "Object/Assets/Song.~a.~a.~a.o" name sound video)
+        (format nil "Object/Assets/~a.~a.o" (subseq kind 0 (1- (length kind))) name))))
+
+(defun asset->deps-list (asset-indicator build)
+  (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
+    (if (equal kind "Songs")
+        (format nil "Source/Generated/Assets/Song.~a.s \\~%~{~25tObject/Assets/Song.~{~a.~a.~a~}.o~^ \\~%~}"
+                name
+                (loop for sound in (all-sound-chips-for-build build)
+                      append (loop for video in +all-video+
+                                   collecting (list name sound video))))
+        (asset->object-name asset-indicator))))
 
 (defun asset->symbol-name (asset-indicator)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
-    (format nil "~a_~a" kind name)))
+    (format nil "~a_~a" (subseq kind 0 (1- (length kind))) name)))
 
 (defun asset->source-name (asset-indicator)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
@@ -314,30 +331,56 @@ Object/Assets/~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png \\~%~10t
               ((equal kind "Scripts") "scup")
               (t (error "Asset kind ~a not known" kind))))))
 
-(defun asset-compilation-line (asset-indicator)
+(defun asset-compilation-line (asset-indicator &key sound video)
   (destructuring-bind (kind name) (split-sequence #\/ asset-indicator)
     (declare (ignore name))
     (cond
       ((equal kind "Maps")
        (format nil "bin/skyline-tool compile-map $<"))
       ((equal kind "Songs")
-       (format nil "bin/skyline-tool compile-music $<"))
+       (format nil "bin/skyline-tool compile-music $@ $< 7800 ~a ~a" sound video))
       ((equal kind "Scripts")
        (format nil "bin/skyline-tool compile-scripts $<"))
       (t (error "Asset kind ~a not known" kind)))))
 
-(defun write-asset-compilation (asset-indicator)
-  (format t "~%
+(defun write-asset-compilation/music (asset-indicator)
+  (let* ((basename (last-segment asset-indicator #\/))
+         (source-pathname (make-pathname :directory '(:relative "Source" "Generated" "Assets")
+                                         :name (format nil "Song.~a" basename)
+                                         :type "s")))
+    (ensure-directories-exist source-pathname)
+    (with-output-to-file (source source-pathname :if-exists :supersede)
+      (format source
+              ";; This is a generated file~%~10t.binary format(\"Song.~a.%s.%s.o\", MUSIC, TV)"
+              basename))
+    (dolist (video '("NTSC" "PAL"))
+      (dolist (sound '("TIA" "POKEY" "YM"))
+        (format t "~%
 ~a: ~a \\
           Source/Assets.index bin/skyline-tool
 	mkdir -p Object/Assets
 	~a"
-          (asset->object-name asset-indicator)
-          (asset->source-name asset-indicator)
-          (asset-compilation-line asset-indicator)))
+                (asset->object-name asset-indicator 
+                                    :sound sound :video video)
+                (asset->source-name asset-indicator)
+                (asset-compilation-line asset-indicator 
+                                        :sound sound :video video))))))
+
+(defun write-asset-compilation (asset-indicator)
+  (if (song-asset-p asset-indicator)
+      (write-asset-compilation/music asset-indicator)
+      (format t "~%
+~a: ~a \\
+          Source/Assets.index bin/skyline-tool
+	mkdir -p Object/Assets
+	~a"
+              (asset->object-name asset-indicator)
+              (asset->source-name asset-indicator)
+              (asset-compilation-line asset-indicator))))
 
 (defun write-asset-bank-makefile (bank &key build sound video)
-  (let ((all-assets (all-assets-for-build build)))
+  (let* ((all-assets (all-assets-for-build build))
+         (asset-objects (mapcar (rcurry #'asset->deps-list build) all-assets)))
     (format t "~%
 Source/Generated/Bank~(~2,'0x~).~a.~a.~a.list: Source/Assets.index \\
 ~10tbin/skyline-tool \\~{~%~10t~a~^ \\~}
@@ -353,15 +396,15 @@ Object/Bank~(~2,'0x~).~a.~a.~a.o: Source/Generated/Bank~(~2,'0x~).~a.~a.~a.s \\
 	${AS7800} -DTV=~a -DMUSIC=~a ~a \\~{~%-I ~a \\~}
 		-l $@.labels.txt -L $@.list.txt $< -o $@"
             bank build sound video
-            (mapcar #'asset->object-name all-assets)
+            asset-objects
             build
             bank build sound video
             bank build sound video
-            (mapcar #'asset->object-name all-assets)
+            asset-objects
             bank build sound video
             bank build sound video
             bank build sound video
-            (mapcar #'asset->object-name all-assets)
+            asset-objects
             video sound (cond ((equal build "AA") "-DATARIAGE")
                               ((equal build "Demo") "-DDEMO")
                               (t ""))
@@ -519,7 +562,7 @@ AS7800=64tass ${ASFLAGS} --m6502 -m --tab-size=1 --verbose-list
           (format source "~&~10t.byte ~d" (get-asset-id (make-keyword (string-upcase kind)) 
                                                         (subseq asset (position #\/ asset))))
           (format source "~&~10t.word ~a" (asset->symbol-name asset)))
-        (format source "~2%"))
+        (format source "~&~10t.byte $ff~2%"))
       (format source "Load~a:~&~10tsec~&~10trts~2%" kind)))
 
 (defun last-segment (string char)
@@ -556,7 +599,11 @@ VLoadScript: jmp LoadScript
       (write-asset-source "Song" #'song-asset-p assets source)
       (write-asset-source "Script" #'script-asset-p assets source)
       (dolist (asset assets)
-        (format source "~&~a:~%~10t.binary \"~a\"" 
-                (asset->symbol-name asset)
-                (last-segment (asset->object-name asset) #\/)))
+        (if (song-asset-p asset)
+            (format source "~&~a:~%~10t.include \"Song.~a.s\"" 
+                    (asset->symbol-name asset)
+                    (subseq asset (1+ (position #\/ asset))))
+            (format source "~&~a:~%~10t.binary \"~a.o\"" 
+                    (asset->symbol-name asset)
+                    (pathname-name (parse-namestring (asset->object-name asset))))))
       (format source "~3&~10t.include \"EndBank.s\"~%"))))

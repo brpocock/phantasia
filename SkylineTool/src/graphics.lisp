@@ -837,6 +837,7 @@ value ~D for tile-cell ~D is too far down for an image with width ~D" (tile-cell
                             cell (car cell)))))
         (format *error-output* "~% Wrote binary tileset data to ~A." out-file)))))
 
+#+ (or)
 (defun compile-tileset (png-file out-dir height width image-nybbles)
   (case *machine*
     ((64 128) (compile-tileset-64 png-file out-dir height width image-nybbles))
