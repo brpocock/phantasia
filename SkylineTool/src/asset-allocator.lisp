@@ -353,13 +353,13 @@ Object/Assets/Tileset.~a.o: Source/Maps/~:*~a.tsx \\~%~10tSource/Maps/~:*~a.png 
                                          :type "s")))
     (ensure-directories-exist source-pathname)
     (with-output-to-file (source source-pathname :if-exists :supersede)
-      (format source ";; This is a generated file~2%" basename)
+      (format source ";; This is a generated file~2%")
       (dolist (video +all-video+)
         (dolist (sound +all-sounds+)
           (format source "~%          .if MUSIC == ~a && TV == ~a
             .binary \"Song.~a.~a.~a.o\"
           .fi~%"
-                  video sound basename sound video)
+                  sound video basename sound video)
           )))
     (dolist (video +all-video+)
       (dolist (sound +all-sounds+)
