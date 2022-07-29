@@ -31,6 +31,7 @@
                :swank
                :trivial-gray-streams
                :xmls
+               :zip
                )
   
   :encoding :utf-8

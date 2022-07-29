@@ -8,106 +8,104 @@
       (1 ;; Waveform 1 = “Buzzy”
        (2096 2080)
        (1048 1040)
-       (698.7 	693.3)
-       (524 	520)
-       (419.2 	416)
-       (349.3 	346.7)
-       (299.4 	297.1)
-       (262 	 	260)
-       (232.9 	231.1)
-       (209.6 	208)
-       (190.5 	189.1)
-       (174.7 	173.3)
-       (161.2 	160)
-       (149.7 	148.6)
-       (139.7 	138.7)
-       (131 	 	130)
-       (123.3 	122.4)
-       (116.4 	115.6)
-       (110.3 	109.5)
-       (104.8 	104)
-       (99.8 	 	99)
-       (95.3 	 	94.5)
-       (91.1 	 	90.4)
-       (87.3 	 	86.7)
-       (83.8 	 	83.2)
-       (80.6 	 	80)
-       (77.6 	 	77)
-       (74.9 	 	74.3)
-       (72.3 	 	71.7)
-       (69.9 	 	69.3)
-       (67.6 	 	67.1)
-       (65.5 	 	65))
+       (698.7  693.3)
+       (524  520)
+       (419.2  416)
+       (349.3  346.7)
+       (299.4  297.1)
+       (262    260)
+       (232.9  231.1)
+       (209.6  208)
+       (190.5  189.1)
+       (174.7  173.3)
+       (161.2  160)
+       (149.7  148.6)
+       (139.7  138.7)
+       (131    130)
+       (123.3  122.4)
+       (116.4  115.6)
+       (110.3  109.5)
+       (104.8  104)
+       (99.8    99)
+       (95.3    94.5)
+       (91.1    90.4)
+       (87.3    86.7)
+       (83.8    83.2)
+       (80.6    80)
+       (77.6    77)
+       (74.9    74.3)
+       (72.3    71.7)
+       (69.9    69.3)
+       (67.6    67.1)
+       (65.5    65))
       
-      (2  ;; Waveform 2 = lower-frequency buzz/rumble
-       (     67.6 	 	67.1)
-       (      33.8 	 	33.5)
-       (      22.5 	 	22.4)
-       (      16.9 	 	16.8)
-       (      13.5 	 	  	  	13.4)
-       (      11.3 	 	  	  	  	11.2)
-       (      9.7 	 	  	  	  	9.6)
-       (      8.5 	 	  	  	  	8.4)
-       (      7.5 	 	  	  	  	7.5)
-       (      6.8 	 	  	  	  	6.7)
-       (      6.1 	 	  	  	  	6.1)
-       (      5.6 	 	  	  	  	5.6)
-       (      5.2 	 	  	  	  	5.2)
-       (      4.8 	 	  	  	  	4.8)
-       (      4.5 	 	  	  	  	4.5)
-       (      4.2 	 	  	  	  	4.2)
-       (      4 	   	  	  	  	4)
-       (      3.8 	   	  	  	  	3.7)
-       (      3.6 	   	  	  	  	3.5)
-       (      3.4 	   	  	  	  	3.4)
-       (      3.2 	   	  	  	  	3.2)
-       (      3.1 	   	  	  	  	3)
-       (      3 	         	  	  	  	2.9)
-       (      2.8 	  	 	  	  	  	2.8)
-       (      2.7 	  	 	  	  	  	2.7)
-       (      2.6 	  	 	  	  	  	2.6)
-       (      2.5 	  	 	  	  	  	2.5)
-       (      2.4 	  	 	  	  	  	2.4)
-       (      2.3 	  	 	  	  	  	2.3)
-       (      2.3 	  	 	  	  	  	2.2)
-       (      2.2 	  	 	  	  	  	2.2)
-       (      2.1 	  	 	  		  	2.1)
-       )
+      (2 ;; Waveform 2 = lower-frequency buzz/rumble
+       ( 67.6 67.1)
+       ( 33.8 33.5)
+       ( 22.5 22.4)
+       ( 16.9 16.8)
+       ( 13.5 13.4)
+       ( 11.3 11.2)
+       ( 9.7 9.6)
+       ( 8.5 8.4)
+       ( 7.5 7.5)
+       ( 6.8 6.7)
+       ( 6.1 6.1)
+       ( 5.6 5.6)
+       ( 5.2 5.2)
+       ( 4.8 4.8)
+       ( 4.5 4.5)
+       ( 4.2 4.2)
+       ( 4 4)
+       ( 3.8 3.7)
+       ( 3.6 3.5)
+       ( 3.4 3.4)
+       ( 3.2 3.2)
+       ( 3.1 3)
+       ( 3 2.9)
+       ( 2.8 2.8)
+       ( 2.7 2.7)
+       ( 2.6 2.6)
+       ( 2.5 2.5)
+       ( 2.4 2.4)
+       ( 2.3 2.3)
+       ( 2.3 2.2)
+       ( 2.2 2.2)
+       ( 2.1 2.1))
       
       (;; Waveform 3 = Flangy “UFO”
-       (     67.6 	 	67.1)
-       (      33.8 	 	33.5)
-       (      22.5 	 	22.4)
-       (      16.9 	 	16.8)
-       (      13.5 	 	  	  	13.4)
-       (      11.3 	 	  	  	  	11.2)
-       (      9.7 	 	  	  	  	9.6)
-       (      8.5 	 	  	  	  	8.4)
-       (      7.5 	 	  	  	  	7.5)
-       (      6.8 	 	  	  	  	6.7)
-       (      6.1 	 	  	  	  	6.1)
-       (      5.6 	 	  	  	  	5.6)
-       (      5.2 	 	  	  	  	5.2)
-       (      4.8 	 	  	  	  	4.8)
-       (      4.5 	 	  	  	  	4.5)
-       (      4.2 	 	  	  	  	4.2)
-       (      4 	   	  	  	  	4)
-       (      3.8 	   	  	  	  	3.7)
-       (      3.6 	   	  	  	  	3.5)
-       (      3.4 	   	  	  	  	3.4)
-       (      3.2 	   	  	  	  	3.2)
-       (      3.1 	   	  	  	  	3)
-       (      3 	         	  	  	  	2.9)
-       (      2.8 	  	 	  	  	  	2.8)
-       (      2.7 	  	 	  	  	  	2.7)
-       (      2.6 	  	 	  	  	  	2.6)
-       (      2.5 	  	 	  	  	  	2.5)
-       (      2.4 	  	 	  	  	  	2.4)
-       (      2.3 	  	 	  	  	  	2.3)
-       (      2.3 	  	 	  	  	  	2.2)
-       (      2.2 	  	 	  	  	  	2.2)
-       (      2.1 	  	 	  		  	2.1)f
-       )
+       ( 67.6 67.1)
+       ( 33.8 33.5)
+       ( 22.5 22.4)
+       ( 16.9 16.8)
+       ( 13.5 13.4)
+       ( 11.3 11.2)
+       ( 9.7 9.6)
+       ( 8.5 8.4)
+       ( 7.5 7.5)
+       ( 6.8 6.7)
+       ( 6.1 6.1)
+       ( 5.6 5.6)
+       ( 5.2 5.2)
+       ( 4.8 4.8)
+       ( 4.5 4.5)
+       ( 4.2 4.2)
+       ( 4 4)
+       ( 3.8 3.7)
+       ( 3.6 3.5)
+       ( 3.4 3.4)
+       ( 3.2 3.2)
+       ( 3.1 3)
+       ( 3 2.9)
+       ( 2.8 2.8)
+       ( 2.7 2.7)
+       ( 2.6 2.6)
+       ( 2.5 2.5)
+       ( 2.4 2.4)
+       ( 2.3 2.3)
+       ( 2.3 2.2)
+       ( 2.2 2.2)
+       ( 2.1 2.1))
       
       (;; Waveform 4 = Pure tone
        (7860 7800)
@@ -354,53 +352,9 @@
        
        ))
   :test #'equalp
-  :documentation "NTSC and PAL/SECAM sound values for each frequency code")
+  :documentation "NTSC and PAL/SECAM sound values for each frequency code
 
-(define-constant +pokey-voices+
-    '(("c" 10 46 NIL NIL NIL NIL NIL NIL NIL) ("a#" 10 53 NIL NIL NIL NIL NIL NIL NIL) ("a" 10 57 NIL NIL NIL NIL NIL NIL NIL)
-      ("g#" 10 60 NIL NIL NIL NIL NIL NIL NIL) ("g" 10 64 NIL NIL NIL NIL NIL NIL NIL) ("f#" 10 69 NIL NIL NIL NIL NIL NIL NIL)
-      ("f" 10 73 NIL NIL NIL NIL NIL NIL NIL) ("e" 10 78 NIL NIL NIL NIL NIL NIL NIL) ("d#" 10 83 NIL NIL NIL NIL NIL NIL NIL)
-      ("d" 10 88 NIL NIL NIL NIL NIL NIL NIL) ("c#" 10 94 NIL NIL NIL NIL NIL NIL NIL) ("c" 9 100 NIL NIL NIL NIL NIL NIL NIL)
-      ("b" 9 106 NIL NIL NIL NIL NIL NIL NIL) ("a#" 9 113 NIL NIL NIL NIL NIL NIL NIL) ("a" 9 120 NIL NIL NIL NIL NIL NIL NIL)
-      ("g#" 9 128 NIL NIL NIL NIL NIL NIL NIL) ("g" 9 136 NIL NIL NIL NIL NIL NIL NIL) ("f#" 9 144 NIL NIL NIL 56 NIL 56 NIL)
-      ("f" 9 153 NIL NIL NIL 59 NIL 59 NIL) ("e" 9 163 NIL NIL NIL 62 NIL 62 NIL) ("d#" 9 173 NIL NIL NIL 65 NIL 65 NIL)
-      ("d" 9 183 NIL NIL NIL 71 NIL 71 NIL) ("c#" 9 195 NIL NIL NIL 74 NIL 74 NIL) ("c" 8 207 NIL 0 NIL 77 NIL 21 NIL)
-      ("b" 8 219 NIL NIL NIL 80 NIL 23 NIL) ("a#" 8 233 NIL NIL NIL 89 NIL 25 NIL) ("a" 8 247 NIL 1 NIL 95 NIL 27 NIL)
-      ("g#" 8 262 NIL NIL NIL 101 NIL 30 NIL) ("g" 8 278 NIL 2 NIL 107 NIL 31 NIL) ("f#" 8 295 NIL 3 NIL 110 NIL 34 NIL)
-      ("f" 8 313 NIL NIL NIL 122 NIL 36 NIL) ("e" 8 332 NIL 4 NIL 131 NIL 39 NIL) ("d#" 8 353 NIL 5 NIL 137 NIL 42 NIL)
-      ("d" 8 374 NIL NIL NIL 146 NIL 45 NIL) ("c#" 8 397 NIL 6 NIL 155 NIL 46 NIL) ("c" 7 421 14 7 0 164 NIL 49 NIL)
-      ("b" 7 446 15 NIL NIL 176 NIL 54 NIL) ("a#" 7 473 16 8 NIL 185 NIL 57 NIL) ("a" 7 501 17 9 NIL 197 NIL 61 NIL)
-      ("g#" 7 532 18 10 NIL 209 NIL 64 NIL) ("g" 7 564 19 11 NIL 221 NIL 69 NIL) ("f#" 7 598 21 12 NIL 236 NIL 72 NIL)
-      ("f" 7 634 22 14 NIL 251 NIL 79 NIL) ("e" 7 672 23 15 NIL 266 NIL 84 NIL) ("d#" 7 712 25 16 NIL 281 NIL 90 NIL)
-      ("d" 7 755 26 18 NIL 296 NIL 94 NIL) ("c#" 7 800 28 19 NIL 314 NIL 100 NIL) ("c" 6 848 29 21 NIL 335 NIL 106 NIL)
-      ("b" 6 899 31 22 NIL 356 NIL 114 NIL) ("a#" 6 953 33 25 NIL 377 NIL 121 NIL) ("a" 6 1010 35 26 NIL 401 NIL 129 NIL)
-      ("g#" 6 1070 37 28 NIL 422 NIL 135 NIL) ("g" 6 1134 40 30 NIL 449 NIL 145 NIL) ("f#" 6 1202 42 32 NIL 476 NIL 154 NIL)
-      ("f" 6 1274 45 34 NIL 506 NIL 162 NIL) ("e" 6 1350 47 37 NIL 536 NIL 174 NIL) ("d#" 6 1431 50 39 NIL 569 NIL 184 NIL)
-      ("d" 6 1517 53 42 NIL 602 NIL 196 NIL) ("c#" 6 1607 57 45 NIL 641 NIL 207 NIL) ("c" 5 1703 60 48 1 677 NIL 220 NIL)
-      ("b" 5 1805 64 51 NIL 716 NIL 235 NIL) ("a#" 5 1913 68 54 NIL 761 26 249 NIL) ("a" 5 2027 72 58 NIL 806 NIL 264 NIL)
-      ("g#" 5 2148 76 62 NIL 854 NIL 280 NIL) ("g" 5 2276 81 67 NIL 905 32 297 10) ("f#" 5 2412 85 71 NIL 959 NIL 315 NIL)
-      ("f" 5 2555 91 76 2 1019 35 334 35) ("e" 5 2708 96 81 NIL 1079 38 355 12) ("d#" 5 2869 102 85 NIL 1145 41 376 41)
-      ("d" 5 3040 108 91 NIL 1211 NIL 399 NIL) ("c#" 5 3222 114 97 NIL 1286 NIL 424 NIL) ("c" 4 3414 121 103 3 1361 47 450 15)
-      ("b" 4 3617 128 110 NIL 1442 50 475 16) ("a#" 4 3832 136 116 NIL 1529 53 505 53) ("a" 4 4061 144 124 NIL 1619 56 535 18)
-      ("g#" 4 4303 153 132 4 1715 62 567 62) ("g" 4 4559 162 140 NIL 1820 65 601 21) ("f#" 4 4830 172 149 NIL 1931 68 637 22)
-      ("f" 4 5118 182 158 5 2042 71 676 71) ("e" 4 5423 193 167 NIL 2165 77 717 25) ("d#" 4 5746 204 178 NIL 2294 80 760 27)
-      ("d" 4 6088 217 190 6 2432 86 807 28) ("c#" 4 6450 230 201 NIL 2576 92 855 30) ("c" 3 6834 243 214 7 2729 98 906 31)
-      ("b" 3 7241 255 227 NIL 2894 101 960 33) ("a#" 3 7672 NIL 240 8 3065 184 1017 36) ("a" 3 8128 NIL 256 NIL 3245 116 1077 37)
-      ("g#" 3 8612 NIL 271 9 3440 122 1141 40) ("g" 3 9125 NIL 288 NIL 3647 131 1212 43) ("f#" 3 9668 NIL 306 10 3869 137 1284 45)
-      ("f" 3 10243 NIL 324 11 4091 146 1360 48) ("e" 3 10852 NIL 343 NIL 4337 155 1441 51) ("d#" 3 11498 NIL 364 12 4595 167 1527 55)
-      ("d" 3 12182 NIL 386 13 4871 173 1617 57) ("c#" 3 12907 NIL 410 14 5159 182 1714 61) ("c" 2 13765 NIL 437 15 5501 197 1830 63)
-      ("b" 2 14489 NIL 461 16 5792 206 1926 67) ("a#" 2 15351 NIL 488 17 6137 218 2041 72) ("a" 2 16264 NIL 518 18 6500 233 2161 76)
-      ("g#" 2 17231 NIL 549 19 6887 245 2292 82) ("g" 2 18256 NIL 583 20 7301 NIL 2442 85) ("f#" 2 19342 NIL 617 21 7736 NIL 2575 93)
-      ("f" 2 20493 NIL 654 23 8195 NIL 2727 97) ("e" 2 21712 NIL 694 24 8681 NIL 2889 103)
-      ("d#" 2 23003 NIL 735 26 9212 NIL 3061 108) ("d" 2 24372 NIL 779 27 9746 NIL 3244 117)
-      ("c#" 2 25821 NIL 826 29 10325 NIL 3436 123) ("c" 1 27357 NIL 876 31 10940 NIL 3642 130))
-  :test #'equalp
-  :documentation "NTSC and PAL sound values for each frequency code")
-
-(define-constant +yamaha-voices+
-    '()
-  :test #'equalp
-  :documentation "NTSC and PAL sound values for each frequency code")
+Format: NTSC followed by PAL/SECAM frequency values for each AUDF value")
 
 (defgeneric midi-to-sound-binary (output-coding machine-type midi-notes sound-chip)
   (:method (output-coding machine-type midi-notes sound-chip)
@@ -424,21 +378,148 @@ skipping MIDI music with ~:d note~:p"
                                    notes :test #'=))
       (list voice freq-code (frequency-distance freq (elt notes freq-code))))))
 
-(defun best-pokey-note-for (freq tv-type)
-  (let ((notes (list ))); TODO
-    (when-let (freq-code (position (first (sort (copy-list notes) #'<
-                                                :key (curry #'frequency-distance freq)))
-                                   notes
-                                   :test #'=))
-      (list voice freq-code (frequency-distance freq (elt notes freq-code))))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun ooxml->string (xml)
+    (if (consp xml)
+        (format nil "~{~a~}" (mapcar #'ooxml->string (cddr xml)))
+        xml))
 
-(defun best-yamaha-note-for (freq tv-type)
-  (let ((notes (list ))); TODO
-    (when-let (freq-code (position (first (sort (copy-list notes) #'<
-                                                :key (curry #'frequency-distance freq)))
-                                   notes
-                                   :test #'=))
-      (list voice freq-code (frequency-distance freq (elt notes freq-code))))))
+  (defun ooxml-cell-repeats (cell)
+    (if (and (consp (second cell))
+             (consp (first (second cell)))
+             (equal (first (first (second cell)))
+                    "number-columns-repeated"))
+        (parse-integer (second (first (second cell))))
+        1))
+
+  (defun ooxml-repeated-cell (cell string)
+    (loop repeat (ooxml-cell-repeats cell)
+          collect string))
+
+  (defun ods-table-rows->list (table)
+    (mapcar (lambda (row)
+              (loop for cell in (remove-if-not (lambda (el) (equal (caar el) "table-cell"))
+                                               row)
+                    append (ooxml-repeated-cell cell (ooxml->string cell))))
+            (mapcar #'rest (remove-if-not (lambda (el) 
+                                            (equal (caar el) "table-row"))
+                                          table))))
+
+  (defun note->midi-note-number (octave note-name)
+    (+ 9 
+       (* 12 octave)
+       (position note-name '("A" "A#" "B" "C" "C#" "D" "D#" "E" "F" "F#" "G" "G#")
+                 :test #'string-equal)))
+
+  (assert (= 60 (note->midi-note-number 4 "C")) ()
+          "Note->MIDI-Note-Number is not tuned correctly")
+
+  (defun interpret-pokey-sheet1 (sheet1)
+    (assert (eql 0 (search "POKEY table" (aref sheet1 2 0))) (sheet1)
+            "POKEY tables not in expected format~%~s" (aref sheet1 2 0))
+    (assert (equal "C" (aref sheet1 0 3)) ()
+            "Table does not start with C~%~s" (aref sheet1 0 3))
+    (loop for row from 3 below 112
+          for out-row from 0
+          with notes = (make-array (list 18 109) :element-type '(or null (unsigned-byte 16)))
+          with octave = 1
+          do (progn
+               (when (eql 0 (search "OCTAVE " (aref sheet1 35 row)))
+                 (setf octave (parse-integer (subseq (aref sheet1 35 row) 7))))
+               (setf (aref notes 0 out-row) (note->midi-note-number 
+                                             octave
+                                             (string-trim " " (aref sheet1 0 row))))
+               (loop for column from 1 below 35 by 2
+                     for out-column from 1
+                     do (let ((number$ (aref sheet1 column row)))
+                          (setf (aref notes out-column out-row)
+                                (if (and (not (emptyp number$))
+                                         (every #'digit-char-p number$))
+                                    (parse-integer number$)
+                                    nil)))))
+          finally (return notes)))
+
+  (defun interpret-pokey-tables (tables)
+    (destructuring-bind (sheet1 sheet2 sheet3 sheet4) tables
+      (declare (ignore sheet2 sheet3 sheet4))
+      (interpret-pokey-sheet1 sheet1)))
+
+  (defun lists->2d-array (lists)
+    (let ((rows (length lists))
+          (cols (reduce #'max (mapcar #'length lists))))
+      (loop with array = (make-array (list cols rows))
+            for row in lists
+            for r from 0
+            do (loop for column in row
+                     for c from 0
+                     do (setf (aref array c r) column))
+            finally (return array))))
+
+  (defun read-pokey.ods ()
+    (format *trace-output* "~&Reading Synthpopalooza's POKEY tables spreadsheet… ")
+    (prog1
+        (zip:with-zipfile (zip (make-pathname 
+                                :name "Synthpopalooza POKEY tables"
+                                :type "ods"
+                                :directory (append (pathname-directory 
+                                                    (asdf:system-source-directory :skyline-tool))
+                                                   (list "data")))
+                           :force-utf-8 t)
+          (let ((xml (xmls:parse-to-list
+                      (map 'string #'code-char
+                           (zip:zipfile-entry-contents
+                            (zip:get-zipfile-entry "content.xml" zip))))))
+            (assert (and (consp (first xml))
+                         (equal (car (first xml)) "document-content")
+                         (equal (cdr (first xml))
+                                "urn:oasis:names:tc:opendocument:xmlns:office:1.0")) 
+                    (xml) 
+                    "ODS file seems to be malformed: document-content tag missing or invalid~%~s"
+                    (first xml))
+            (let ((body (first (remove-if-not (lambda (el) (equal (caar el) "body")) (rest xml)))))
+              (assert (and (consp (caaddr body))
+                           (equal (car (caaddr body)) "spreadsheet")
+                           (equal (cdr (caaddr body)) "urn:oasis:names:tc:opendocument:xmlns:office:1.0"))
+                      (xml)
+                      "ODS is not a spreadsheet?~%~s"
+                      (first body))
+              (let* ((tables (mapcar #'cdr 
+                                     (remove-if-not (lambda (el) (equal (caar el) "table"))
+                                                    (subseq (caddr body) 2)))))
+                (mapcar #'ods-table-rows->list tables)))))
+      (format *trace-output* " done.")))
+
+  (defun read-pokey-tables ()
+    (interpret-pokey-tables (mapcar #'lists->2d-array (read-pokey.ods))))
+  )
+
+(define-constant +pokey-notes-table+
+    (read-pokey-tables)
+  :test 'equalp)
+
+(defun pokey-distortion-column (distortion bits)
+  (+ (ecase bits
+       (16 0)
+       (8 1))
+     (ecase distortion
+       (:10 1)
+       (:2 4)
+       (:12a 7)
+       (:12b 10)
+       (:8 12)
+       (:4b 14)
+       (:4a 16))))
+
+(assert (= 97 (aref +pokey-notes-table+ (pokey-distortion-column :12a 8) 5))
+        () "POKEY notes table seems to be incorrect")
+
+(defun best-pokey-note-for (midi-note-number distortion bits)
+  (loop for row from 0
+        when (= midi-note-number (aref +pokey-notes-table+ 0 row))
+          do (let ((value (aref +pokey-notes-table+ (pokey-distortion-column distortion bits) row)))
+               (assert (< value (expt 2 bits)))
+               (return value))
+        finally (return nil)))
 
 (defun null-if-zero-note (n)
   (if (or (null n) (zerop (lastcar n))) nil n))
@@ -478,48 +559,6 @@ skipping MIDI music with ~:d note~:p"
                      (aref array i 4) (elt note 4)))          ;comment
       array)))
 
-(defun array<-pokey-notes-list (list output-coding)
-  (labels ((nearest (&rest set)
-             (first (sort set #'< :key #'third))))
-    (let ((array (make-array (list (length list) 5))))
-      (loop for note in list
-            for i from 0
-            for (control freq) 
-              = 
-              (if-let (note (elt note 2))
-                (best-pokey-note-for note output-coding)
-                (list nil nil))
-            do (setf (aref array i 0) (when (elt note 0)
-                                        (floor (max (/ (elt note 0) +midi-duration-divisor+)
-                                                    1))) ; duration
-                     (aref array i 1) control ;control
-                     (aref array i 2) freq    ;frequency
-                     (aref array i 3) (when (elt note 3)
-                                        (floor (elt note 3))) ; volume
-                     (aref array i 4) (elt note 4)))          ;comment
-      array)))
-
-(defun array<-yamaha-notes-list (list output-coding)
-  (labels ((nearest (&rest set)
-             (first (sort set #'< :key #'third))))
-    (let ((array (make-array (list (length list) 5))))
-      (loop for note in list
-            for i from 0
-            for (control freq) 
-              = 
-              (if-let (note (elt note 2))
-                (best-yamaha-note-for note output-coding)
-                (list nil nil))
-            do (setf (aref array i 0) (when (elt note 0)
-                                        (floor (max (/ (elt note 0) +midi-duration-divisor+)
-                                                    1))) ; duration
-                     (aref array i 1) control ;control
-                     (aref array i 2) freq    ;frequency
-                     (aref array i 3) (when (elt note 3)
-                                        (floor (elt note 3))) ; volume
-                     (aref array i 4) (elt note 4)))          ;comment
-      array)))
-
 (defun midi-translate-notes (notes)
   (let ((volume 8)
         (output (list)))
@@ -540,15 +579,87 @@ skipping MIDI music with ~:d note~:p"
                               output)))))
     (reverse output)))
 
+(defun array<-yamaha-notes-list (notes tv)
+  (warn "YM-2151 not implemented!")
+  #(0))
+
 (defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :ym)))
   (array<-yamaha-notes-list (midi-translate-notes (car midi-notes)) output-coding))
 
+(defun voice-free-at-time-p (voice time)
+  (or (emptyp voice)
+      (notany (lambda (note)
+                (destructuring-bind (start key duration distortion) note
+                  (declare (ignore key distortion))
+                  (<= start time (+ start duration))))
+              voice)))
+
+(defun find-free-voice (voices time)
+  (position-if (lambda (voice) (voice-free-at-time-p voice time))
+               voices))
+
+(defun midi->pokey (midi-notes)
+  (loop for object in midi-notes
+        with distortion
+        for kind = (first object)
+        for params = (rest object)
+        with voices = (make-array 4 :initial-element nil)
+        with tia-voices = (make-array 2 :initial-element nil)
+        collecting (ecase kind
+                     (:text (cond ((equal (first params) "Piano")
+                                   (setf distortion :10))
+                                  (t (warn "Ignored text in MIDI: ~s" params))))
+                     (:rest)
+                     (:note (destructuring-bind (&key time key duration) params
+                              (cond
+                                ((null distortion)
+                                 (warn "Note without knowing instrument: dropping note ~d at time ~d"
+                                       key time))
+                                ((symbolp distortion)
+                                 (let ((voice (find-free-voice voices time)))
+                                   (if voice
+                                       (setf (aref voices voice)
+                                             (cons (list time (best-pokey-note-for 
+                                                               key distortion 8)
+                                                         duration distortion)
+                                                   (aref voices voice)))
+                                       (warn "Too much polyphony: dropping note ~d at time ~d"
+                                             key time))))
+                                (t (error "Unhandled DISTORTION ~s" distortion))))))
+        finally (return (list voices tia-voices))))
+
+(defun merge-pokey-tia-voices (notes)
+  (destructuring-bind (pokey tia) notes
+    (append
+     (loop for voice below 4
+           append (mapcar (lambda (note)
+                            (cons voice note))
+                          (aref pokey voice)))
+     (loop for voice below 2
+           for voice-code from #x80
+           append (mapcar (lambda (note)
+                            (cons voice-code note))
+                          (aref tia voice))))))
+
+(defun adjust-note-timing-for-frame-rate (notes frame-rate)
+  (loop for (voice time key duration distortion) in notes
+        ;; 454 = convert 1⁄4 note to seconds at 120bpm
+        collecting (list voice (floor (* (/ time 454) 1/2 frame-rate))
+                         key 
+                         (floor (* (/ duration 454) 1/2 frame-rate))
+                         distortion)))
+
+(defun array<-pokey-notes-list (notes tv-type)
+  (let ((frame-rate (ecase tv-type (:ntsc 60) (:pal 50)))) 
+    (coerce (sort (adjust-note-timing-for-frame-rate (merge-pokey-tia-voices notes) frame-rate)
+                  #'< :key #'second)
+            'vector)))
+
 (defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :pokey)))
-  (array<-pokey-notes-list (midi-translate-notes (car midi-notes)) output-coding))
+  (array<-pokey-notes-list (midi->pokey (car midi-notes)) output-coding))
 
 (defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :tia)))
   (array<-tia-notes-list (midi-translate-notes (car midi-notes)) output-coding))
-
 
 (defun collect-midi-texts (midi)
   (loop for track in (midi:midifile-tracks midi)
@@ -598,18 +709,7 @@ skipping MIDI music with ~:d note~:p"
         ((zerop (length real-tracks))
          (error "File ~a contains no tracks with actual music?
 Gathered text:~{~% • ~a~}"
-                file texts))
-        ((< 2 (length real-tracks))
-         (warn "File ~a contains multiple music tracks; using the longest two ~{
-  • Track with length ~:d chunk~:p, ~:d note~:p~}"
-               file (mapcar (lambda (track)
-                              (list (length track)
-                                    (midi-track-notes-count track)))
-                            real-tracks))
-         (let ((sorted-tracks (sort real-tracks #'>
-                                    :key #'midi-track-notes-count)))
-           (setf real-tracks (list (first sorted-tracks)
-                                   (second sorted-tracks))))))
+                file texts)))
       (map 'list (lambda (track) (midi-track-decode track parts/quarter))
            real-tracks))))
 
@@ -622,8 +722,8 @@ Gathered text:~{~% • ~a~}"
       (split-string line :separator "=")
     (let ((symbol-name (make-keyword (string-trim " " symbol-name$)))
           (midi-file-name (string-trim " " midi-file-name$)))
-      (format *trace-output* "~&Converting MIDI file ~a to format ~a…"
-              midi-file-name output-coding)
+      (format *trace-output* "~&Converting MIDI file ~a to ~a format for ~a…"
+              midi-file-name sound-chip output-coding)
       (multiple-value-bind (numbers comments)
           (midi-to-sound-binary output-coding
                                 *machine*
@@ -812,35 +912,57 @@ Gathered text:~{~% • ~a~}"
                                    0))
                               object)))))
 
-(defmethod write-song-data-to-binary (notes object (sound-chip (eql :POKEY)))
-  (loop for i below (array-dimension notes 0)
-        do (let ((duration (aref notes i 0))
-                 (control (aref notes i 1))
-                 (frequency (aref notes i 2))
-                 (volume (aref notes i 3))
-                 (comment (aref notes i 4)))
-             (unless (or (symbolp comment) (emptyp comment))
-               (format *trace-output* "~&;;; ~a" comment))
-             (if (or (null duration) (< duration +midi-duration-divisor+))
-                 (when (= i (1- (array-dimension notes 0)))
-                   (write-bytes #(0 0 0 0 1) object))
-                 (write-bytes #(0 1 2 3 4); TODO
-                              object)))))
+(defun pokey-distortion-code (distortion) ; FIXME
+  (parse-integer (symbol-name distortion) :junk-allowed t))
+
+(defmethod write-song-data-to-binary (data object (sound-chip (eql :POKEY)))
+  (loop for note across data
+        for now = 0
+        with off-notes = (list)
+        do (labels
+               ((emit-off-notes (until next-voice)
+                  (when-let (offs (remove-if-not (lambda (off) (< (first off) until))
+                                                 off-notes))
+                    (dolist (off (sort offs #'< :key #'first))
+                      (destructuring-bind (time voice) off
+                        (assert (>= time now))
+                        (unless (and (= until time)
+                                     (= voice next-voice))
+                          (let ((delay (- time now)))
+                            (assert (plusp delay))
+                            (loop while (> delay #xff)
+                                  do (progn
+                                       (write-bytes (vector #xff #x40 #xff 0) object)
+                                       (decf delay #xff)
+                                       (incf now #xff)))
+                            (assert (plusp delay))
+                            (write-bytes (vector delay
+                                                 #x40
+                                                 voice
+                                                 0)
+                                         object)
+                            (incf now delay))))))))
+             (destructuring-bind (voice time key duration distortion) note
+               (emit-off-notes time voice)
+               (let ((delay (- time now)))
+                 (loop while (> delay #xff)
+                       do (progn
+                            (write-bytes (vector #xff #x40 #xff 0) object)
+                            (decf delay #xff)
+                            (incf now #xff)))
+                 (write-bytes (vector delay
+                                      voice
+                                      key
+                                      (if (< voice #x80)
+                                          (pokey-distortion-code distortion)
+                                          distortion)) 
+                              object)
+                 (setf now time)
+                 (appendf off-notes (list (list (+ time duration) voice))))))))
 
 (defmethod write-song-data-to-binary (notes object (sound-chip (eql :YM)))
-  (loop for i below (array-dimension notes 0)
-        do (let ((duration (aref notes i 0))
-                 (control (aref notes i 1))
-                 (frequency (aref notes i 2))
-                 (volume (aref notes i 3))
-                 (comment (aref notes i 4)))
-             (unless (or (symbolp comment) (emptyp comment))
-               (format *trace-output* "~&;;; ~a" comment))
-             (if (or (null duration) (< duration +midi-duration-divisor+))
-                 (when (= i (1- (array-dimension notes 0)))
-                   (write-bytes #(0 0 0 0 1) object))
-                 (write-bytes #(0 1 2 3 4); TODO
-                              object)))))
+  (warn "YM-2151 is unimplemented")
+  (write-bytes #(0 0 0 0 0 0 0 0) object))
 
 (defun assigned-song-bank-and-title (assignment)
   (list (car assignment)
@@ -1029,3 +1151,4 @@ Music:~:*
 (define-constant +semitone+ (expt 2 1/12)
   :documentation "The ratio of each semitone in equal temperment"
   :test #'=)
+
