@@ -404,7 +404,12 @@ skipping MIDI music with ~:d note~:p"
             (mapcar #'rest (remove-if-not (lambda (el) 
                                             (equal (caar el) "table-row"))
                                           table))))
-
+  
+  (defun midi->note-name (note)
+    (multiple-value-bind (octave letter) (floor (- note 9) 12)
+      (format nil "~a ~d" (elt '("A" "A♯" "B" "C" "C♯" "D" "D♯" "E" "F" "F♯" "G" "G♯") letter)
+              octave)))
+  
   (defun note->midi-note-number (octave note-name)
     (+ 9 
        (* 12 octave)
@@ -570,6 +575,12 @@ skipping MIDI music with ~:d note~:p"
              (null-if-zero-note (best-tia-pal-note-for note 8))
              (list 0 0 most-positive-fixnum))))
 
+(defun array<-7800-tia-notes-list (notes tv-type)
+  (let ((frame-rate (ecase tv-type (:ntsc 60) (:pal 50)))) 
+    (coerce (sort (adjust-note-timing-for-frame-rate (merge-tia-voices notes) frame-rate)
+                  #'< :key #'second)
+            'vector)))
+
 (defun array<-tia-notes-list (list output-coding)
   (let ((array (make-array (list (length list) 5))))
     (loop for note in list
@@ -618,36 +629,37 @@ skipping MIDI music with ~:d note~:p"
   1)
 
 (defun midi->7800-tia (midi-notes tv)
-  (loop for object in midi-notes
+  (loop for track in midi-notes
         with distortion
         with tia-voices = (make-array 2 :initial-element nil)
-        collecting (destructuring-bind (kind . params) object
-                     (ecase kind
-                       (:text (setf distortion (find-tia-distortion params)))
-                       (:rest)
-                       (:note (destructuring-bind (&key time key duration) params
-                                (typecase distortion
-                                  (null
-                                   (warn "Note without knowing instrument: dropping note ~d at time ~d"
-                                         key time))
-                                  (number
-                                   (let ((voice (find-free-voice tia-voices time)))
-                                     (if voice
-                                         (setf (aref tia-voices voice)
-                                               (cons (list time (best-tia-note-for key distortion tv)
-                                                           duration distortion)
-                                                     (aref tia-voices voice)))
-                                         (warn "Too much polyphony: dropping note ~d at time ~d"
-                                               key time))))
-                                  (t (error "Unhandled DISTORTION ~s for TIA only" distortion)))))))
-        finally (return (list tia-voices))))
+        append
+        (loop for (kind . params) in track
+              collecting (ecase kind
+                           (:text (setf distortion (find-tia-distortion params)))
+                           (:rest)
+                           (:note (destructuring-bind (&key time key duration) params
+                                    (typecase distortion
+                                      (null
+                                       (warn "Note without knowing instrument: dropping note ~a at time ~d"
+                                             (midi->note-name key) time))
+                                      (number
+                                       (let ((voice (find-free-voice tia-voices time)))
+                                         (if voice
+                                             (setf (aref tia-voices voice)
+                                                   (cons (list time (best-tia-note-for key distortion tv)
+                                                               duration distortion)
+                                                         (aref tia-voices voice)))
+                                             (warn "Too much polyphony: dropping note ~a at time ~d (TIA 7800)"
+                                                   (midi->note-name key) time))))
+                                      (t (error "Unhandled DISTORTION ~s for TIA only" distortion)))))))
+        finally (return tia-voices)))
 
 (defun find-yamaha-distortion (text)
   (warn "Not computing YM-2151 “distortion” for ~a" text)
-  :yamaha)
+  :y0)
 
 (defun best-yamaha-note-for (key distortion)
-  (warn "Not computing YM-2151 note for ~d, ~s" key distortion)
+  (warn "Not computing YM-2151 note for ~a, ~s" (midi->note-name key) distortion)
   0)
 
 (defun array<-yamaha-notes-list (notes tv-type)
@@ -674,86 +686,88 @@ skipping MIDI music with ~:d note~:p"
 
 (defun find-pokey-distortion (text)
   (cond ((equal (first text) "Piano") :10)
-        ((equal (first text) "Drums") :11)
+        ((equal (first text) "Drums") :12a)
         (t (warn "Ignored text in MIDI: ~s" text))))
 
 (defun best-tia-note-for (key distortion tv)
   (let ((freq (freq<-midi-key key)))
-    (ecase tv
-      (:ntsc (or (best-tia-ntsc-note-for freq distortion)
-                 (best-tia-note-for-ntsc freq)))
-      (:pal (or (best-tia-pal-note-for freq distortion)
-                (best-tia-note-for-pal freq))))))
+    (elt (ecase tv
+           (:ntsc (or (best-tia-ntsc-note-for freq distortion)
+                      (best-tia-note-for-ntsc freq)))
+           (:pal (or (best-tia-pal-note-for freq distortion)
+                     (best-tia-note-for-pal freq))))
+         0)))
 
 (defun midi->pokey (midi-notes tv)
-  (loop for object in midi-notes
+  (loop for track in midi-notes
         with distortion
         with voices = (make-array 4 :initial-element nil)
         with tia-voices = (make-array 2 :initial-element nil)
-        collecting (destructuring-bind (kind . params) object
-                     (ecase kind
-                       (:text (setf distortion (find-pokey-distortion params)))
-                       (:rest)
-                       (:note (destructuring-bind (&key time key duration) params
-                                (typecase distortion
-                                  (null
-                                   (warn "Note without knowing instrument: dropping note ~d at time ~d"
-                                         key time))
-                                  (symbol
-                                   (let ((voice (find-free-voice voices time)))
-                                     (if voice
-                                         (setf (aref voices voice)
-                                               (cons (list time (best-pokey-note-for 
-                                                                 key distortion 8)
-                                                           duration distortion)
-                                                     (aref voices voice)))
-                                         (warn "Too much polyphony: dropping POKEY note ~d at time ~d"
-                                               key time))))
-                                  (number
-                                   (let ((voice (find-free-voice tia-voices time)))
-                                     (if voice
-                                         (setf (aref voices voice)
-                                               (cons (list time (best-tia-note-for key distortion tv)
-                                                           duration distortion)
-                                                     (aref voices voice)))
-                                         (warn "Too much polyphony: dropping TIA note ~d at time ~d"
-                                               key time))))
-                                  (t (error "Unhandled DISTORTION ~s" distortion)))))))
+        append
+        (loop for object in midi-notes
+              collecting (destructuring-bind (kind . params) object
+                           (ecase kind
+                             (:text (setf distortion (find-pokey-distortion params)))
+                             (:rest)
+                             (:note (destructuring-bind (&key time key duration) params
+                                      (typecase distortion
+                                        (null
+                                         (warn "Note without knowing instrument: dropping note ~a at time ~d (POKEY)"
+                                               (midi->note-name key) time))
+                                        (symbol
+                                         (let ((voice (find-free-voice voices time)))
+                                           (if voice
+                                               (setf (aref voices voice)
+                                                     (cons (list time (best-pokey-note-for 
+                                                                       key distortion 8)
+                                                                 duration distortion)
+                                                           (aref voices voice)))
+                                               (warn "Too much polyphony: dropping POKEY note ~a at time ~d"
+                                                     (midi->note-name key) time))))
+                                        (number
+                                         (let ((voice (find-free-voice tia-voices time)))
+                                           (if voice
+                                               (setf (aref voices voice)
+                                                     (cons (list time (best-tia-note-for key distortion tv)
+                                                                 duration distortion)
+                                                           (aref voices voice)))
+                                               (warn "Too much polyphony: dropping TIA note ~a at time ~d"
+                                                     (midi->note-name key) time))))
+                                        (t (error "Unhandled DISTORTION ~s" distortion)))))))) 
         finally (return (list voices tia-voices))))
 
 (defun midi->ym-2151 (midi-notes tv)
-  (loop for object in midi-notes
+  (loop for (kind . params) in midi-notes
         with distortion
         with voices = (make-array 4 :initial-element nil)
         with tia-voices = (make-array 2 :initial-element nil)
-        collecting (destructuring-bind (kind . params) object
-                     (ecase kind
-                       (:text (setf distortion (find-yamaha-distortion params)))
-                       (:rest)
-                       (:note (destructuring-bind (&key time key duration) params
-                                (typecase distortion
-                                  (null
-                                   (warn "Note without knowing instrument: dropping note ~d at time ~d"
-                                         key time))
-                                  (symbol
-                                   (let ((voice (find-free-voice voices time)))
-                                     (if voice
-                                         (setf (aref voices voice)
-                                               (cons (list time (best-yamaha-note-for key distortion)
-                                                           duration distortion)
-                                                     (aref voices voice)))
-                                         (warn "Too much polyphony: dropping POKEY note ~d at time ~d"
-                                               key time))))
-                                  (number
-                                   (let ((voice (find-free-voice tia-voices time)))
-                                     (if voice
-                                         (setf (aref voices voice)
-                                               (cons (list time (best-tia-note-for key distortion tv)
-                                                           duration distortion)
-                                                     (aref voices voice)))
-                                         (warn "Too much polyphony: dropping TIA note ~d at time ~d"
-                                               key time))))
-                                  (t (error "Unhandled DISTORTION ~s" distortion)))))))
+        collecting (ecase kind
+                     (:text (setf distortion (find-yamaha-distortion params)))
+                     (:rest)
+                     (:note (destructuring-bind (&key time key duration) params
+                              (typecase distortion
+                                (null
+                                 (warn "Note without knowing instrument: dropping note ~a at time ~d (YM-2151)"
+                                       (midi->note-name key) time))
+                                (symbol
+                                 (let ((voice (find-free-voice voices time)))
+                                   (if voice
+                                       (setf (aref voices voice)
+                                             (cons (list time (best-yamaha-note-for key distortion)
+                                                         duration distortion)
+                                                   (aref voices voice)))
+                                       (warn "Too much polyphony: dropping YM-2151 note ~a at time ~d"
+                                             (midi->note-name key) time))))
+                                (number
+                                 (let ((voice (find-free-voice tia-voices time)))
+                                   (if voice
+                                       (setf (aref voices voice)
+                                             (cons (list time (best-tia-note-for key distortion tv)
+                                                         duration distortion)
+                                                   (aref voices voice)))
+                                       (warn "Too much polyphony: dropping TIA note ~d at time ~d"
+                                             key time))))
+                                (t (error "Unhandled DISTORTION ~s" distortion))))))
         finally (return (list voices tia-voices))))
 
 (defun merge-pokey-tia-voices (notes)
@@ -768,6 +782,12 @@ skipping MIDI music with ~:d note~:p"
            append (mapcar (lambda (note)
                             (cons voice-code note))
                           (aref tia voice))))))
+
+(defun merge-tia-voices (notes)
+  (loop for voice below 2
+        for voice-code from #x80
+        append (mapcar (lambda (note) (cons voice-code note))
+                       (aref notes voice))))
 
 (defun merge-yamaha-tia-voices (notes)
   (destructuring-bind (yamaha tia) notes
@@ -803,7 +823,7 @@ skipping MIDI music with ~:d note~:p"
   (array<-tia-notes-list (midi->2600-tia (car midi-notes)) output-coding))
 
 (defmethod midi-to-sound-binary (output-coding (machine-type (eql 7800)) midi-notes (sound (eql :tia)))
-  (array<-tia-notes-list (midi->7800-tia midi-notes output-coding) output-coding))
+  (array<-7800-tia-notes-list (midi->7800-tia midi-notes output-coding) output-coding))
 
 (defun collect-midi-texts (midi)
   (loop for track in (midi:midifile-tracks midi)
@@ -849,11 +869,10 @@ skipping MIDI music with ~:d note~:p"
     (let ((parts/quarter (midi::midifile-division midi))
           (texts (collect-midi-texts midi))
           (real-tracks (midi-tracks-with-music midi)))
-      (cond
-        ((zerop (length real-tracks))
-         (error "File ~a contains no tracks with actual music?
+      (when (zerop (length real-tracks))
+        (error "File ~a contains no tracks with actual music?
 Gathered text:~{~% • ~a~}"
-                file texts)))
+               file texts))
       (map 'list (lambda (track) (midi-track-decode track parts/quarter))
            real-tracks))))
 
@@ -1037,7 +1056,7 @@ Gathered text:~{~% • ~a~}"
   (format source-file "~2%;;; end of ~a" (assembler-label-name title)))
 
 (defgeneric write-song-data-to-binary (notes object machine sound-chip)
-  (:method ((notes t) (obect t) (machine t) (sound-chip t))
+  (:method (notes object machine sound-chip)
     (error "Unimplemented: Cannot write notes for machine ~a, sound-chip ~a" machine sound-chip)))
 
 (defmethod write-song-data-to-binary (notes object (machine (eql 2600)) (sound-chip (eql :TIA)))
@@ -1063,7 +1082,10 @@ Gathered text:~{~% • ~a~}"
 (defun pokey-distortion-code (distortion) ; FIXME
   (parse-integer (symbol-name distortion) :junk-allowed t))
 
-(defmethod write-song-data-to-binary (data object (machine (eql 7800)) (sound-chip (eql :POKEY)))
+(defun yamaha-distortion-code (distortion) ; FIXME
+  (parse-integer (subseq (symbol-name distortion) 1) :junk-allowed t))
+
+(defmethod write-song-data-to-binary (data object (machine (eql 7800)) sound-chip)
   (loop for note across data
         for now = 0
         with off-notes = (list)
@@ -1077,13 +1099,13 @@ Gathered text:~{~% • ~a~}"
                         (unless (and (= until time)
                                      (= voice next-voice))
                           (let ((delay (- time now)))
-                            (assert (plusp delay))
+                            (assert (<= 0 delay))
                             (loop while (> delay #xff)
                                   do (progn
                                        (write-bytes (vector #xff #x40 #xff 0) object)
                                        (decf delay #xff)
                                        (incf now #xff)))
-                            (assert (plusp delay))
+                            (assert (<= 0 delay))
                             (write-bytes (vector delay
                                                  #x40
                                                  voice
@@ -1098,19 +1120,15 @@ Gathered text:~{~% • ~a~}"
                             (write-bytes (vector #xff #x40 #xff 0) object)
                             (decf delay #xff)
                             (incf now #xff)))
-                 (write-bytes (vector delay
-                                      voice
-                                      key
+                 (write-bytes (vector delay voice key
                                       (if (< voice #x80)
-                                          (pokey-distortion-code distortion)
+                                          (ecase sound-chip
+                                            (:pokey (pokey-distortion-code distortion))
+                                            (:ym (yamaha-distortion-code distortion)))
                                           distortion)) 
                               object)
                  (setf now time)
                  (appendf off-notes (list (list (+ time duration) voice))))))))
-
-(defmethod write-song-data-to-binary (notes object machine (sound-chip (eql :YM)))
-  (warn "YM-2151 is unimplemented")
-  (write-bytes #(0 0 0 0 0 0 0 0) object))
 
 (defun assigned-song-bank-and-title (assignment)
   (list (car assignment)
@@ -1190,12 +1208,11 @@ Music:~:*
     (with-output-to-file (object object-name :element-type '(unsigned-byte 8)
                                              :if-exists :supersede :if-does-not-exist :create)
       (format *trace-output* "~&Writing ~a…" object-name)
-      (import-song-to-catalog
-       :song-file-name midi-name
-       :sound-chip sound-chip
-       :output-coding output-coding
-       :catalog catalog
-       :comments-catalog comments-catalog)
+      (import-song-to-catalog :song-file-name midi-name
+                              :sound-chip sound-chip
+                              :output-coding output-coding
+                              :catalog catalog
+                              :comments-catalog comments-catalog)
       (loop for symbol being the hash-keys of catalog
             for notes = (gethash symbol catalog)
             do (write-song-data-to-binary notes object *machine* sound-chip)))))
@@ -1299,4 +1316,3 @@ Music:~:*
 (define-constant +semitone+ (expt 2 1/12)
   :documentation "The ratio of each semitone in equal temperment"
   :test #'=)
-
