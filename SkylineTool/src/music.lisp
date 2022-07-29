@@ -438,10 +438,37 @@ skipping MIDI music with ~:d note~:p"
                                     (parse-integer number$)
                                     nil)))))
           finally (return notes)))
-
+  
+  (defun interpret-pokey-sheet2 (sheet2)
+    (return-from interpret-pokey-sheet2 nil)
+    (assert (eql 0 (search "POKEY table" (aref sheet2 2 0))) (sheet2)
+            "POKEY tables not in expected format~%~s" (aref sheet2 2 0))
+    (assert (equal "C" (aref sheet2 0 3)) ()
+            "Table does not start with C~%~s" (aref sheet2 0 3))
+    (loop for row from 3 below 112
+          for out-row from 0
+          with notes = (make-array (list 18 109) :element-type '(or null (unsigned-byte 16)))
+          with octave = 1
+          do (progn
+               (when (eql 0 (search "OCTAVE " (aref sheet2 35 row)))
+                 (setf octave (parse-integer (subseq (aref sheet2 35 row) 7))))
+               (setf (aref notes 0 out-row) (note->midi-note-number 
+                                             octave
+                                             (string-trim " " (aref sheet2 0 row))))
+               (loop for column from 1 below 35 by 2
+                     for out-column from 1
+                     do (let ((number$ (aref sheet2 column row)))
+                          (setf (aref notes out-column out-row)
+                                (if (and (not (emptyp number$))
+                                         (every #'digit-char-p number$))
+                                    (parse-integer number$)
+                                    nil)))))
+          finally (return notes)))
+  
   (defun interpret-pokey-tables (tables)
     (destructuring-bind (sheet1 sheet2 sheet3 sheet4) tables
-      (declare (ignore sheet2 sheet3 sheet4))
+      (declare (ignore sheet3 sheet4))
+      (interpret-pokey-sheet2 sheet2) ; TODO, ignored
       (interpret-pokey-sheet1 sheet1)))
 
   (defun lists->2d-array (lists)
@@ -490,8 +517,7 @@ skipping MIDI music with ~:d note~:p"
       (format *trace-output* " done.")))
 
   (defun read-pokey-tables ()
-    (interpret-pokey-tables (mapcar #'lists->2d-array (read-pokey.ods))))
-  )
+    (interpret-pokey-tables (mapcar #'lists->2d-array (read-pokey.ods)))))
 
 (define-constant +pokey-notes-table+
     (read-pokey-tables)
@@ -524,67 +550,115 @@ skipping MIDI music with ~:d note~:p"
 (defun null-if-zero-note (n)
   (if (or (null n) (zerop (lastcar n))) nil n))
 
-(defun array<-tia-notes-list (list output-coding)
+(defun best-tia-note-for-ntsc (note)
   (labels ((nearest (&rest set)
              (first (sort set #'< :key #'third))))
-    (let ((array (make-array (list (length list) 5))))
-      (loop for note in list
-            for i from 0
-            for (control freq) 
-              = 
-              (if-let (note (elt note 2))
-                (ecase output-coding
-                  (:ntsc
-                   (nearest (null-if-zero-note (best-tia-ntsc-note-for note 4))
-                            (null-if-zero-note (best-tia-ntsc-note-for note 5))
-                            (null-if-zero-note (best-tia-ntsc-note-for note 2))
-                            (null-if-zero-note (best-tia-ntsc-note-for note 6))
-                            (null-if-zero-note (best-tia-ntsc-note-for note 8))
-                            (list 0 0 most-positive-fixnum)))
-                  (:pal
-                   (nearest (null-if-zero-note (best-tia-pal-note-for note 4))
-                            (null-if-zero-note (best-tia-pal-note-for note 5))
-                            (null-if-zero-note (best-tia-pal-note-for note 2))
-                            (null-if-zero-note (best-tia-ntsc-note-for note 6))
-                            (null-if-zero-note (best-tia-ntsc-note-for note 8))
-                            (list 0 0 most-positive-fixnum))))
-                (list nil nil))
-            do (setf (aref array i 0) (when (elt note 0)
-                                        (floor (max (/ (elt note 0) +midi-duration-divisor+)
-                                                    1))) ; duration
-                     (aref array i 1) control ;control
-                     (aref array i 2) freq    ;frequency
-                     (aref array i 3) (when (elt note 3)
-                                        (floor (elt note 3))) ; volume
-                     (aref array i 4) (elt note 4)))          ;comment
-      array)))
+    (nearest (null-if-zero-note (best-tia-ntsc-note-for note 4))
+             (null-if-zero-note (best-tia-ntsc-note-for note 5))
+             (null-if-zero-note (best-tia-ntsc-note-for note 2))
+             (null-if-zero-note (best-tia-ntsc-note-for note 6))
+             (null-if-zero-note (best-tia-ntsc-note-for note 8))
+             (list 0 0 most-positive-fixnum))))
 
-(defun midi-translate-notes (notes)
+(defun best-tia-note-for-pal (note)
+  (labels ((nearest (&rest set)
+             (first (sort set #'< :key #'third))))
+    (nearest (null-if-zero-note (best-tia-pal-note-for note 4))
+             (null-if-zero-note (best-tia-pal-note-for note 5))
+             (null-if-zero-note (best-tia-pal-note-for note 2))
+             (null-if-zero-note (best-tia-pal-note-for note 6))
+             (null-if-zero-note (best-tia-pal-note-for note 8))
+             (list 0 0 most-positive-fixnum))))
+
+(defun array<-tia-notes-list (list output-coding)
+  (let ((array (make-array (list (length list) 5))))
+    (loop for note in list
+          for i from 0
+          for (control freq) 
+            = 
+            (if-let (note (elt note 2))
+              (ecase output-coding
+                (:ntsc
+                 (best-tia-note-for-ntsc note))
+                (:pal
+                 (best-tia-note-for-pal note)))
+              (list nil nil))
+          do (setf (aref array i 0) (when (elt note 0)
+                                      (floor (max (/ (elt note 0) +midi-duration-divisor+)
+                                                  1))) ; duration
+                   (aref array i 1) control            ;control
+                   (aref array i 2) freq               ;frequency
+                   (aref array i 3) (when (elt note 3)
+                                      (floor (elt note 3))) ; volume
+                   (aref array i 4) (elt note 4)))          ;comment
+    array))
+
+(defun midi->2600-tia (notes)
   (let ((volume 8)
         (output (list)))
     (loop for note in notes
           for i from 0
-          do (destructuring-bind (note/rest . info) note
-               (ecase note/rest
-                 (:note 
-                  (push (make-array 5 :initial-contents (list (getf info :duration)
-                                                              0
-                                                              (freq<-midi-key (getf info :key))
-                                                              volume
-                                                              (nth-value 2 (key<-midi-key (getf info :key)))))
-                        output))
-                 (:rest (push (make-array 5 :initial-contents (list (getf info :duration) 0 0 0 nil))
-                              output))
-                 (:text (push (make-array 5 :initial-contents (list nil nil nil nil info))
-                              output)))))
+          for (note/rest . info) = note
+          do (ecase note/rest
+               (:note 
+                (push (make-array 5 :initial-contents (list (getf info :duration)
+                                                            0
+                                                            (freq<-midi-key (getf info :key))
+                                                            volume
+                                                            (nth-value 2 (key<-midi-key (getf info :key)))))
+                      output))
+               (:rest (push (make-array 5 :initial-contents (list (getf info :duration) 0 0 0 nil))
+                            output))
+               (:text (push (make-array 5 :initial-contents (list nil nil nil nil info))
+                            output))))
     (reverse output)))
 
-(defun array<-yamaha-notes-list (notes tv)
+(defun find-tia-distortion (params)
+  (warn "Not finding best TIA distortion for ~a" params)
+  1)
+
+(defun midi->7800-tia (midi-notes tv)
+  (loop for object in midi-notes
+        with distortion
+        with tia-voices = (make-array 2 :initial-element nil)
+        collecting (destructuring-bind (kind . params) object
+                     (ecase kind
+                       (:text (setf distortion (find-tia-distortion params)))
+                       (:rest)
+                       (:note (destructuring-bind (&key time key duration) params
+                                (typecase distortion
+                                  (null
+                                   (warn "Note without knowing instrument: dropping note ~d at time ~d"
+                                         key time))
+                                  (number
+                                   (let ((voice (find-free-voice tia-voices time)))
+                                     (if voice
+                                         (setf (aref tia-voices voice)
+                                               (cons (list time (best-tia-note-for key distortion tv)
+                                                           duration distortion)
+                                                     (aref tia-voices voice)))
+                                         (warn "Too much polyphony: dropping note ~d at time ~d"
+                                               key time))))
+                                  (t (error "Unhandled DISTORTION ~s for TIA only" distortion)))))))
+        finally (return (list tia-voices))))
+
+(defun find-yamaha-distortion (text)
+  (warn "Not computing YM-2151 “distortion” for ~a" text)
+  :yamaha)
+
+(defun best-yamaha-note-for (key distortion)
+  (warn "Not computing YM-2151 note for ~d, ~s" key distortion)
+  0)
+
+(defun array<-yamaha-notes-list (notes tv-type)
   (warn "YM-2151 not implemented!")
-  #(0))
+  (let ((frame-rate (ecase tv-type (:ntsc 60) (:pal 50))))
+    (coerce (sort (adjust-note-timing-for-frame-rate (merge-yamaha-tia-voices notes) frame-rate)
+                  #'< :key #'second)
+            'vector)))
 
 (defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :ym)))
-  (array<-yamaha-notes-list (midi-translate-notes (car midi-notes)) output-coding))
+  (array<-yamaha-notes-list (midi->ym-2151 (car midi-notes) output-coding) output-coding))
 
 (defun voice-free-at-time-p (voice time)
   (or (emptyp voice)
@@ -598,34 +672,88 @@ skipping MIDI music with ~:d note~:p"
   (position-if (lambda (voice) (voice-free-at-time-p voice time))
                voices))
 
-(defun midi->pokey (midi-notes)
+(defun find-pokey-distortion (text)
+  (cond ((equal (first text) "Piano") :10)
+        ((equal (first text) "Drums") :11)
+        (t (warn "Ignored text in MIDI: ~s" text))))
+
+(defun best-tia-note-for (key distortion tv)
+  (let ((freq (freq<-midi-key key)))
+    (ecase tv
+      (:ntsc (or (best-tia-ntsc-note-for freq distortion)
+                 (best-tia-note-for-ntsc freq)))
+      (:pal (or (best-tia-pal-note-for freq distortion)
+                (best-tia-note-for-pal freq))))))
+
+(defun midi->pokey (midi-notes tv)
   (loop for object in midi-notes
         with distortion
-        for kind = (first object)
-        for params = (rest object)
         with voices = (make-array 4 :initial-element nil)
         with tia-voices = (make-array 2 :initial-element nil)
-        collecting (ecase kind
-                     (:text (cond ((equal (first params) "Piano")
-                                   (setf distortion :10))
-                                  (t (warn "Ignored text in MIDI: ~s" params))))
-                     (:rest)
-                     (:note (destructuring-bind (&key time key duration) params
-                              (cond
-                                ((null distortion)
-                                 (warn "Note without knowing instrument: dropping note ~d at time ~d"
-                                       key time))
-                                ((symbolp distortion)
-                                 (let ((voice (find-free-voice voices time)))
-                                   (if voice
-                                       (setf (aref voices voice)
-                                             (cons (list time (best-pokey-note-for 
-                                                               key distortion 8)
-                                                         duration distortion)
-                                                   (aref voices voice)))
-                                       (warn "Too much polyphony: dropping note ~d at time ~d"
-                                             key time))))
-                                (t (error "Unhandled DISTORTION ~s" distortion))))))
+        collecting (destructuring-bind (kind . params) object
+                     (ecase kind
+                       (:text (setf distortion (find-pokey-distortion params)))
+                       (:rest)
+                       (:note (destructuring-bind (&key time key duration) params
+                                (typecase distortion
+                                  (null
+                                   (warn "Note without knowing instrument: dropping note ~d at time ~d"
+                                         key time))
+                                  (symbol
+                                   (let ((voice (find-free-voice voices time)))
+                                     (if voice
+                                         (setf (aref voices voice)
+                                               (cons (list time (best-pokey-note-for 
+                                                                 key distortion 8)
+                                                           duration distortion)
+                                                     (aref voices voice)))
+                                         (warn "Too much polyphony: dropping POKEY note ~d at time ~d"
+                                               key time))))
+                                  (number
+                                   (let ((voice (find-free-voice tia-voices time)))
+                                     (if voice
+                                         (setf (aref voices voice)
+                                               (cons (list time (best-tia-note-for key distortion tv)
+                                                           duration distortion)
+                                                     (aref voices voice)))
+                                         (warn "Too much polyphony: dropping TIA note ~d at time ~d"
+                                               key time))))
+                                  (t (error "Unhandled DISTORTION ~s" distortion)))))))
+        finally (return (list voices tia-voices))))
+
+(defun midi->ym-2151 (midi-notes tv)
+  (loop for object in midi-notes
+        with distortion
+        with voices = (make-array 4 :initial-element nil)
+        with tia-voices = (make-array 2 :initial-element nil)
+        collecting (destructuring-bind (kind . params) object
+                     (ecase kind
+                       (:text (setf distortion (find-yamaha-distortion params)))
+                       (:rest)
+                       (:note (destructuring-bind (&key time key duration) params
+                                (typecase distortion
+                                  (null
+                                   (warn "Note without knowing instrument: dropping note ~d at time ~d"
+                                         key time))
+                                  (symbol
+                                   (let ((voice (find-free-voice voices time)))
+                                     (if voice
+                                         (setf (aref voices voice)
+                                               (cons (list time (best-yamaha-note-for key distortion)
+                                                           duration distortion)
+                                                     (aref voices voice)))
+                                         (warn "Too much polyphony: dropping POKEY note ~d at time ~d"
+                                               key time))))
+                                  (number
+                                   (let ((voice (find-free-voice tia-voices time)))
+                                     (if voice
+                                         (setf (aref voices voice)
+                                               (cons (list time (best-tia-note-for key distortion tv)
+                                                           duration distortion)
+                                                     (aref voices voice)))
+                                         (warn "Too much polyphony: dropping TIA note ~d at time ~d"
+                                               key time))))
+                                  (t (error "Unhandled DISTORTION ~s" distortion)))))))
         finally (return (list voices tia-voices))))
 
 (defun merge-pokey-tia-voices (notes)
@@ -635,6 +763,19 @@ skipping MIDI music with ~:d note~:p"
            append (mapcar (lambda (note)
                             (cons voice note))
                           (aref pokey voice)))
+     (loop for voice below 2
+           for voice-code from #x80
+           append (mapcar (lambda (note)
+                            (cons voice-code note))
+                          (aref tia voice))))))
+
+(defun merge-yamaha-tia-voices (notes)
+  (destructuring-bind (yamaha tia) notes
+    (append
+     (loop for voice below 4
+           append (mapcar (lambda (note)
+                            (cons voice note))
+                          (aref yamaha voice)))
      (loop for voice below 2
            for voice-code from #x80
            append (mapcar (lambda (note)
@@ -656,10 +797,13 @@ skipping MIDI music with ~:d note~:p"
             'vector)))
 
 (defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :pokey)))
-  (array<-pokey-notes-list (midi->pokey (car midi-notes)) output-coding))
+  (array<-pokey-notes-list (midi->pokey (car midi-notes) output-coding) output-coding))
 
-(defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :tia)))
-  (array<-tia-notes-list (midi-translate-notes (car midi-notes)) output-coding))
+(defmethod midi-to-sound-binary (output-coding (machine-type (eql 2600)) midi-notes (sound (eql :tia)))
+  (array<-tia-notes-list (midi->2600-tia (car midi-notes)) output-coding))
+
+(defmethod midi-to-sound-binary (output-coding (machine-type (eql 7800)) midi-notes (sound (eql :tia)))
+  (array<-tia-notes-list (midi->7800-tia midi-notes output-coding) output-coding))
 
 (defun collect-midi-texts (midi)
   (loop for track in (midi:midifile-tracks midi)
@@ -892,7 +1036,11 @@ Gathered text:~{~% • ~a~}"
              (finish-output source-file)))
   (format source-file "~2%;;; end of ~a" (assembler-label-name title)))
 
-(defmethod write-song-data-to-binary (notes object (sound-chip (eql :TIA)))
+(defgeneric write-song-data-to-binary (notes object machine sound-chip)
+  (:method ((notes t) (obect t) (machine t) (sound-chip t))
+    (error "Unimplemented: Cannot write notes for machine ~a, sound-chip ~a" machine sound-chip)))
+
+(defmethod write-song-data-to-binary (notes object (machine (eql 2600)) (sound-chip (eql :TIA)))
   (loop for i below (array-dimension notes 0)
         do (let ((duration (aref notes i 0))
                  (control (aref notes i 1))
@@ -915,7 +1063,7 @@ Gathered text:~{~% • ~a~}"
 (defun pokey-distortion-code (distortion) ; FIXME
   (parse-integer (symbol-name distortion) :junk-allowed t))
 
-(defmethod write-song-data-to-binary (data object (sound-chip (eql :POKEY)))
+(defmethod write-song-data-to-binary (data object (machine (eql 7800)) (sound-chip (eql :POKEY)))
   (loop for note across data
         for now = 0
         with off-notes = (list)
@@ -960,7 +1108,7 @@ Gathered text:~{~% • ~a~}"
                  (setf now time)
                  (appendf off-notes (list (list (+ time duration) voice))))))))
 
-(defmethod write-song-data-to-binary (notes object (sound-chip (eql :YM)))
+(defmethod write-song-data-to-binary (notes object machine (sound-chip (eql :YM)))
   (warn "YM-2151 is unimplemented")
   (write-bytes #(0 0 0 0 0 0 0 0) object))
 
@@ -1050,7 +1198,7 @@ Music:~:*
        :comments-catalog comments-catalog)
       (loop for symbol being the hash-keys of catalog
             for notes = (gethash symbol catalog)
-            do (write-song-data-to-binary notes object sound-chip)))))
+            do (write-song-data-to-binary notes object *machine* sound-chip)))))
 
 (defun compile-music-2600 (source-out-name in-file-name)
   (let ((catalog (make-hash-table))
