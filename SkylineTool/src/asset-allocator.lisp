@@ -139,11 +139,11 @@
 (define-constant +all-builds+ '("AA" "Public" "Demo")
   :test #'equalp)
 
-(define-constant +all-sounds+ '("TIA" "POKEY" "YM")
+(define-constant +all-sounds+ '("TIA" "POKEY")
   :test #'equalp)
 
 (defun all-sound-chips-for-build (build)
-  (cond ((equal "AA" build) '("YM"))
+  (cond ((equal "AA" build) '("POKEY"))
         (t +all-sounds+)))
 
 (define-constant +all-video+ '("NTSC" "PAL")
@@ -475,16 +475,13 @@ unset 7800joy2
 set savekey
 set composite~@[
 set pokey@440
-~]~@[
-set ym2151@460
 ~]save
 exit
 "
             "Phantasia" ; TODO
             (nth-value 6 (decode-universal-time (get-universal-time)))
             video
-            (equal sound "POKEY")
-            (equal sound "YM"))))
+            (equal sound "POKEY"))))
 
 (defun write-master-makefile ()
   (with-output-to-file (*standard-output* "Source/Generated/Makefile" :if-exists :supersede)

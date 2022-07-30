@@ -4,13 +4,11 @@ all:	game demo doc
 
 publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 	@until rsync -essh --progress \
-		Dist/Phantasia.AA.YM.NTSC.a78 Dist/Phantasia.AA.YM.PAL.a78 \
+		Dist/Phantasia.AA.POKEY.NTSC.a78 Dist/Phantasia.AA.POKEY.PAL.a78 \
 		Dist/Phantasia.Public.TIA.NTSC.a78 Dist/Phantasia.Public.TIA.PAL.a78 \
 		Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78 \
-		Dist/Phantasia.Public.YM.NTSC.a78 Dist/Phantasia.Public.YM.PAL.a78 \
 		Dist/Phantasia.Demo.TIA.NTSC.a78 Dist/Phantasia.Demo.TIA.PAL.a78 \
 		Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78 \
-		Dist/Phantasia.Public.YM.NTSC.a78 Dist/Phantasia.Public.YM.PAL.a78 \
 		Dist/Phantasia.AA.pdf \
 		Dist/Phantasia.pdf \
 		Dist/Phantasia.Demo.pdf \
@@ -20,28 +18,24 @@ publish:	game demo atariage doc Dist/Phantasia.Source.tar.gz
 		star-hope.org:star-hope.org/games/Phantasia/ ; \
 	do sleep 1; done
 
-atariage:	Dist/Phantasia.AA.YM.NTSC.a78 Dist/Phantasia.AA.YM.PAL.a78 \
+atariage:	Dist/Phantasia.AA.POKEY.NTSC.a78 Dist/Phantasia.AA.POKEY.PAL.a78 \
 	Dist/Phantasia.AA.pdf
 
 game:	Dist/Phantasia.Public.TIA.NTSC.a78 Dist/Phantasia.Public.TIA.PAL.a78 \
-          Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78 \
-          Dist/Phantasia.Public.YM.NTSC.a78 Dist/Phantasia.Public.YM.PAL.a78
+          Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78
 
 demo:	Dist/Phantasia.Demo.TIA.NTSC.a78 Dist/Phantasia.Demo.TIA.PAL.a78 \
-	Dist/Phantasia.Demo.POKEY.NTSC.a78 Dist/Phantasia.Demo.POKEY.PAL.a78 \
-	Dist/Phantasia.Demo.YM.NTSC.a78 Dist/Phantasia.Demo.YM.PAL.a78
+	Dist/Phantasia.Demo.POKEY.NTSC.a78 Dist/Phantasia.Demo.POKEY.PAL.a78
 
 Dist/Phantasia.Source.tar.gz:	game
 	tar zcf $@ Makefile README.md Guts.txt Source Manual
 
 Dist/Phantasia.zip:	Dist/Phantasia.Public.POKEY.NTSC.a78 Dist/Phantasia.Public.POKEY.PAL.a78 \
 		Dist/Phantasia.Public.TIA.NTSC.a78 Dist/Phantasia.Public.TIA.PAL.a78 \
-		Dist/Phantasia.Public.YM.NTSC.a78 Dist/Phantasia.Public.YM.PAL.a78 \
 		Dist/Phantasia.pdf
 
 Dist/Phantasia.Demo.zip:	Dist/Phantasia.Demo.TIA.NTSC.a78 Dist/Phantasia.Demo.TIA.PAL.a78 \
 		Dist/Phantasia.Demo.POKEY.NTSC.a78 Dist/Phantasia.Demo.POKEY.PAL.a78 \
-		Dist/Phantasia.Demo.YM.NTSC.a78 Dist/Phantasia.Demo.YM.PAL.a78 \
 		Dist/Phantasia.Demo.pdf 
 
 USBMOUNT=$(shell echo \"$$(mount | grep /run/media/$$USER | grep vfat | head -n 1 | \
@@ -83,28 +77,16 @@ Dist/Phantasia.Public.POKEY.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/s
 Dist/Phantasia.Public.POKEY.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.Public.YM.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+Dist/Phantasia.AA.POKEY.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile $@
 
-Dist/Phantasia.Public.YM.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile $@
-
-Dist/Phantasia.AA.YM.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile $@
-
-Dist/Phantasia.AA.YM.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
+Dist/Phantasia.AA.POKEY.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile $@
 
 Dist/Phantasia.Demo.POKEY.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile $@
 
 Dist/Phantasia.Demo.POKEY.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile $@
-
-Dist/Phantasia.Demo.YM.NTSC.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
-	$(MAKE) -f Source/Generated/Makefile $@
-
-Dist/Phantasia.Demo.YM.PAL.a78:	${SOURCES} Source/Generated/Makefile bin/skyline-tool
 	$(MAKE) -f Source/Generated/Makefile $@
 
 Source/Generated/Makefile:	bin/skyline-tool
@@ -293,16 +275,16 @@ AS=error
 
 A7800=a7800 a7800dev -debug -debugger_font 'Source Code Pro' 
 
-emu:	Dist/Phantasia.Public.YM.NTSC.a78
+emu:	Dist/Phantasia.Public.POKEY.NTSC.a78
 	$(A7800) -cart $$(pwd)/$<
 
-emu-pal:	Dist/Phantasia.Public.YM.PAL.a78
+emu-pal:	Dist/Phantasia.Public.POKEY.PAL.a78
 	$(A7800) -cart $$(pwd)/$<
 
-emu-demo:	Dist/Phantasia.Demo.YM.NTSC.a78
+emu-demo:	Dist/Phantasia.Demo.POKEY.NTSC.a78
 	$(A7800) -cart $$(pwd)/$<
 
-emu-demo-pal:	Dist/Phantasia.Demo.YM.PAL.a78
+emu-demo-pal:	Dist/Phantasia.Demo.POKEY.PAL.a78
 	$(A7800) -cart $$(pwd)/$<
 
 quickclean:
@@ -329,7 +311,7 @@ release:	all
 	@if [ $(RELEASE) = noreleasenamegiven ]; then echo "Usage: make RELEASE=ident release" >&2; exit 1; fi
 	mkdir -p Dist/$(RELEASE)
 	-rm Dist/$(RELEASE)/*
-	-cp -v Dist/Phantasia.{Public,Demo}.{POKEY,TIA,YM}.{NTSC,PAL}.{a78,pdf} \
+	-cp -v Dist/Phantasia.{Public,Demo}.{POKEY,TIA}.{NTSC,PAL}.{a78,pdf} \
 		Dist/$(RELEASE) 2>/dev/null
 	cp -v Dist/Phantasia-book.pdf Dist/$(RELEASE)
 	@cd Dist/$(RELEASE) ; \
@@ -339,15 +321,15 @@ release:	all
 	@echo "AtariAge Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.AtariAge.$(RELEASE).zip \
-		$(RELEASE)/Phantasia.AA.YM.{NTSC,PAL}.$(RELEASE).{a78,pdf} )
+		$(RELEASE)/Phantasia.AA.POKEY.{NTSC,PAL}.$(RELEASE).{a78,pdf} )
 	@echo "Public Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.$(RELEASE).zip \
-		$(RELEASE)/Phantasia.Public.{TIA,POKEY,YM}.{NTSC,PAL}.$(RELEASE).{a78,pdf} )
+		$(RELEASE)/Phantasia.Public.{TIA,POKEY}.{NTSC,PAL}.$(RELEASE).{a78,pdf} )
 	@echo "Demo Release $(RELEASE) of Phantasia for the Atari 7800. © 2022 Bruce-Robert Pocock." | \
 		(cd Dist; zip --archive-comment -9 \
 		$(RELEASE)/Phantasia.Demo.$(RELEASE).zip \
-		$(RELEASE)/Phantasia.Demo.{TIA,POKEY,YM}.{NTSC,PAL}.$(RELEASE).{a78,pdf} )
+		$(RELEASE)/Phantasia.Demo.{TIA,POKEY}.{NTSC,PAL}.$(RELEASE).{a78,pdf} )
 
 publish-release:	release
 	until rsync -essh -v Dist/$(RELEASE)/*$(RELEASE)* \

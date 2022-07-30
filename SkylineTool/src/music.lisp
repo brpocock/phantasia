@@ -654,24 +654,6 @@ skipping MIDI music with ~:d note~:p"
                                       (t (error "Unhandled DISTORTION ~s for TIA only" distortion)))))))
         finally (return tia-voices)))
 
-(defun find-yamaha-distortion (text)
-  (warn "Not computing YM-2151 “distortion” for ~a" text)
-  :y0)
-
-(defun best-yamaha-note-for (key distortion)
-  (warn "Not computing YM-2151 note for ~a, ~s" (midi->note-name key) distortion)
-  0)
-
-(defun array<-yamaha-notes-list (notes tv-type)
-  (warn "YM-2151 not implemented!")
-  (let ((frame-rate (ecase tv-type (:ntsc 60) (:pal 50))))
-    (coerce (sort (adjust-note-timing-for-frame-rate (merge-yamaha-tia-voices notes) frame-rate)
-                  #'< :key #'second)
-            'vector)))
-
-(defmethod midi-to-sound-binary (output-coding machine-type midi-notes (sound (eql :ym)))
-  (array<-yamaha-notes-list (midi->ym-2151 (car midi-notes) output-coding) output-coding))
-
 (defun voice-free-at-time-p (voice time)
   (or (emptyp voice)
       (notany (lambda (note)
@@ -736,40 +718,6 @@ skipping MIDI music with ~:d note~:p"
                                         (t (error "Unhandled DISTORTION ~s" distortion)))))))) 
         finally (return (list voices tia-voices))))
 
-(defun midi->ym-2151 (midi-notes tv)
-  (loop for (kind . params) in midi-notes
-        with distortion
-        with voices = (make-array 4 :initial-element nil)
-        with tia-voices = (make-array 2 :initial-element nil)
-        collecting (ecase kind
-                     (:text (setf distortion (find-yamaha-distortion params)))
-                     (:rest)
-                     (:note (destructuring-bind (&key time key duration) params
-                              (typecase distortion
-                                (null
-                                 (warn "Note without knowing instrument: dropping note ~a at time ~d (YM-2151)"
-                                       (midi->note-name key) time))
-                                (symbol
-                                 (let ((voice (find-free-voice voices time)))
-                                   (if voice
-                                       (setf (aref voices voice)
-                                             (cons (list time (best-yamaha-note-for key distortion)
-                                                         duration distortion)
-                                                   (aref voices voice)))
-                                       (warn "Too much polyphony: dropping YM-2151 note ~a at time ~d"
-                                             (midi->note-name key) time))))
-                                (number
-                                 (let ((voice (find-free-voice tia-voices time)))
-                                   (if voice
-                                       (setf (aref voices voice)
-                                             (cons (list time (best-tia-note-for key distortion tv)
-                                                         duration distortion)
-                                                   (aref voices voice)))
-                                       (warn "Too much polyphony: dropping TIA note ~d at time ~d"
-                                             key time))))
-                                (t (error "Unhandled DISTORTION ~s" distortion))))))
-        finally (return (list voices tia-voices))))
-
 (defun merge-pokey-tia-voices (notes)
   (destructuring-bind (pokey tia) notes
     (append
@@ -788,19 +736,6 @@ skipping MIDI music with ~:d note~:p"
         for voice-code from #x80
         append (mapcar (lambda (note) (cons voice-code note))
                        (aref notes voice))))
-
-(defun merge-yamaha-tia-voices (notes)
-  (destructuring-bind (yamaha tia) notes
-    (append
-     (loop for voice below 4
-           append (mapcar (lambda (note)
-                            (cons voice note))
-                          (aref yamaha voice)))
-     (loop for voice below 2
-           for voice-code from #x80
-           append (mapcar (lambda (note)
-                            (cons voice-code note))
-                          (aref tia voice))))))
 
 (defun adjust-note-timing-for-frame-rate (notes frame-rate)
   (loop for (voice time key duration distortion) in notes
@@ -1082,9 +1017,6 @@ Gathered text:~{~% • ~a~}"
 (defun pokey-distortion-code (distortion) ; FIXME
   (parse-integer (symbol-name distortion) :junk-allowed t))
 
-(defun yamaha-distortion-code (distortion) ; FIXME
-  (parse-integer (subseq (symbol-name distortion) 1) :junk-allowed t))
-
 (defmethod write-song-data-to-binary (data object (machine (eql 7800)) sound-chip)
   (loop for note across data
         for now = 0
@@ -1123,8 +1055,7 @@ Gathered text:~{~% • ~a~}"
                  (write-bytes (vector delay voice key
                                       (if (< voice #x80)
                                           (ecase sound-chip
-                                            (:pokey (pokey-distortion-code distortion))
-                                            (:ym (yamaha-distortion-code distortion)))
+                                            (:pokey (pokey-distortion-code distortion)))
                                           distortion)) 
                               object)
                  (setf now time)
