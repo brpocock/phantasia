@@ -164,12 +164,15 @@
       (let ((gid (mod (parse-integer gid$) 128))
             (type (or (assocdr "type" (second object) nil) "rug"))
             (decal-props
-              (logior (when-let (text (assocdr "text" (second object) nil))
-                        (logior (ash 1 14)
-                                (ash (get-text-reference text texts) 8)))
-                      (when-let (script (assocdr "script" (second object) nil))
-                        (logior (ash 1 15)
-                                (ash (get-text-reference script texts) 8))))))
+              (reduce #'logior
+                      (remove-if #'null
+                                 (list
+                                  (when-let (text (assocdr "text" (second object) nil))
+                                    (logior (ash 1 14)
+                                            (ash (get-text-reference text texts) 8)))
+                                  (when-let (script (assocdr "script" (second object) nil))
+                                    (logior (ash 1 15)
+                                            (ash (get-text-reference script texts) 8))))))))
         (format *trace-output* "~& “~a” @(~d, ~d)" name x y) 
         (return-from collect-decal-object (list x y gid decal-props))))))
 
