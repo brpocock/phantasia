@@ -10,6 +10,6 @@ GenerateDrawingList:          .block
           jsr WriteOverscanDL
 
           jsr JGetPlayerFrame
-          jsr UpdateSprites
+          jsr UpdateDecals
           jmp SwitchToNewDLL    ; tail call
           .bend

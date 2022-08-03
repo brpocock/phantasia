@@ -1,7 +1,7 @@
-;;; Phantasia Source/Routines/SpriteSorter.s
+;;; Phantasia Source/Routines/DecalSorter.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
-SpriteSorter:	.block
+DecalSorter:	.block
 
           brk
           rts

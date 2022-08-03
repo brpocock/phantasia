@@ -1,9 +1,9 @@
-;;; Phantasia Source/Routines/MoveSprite.s
+;;; Phantasia Source/Routines/MoveDecal.s
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
-MoveSprite:         .macro high, low, fraction, lowSize, isX
+MoveDecal:         .macro high, low, fraction, lowSize, isX
           .block
-          ;; X = sprite number
+          ;; X = decal number
           ;; Y = Δx
           ;; A = speed
 
@@ -69,7 +69,7 @@ DoneMinorPlus:
 
 BounceOffTheWalls:
           .if !(\isX)
-            lda SpriteXL, x
+            lda DecalXL, x
             cmp #4
             blt +
             inc CheckX
@@ -89,16 +89,16 @@ DoneMath:
           .bend
           .endm
 
-MoveSpriteX:
-          .MoveSprite SpriteXH, SpriteXL, SpriteXFraction, 8, true
+MoveDecalX:
+          .MoveDecal DecalXH, DecalXL, DecalXFraction, 8, true
 
-MoveSpriteY:
-          .MoveSprite SpriteYH, SpriteYL, SpriteYFraction, 16, false
+MoveDecalY:
+          .MoveDecal DecalYH, DecalYL, DecalYFraction, 16, false
           
 GetCheckPoint:      .block
-          lda SpriteXH, x
+          lda DecalXH, x
           sta CheckX
-          lda SpriteYH, x
+          lda DecalYH, x
           sta CheckY
           rts
           .bend

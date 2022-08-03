@@ -4,7 +4,7 @@
   <property name="ID" type="int" value="5"/>
  </properties>
  <tileset firstgid="1" source="IndoorTiles.tsx"/>
- <tileset firstgid="129" source="IndoorSprites.tsx"/>
+ <tileset firstgid="129" source="IndoorDecals.tsx"/>
  <layer id="1" name="Ground" width="20" height="8">
   <properties>
    <property name="Ground" type="bool" value="true"/>

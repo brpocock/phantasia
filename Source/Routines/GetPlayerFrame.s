@@ -6,7 +6,7 @@ GetPlayerFrame:     .block
 
 SetFacing:          .macro stick, art
           .block
-          lda SpriteFacing
+          lda DecalFacing
           and #\stick
           beq NoArt
           ldx #\art
@@ -21,7 +21,7 @@ NoArt:
           .SetFacing P0StickUp, PlayerFacingUp
 
 SetSourceWalk:
-          lda SpriteAction
+          lda DecalAction
           ;; cmp #ActionIdle ; unnecessary, it's zero
           bne NotIdle
           ldy # 2
@@ -81,14 +81,14 @@ SetFrameForWalking:
           and #$06
           lsr a
           tay
-          lda SpriteFacing
+          lda DecalFacing
           and #P0StickUp|P0StickDown
           beq +
           lda FramePatternUD, y
           jmp SetSourceFrame0
 
 +
-          lda SpriteFacing
+          lda DecalFacing
           and #P0StickRight
           beq NormalLR
 
@@ -122,7 +122,7 @@ CopyTile:
           .mvaw Dest, AnimationBuffer + $1004
           jsr BlockCopy
 
-          lda SpriteAction
+          lda DecalAction
           cmp #ActionWading
           bne DoneWading
 
@@ -147,7 +147,7 @@ LargeShield:
           ldy #$08
 
 SmallShield:
-          lda SpriteFacing
+          lda DecalFacing
           and #P0StickDown | P0StickLeft | P0StickRight
           beq TopSmallShield
           .BitBit P0StickDown

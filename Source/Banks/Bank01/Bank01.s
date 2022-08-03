@@ -9,7 +9,7 @@ Tileset:
           .binary "Tileset.OverworldTiles.o"
 
           .align $2000
-Sprites:
-          .binary "Tileset.OverworldSprites.o"
+Decals:
+          .binary "Tileset.OverworldDecals.o"
 
           .include "EndBank.s"

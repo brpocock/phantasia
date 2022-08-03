@@ -25,7 +25,7 @@ GamePlay:
           .include "StartDLL.s"
           .include "StatsDL.s"
           .include "SwitchToNewDLL.s"
-          .include "UpdateSprites.s"
+          .include "UpdateDecals.s"
           .include "WriteOverscanDL.s"
 ;;; 
           * = $a000

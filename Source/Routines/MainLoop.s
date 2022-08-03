@@ -23,7 +23,7 @@ CheckForAlarm:
           jsr CallAlarmFunction
 
 AlarmDone:
-          jsr UpdateSprites
+          jsr UpdateDecals
 
           lda ScreenChangedP
           beq MainLoop

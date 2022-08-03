@@ -13,7 +13,7 @@
           MapOffsetArt = 2
           MapOffsetTileAttributes = 4
           MapOffsetAttributes = 6
-          MapOffsetSprites = 8
+          MapOffsetDecals = 8
           MapOffsetExits = 10
           MapOffsetTitle = 16
 ;;; 
@@ -21,7 +21,7 @@
           Controller7800 = $00
 ;;; 
           NumMapRows = 13       ; on screen at once
-          MaxSprites = 16
+          MaxDecals = 16
 ;;; 
           PlayerMovementSpeed = $55
 

@@ -35,9 +35,9 @@ TileDLI:  .block
           bmi WaitForOverscan
 
           jsr UserInput
-          jsr MoveSprites
+          jsr MoveDecals
           jsr CheckPlayerCollision
-          jsr CheckSpriteCollision
+          jsr CheckDecalCollision
           jsr FrameWork
 
 WaitForOverscan:

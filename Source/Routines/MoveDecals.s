@@ -1,7 +1,7 @@
-;;; Phantasia Source/Routines/MoveSprites.s
+;;; Phantasia Source/Routines/MoveDecals.s
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
-MoveSprites:         .block
+MoveDecals:         .block
 
           rts
 

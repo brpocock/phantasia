@@ -21,22 +21,22 @@ Hole:     .macro offset
           * = $4000
 ;;; 
           .Hole $4040
-SpriteXH:
-          .fill MaxSprites, ?
-SpriteXL:
-          .fill MaxSprites, ?
-SpriteXFraction:
-          .fill MaxSprites, ?
-SpriteYH:
-          .fill MaxSprites, ?
-SpriteYL:
-          .fill MaxSprites, ?
-SpriteYFraction:
-          .fill MaxSprites, ?
-SpriteArtH:
-          .fill MaxSprites, ?
-SpriteArtL:
-          .fill MaxSprites, ?
+DecalXH:
+          .fill MaxDecals, ?
+DecalXL:
+          .fill MaxDecals, ?
+DecalXFraction:
+          .fill MaxDecals, ?
+DecalYH:
+          .fill MaxDecals, ?
+DecalYL:
+          .fill MaxDecals, ?
+DecalYFraction:
+          .fill MaxDecals, ?
+DecalArtH:
+          .fill MaxDecals, ?
+DecalArtL:
+          .fill MaxDecals, ?
 
 PriorH:   .byte ?
 PriorL:   .byte ?
@@ -47,22 +47,22 @@ CheckMask:          .byte ?
 ;;; 
 
           .Hole $4140
-SpriteDLH:
-          .fill MaxSprites, ?
-SpriteDLL:
-          .fill MaxSprites, ?
-SpriteFacing:
-          .fill MaxSprites, ?
-SpriteController:
-          .fill MaxSprites, ?
-SpriteDatum:
-          .fill MaxSprites, ?
-SpriteHP:
-          .fill MaxSprites, ?
-SpriteAction:
-          .fill MaxSprites, ?
-SpriteActionParam:
-          .fill MaxSprites, ?
+DecalDLH:
+          .fill MaxDecals, ?
+DecalDLL:
+          .fill MaxDecals, ?
+DecalFacing:
+          .fill MaxDecals, ?
+DecalController:
+          .fill MaxDecals, ?
+DecalDatum:
+          .fill MaxDecals, ?
+DecalHP:
+          .fill MaxDecals, ?
+DecalAction:
+          .fill MaxDecals, ?
+DecalActionParam:
+          .fill MaxDecals, ?
           HoleSum += * - $4140
 ;;; 
           .Hole $4240
@@ -189,7 +189,7 @@ Counter2:         .word ?
 StatsLines:         .byte ?
 DialogueLines:     .byte ?
 MapLines:           .byte ?
-NumSprites:         .byte ?
+NumDecals:         .byte ?
           HoleSum += * - $5040
 ;;; 
           .Hole $5140

@@ -1,7 +1,7 @@
-;;; Phantasia Source/Routines/SpriteMovement.s
+;;; Phantasia Source/Routines/DecalMovement.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
-SpriteMovement:	.block
+DecalMovement:	.block
 
           brk
           rts

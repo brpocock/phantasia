@@ -1,9 +1,9 @@
-;;; Phantasia Source/Routines/UpdateSprites.s
+;;; Phantasia Source/Routines/UpdateDecals.s
 ;;; Copyright © 2022 Bruce-Robert Pocock
 
-UpdateSprites:      .block
+UpdateDecals:      .block
           ldy # 0
-ClearSpritesFromDLs:
+ClearDecalsFromDLs:
           lda MapRowEndL, y
           sta Pointer
           lda MapRowEndH, y
@@ -19,13 +19,13 @@ ClearSpritesFromDLs:
 
           ldy Swap              ; map row being cleared
           cpy #NumMapRows
-          bne ClearSpritesFromDLs
+          bne ClearDecalsFromDLs
 
-          ldx NumSprites
-          beq DoneUpdatingSprites
+          ldx NumDecals
+          beq DoneUpdatingDecals
 
-AddOneSprite:
-          lda SpriteYH
+AddOneDecal:
+          lda DecalYH
           sec
           sbc MapTopRow
           bmi DonePlayer
@@ -40,26 +40,26 @@ AddOneSprite:
           .mvapyi Pointer, #DLExtMode(true, false)
           lda Source + 1
           clc
-          adc SpriteYL
+          adc DecalYL
           sta (Pointer), y
           iny
           .mvapyi Pointer, #DLPalWidth(4, 4)
-          lda SpriteXH
+          lda DecalXH
           sec
           sbc MapLeftColumn
           asl a
           asl a
           asl a
           clc
-          adc SpriteXL
+          adc DecalXL
           sec
           sbc MapLeftPixel
           sta (Pointer), y
 
-          lda SpriteYL
+          lda DecalYL
           beq DonePlayer
 
-          lda SpriteYH
+          lda DecalYH
           sec
           sbc MapTopRow
           tay
@@ -74,18 +74,18 @@ AddOneSprite:
           .mvapyi Pointer, #DLExtMode(true, false)
           lda Source + 1
           clc
-          adc SpriteYL
+          adc DecalYL
           sta (Pointer), y
           iny
           .mvapyi Pointer, #DLPalWidth(4, 4)
-          lda SpriteXH
+          lda DecalXH
           sec
           sbc MapLeftColumn
           asl a
           asl a
           asl a
           clc
-          adc SpriteXL
+          adc DecalXL
           sec
           sbc MapLeftPixel
           sta (Pointer), y
@@ -93,9 +93,9 @@ AddOneSprite:
 
 DonePlayer:
           dex
-          bne AddOneSprite
+          bne AddOneDecal
 
-DoneUpdatingSprites:
+DoneUpdatingDecals:
           rts
 
 FindBlankOnRow:
@@ -105,29 +105,29 @@ FindBlankOnRow:
           lda MapRowEndH, y
           sta Pointer + 1
           ldy # 0
-FindSpriteBlanks:
+FindDecalBlanks:
           lda (Pointer), y
-          bne NotFoundSpriteBlanks
+          bne NotFoundDecalBlanks
 
           iny
           lda (Pointer), y
           bne NotFound2
 
-          geq FoundSpriteBlanks
+          geq FoundDecalBlanks
 
-NotFoundSpriteBlanks:
+NotFoundDecalBlanks:
           iny
 NotFound2:
           iny
           iny
           iny
           iny
-          jmp FindSpriteBlanks
+          jmp FindDecalBlanks
 
-FoundSpriteBlanks:
+FoundDecalBlanks:
           dey
-          .mva SpriteDLL, Pointer
-          .mva SpriteDLH, Pointer + 1
+          .mva DecalDLL, Pointer
+          .mva DecalDLH, Pointer + 1
           rts
 
           .bend

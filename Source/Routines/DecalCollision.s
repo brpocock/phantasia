@@ -1,7 +1,7 @@
-;;; Phantasia Source/Routines/SpriteCollision.s
+;;; Phantasia Source/Routines/DecalCollision.s
 ;;;; Copyright © 2022 Bruce-Robert Pocock
 
-SpriteCollision:	.block
+DecalCollision:	.block
 
           brk
           rts

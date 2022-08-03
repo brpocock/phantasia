@@ -62,23 +62,23 @@ CopyAttributesLoop:
 DoneAttributes:
 ;;; 
 LoadPlayer:
-          .mva SpriteXH, # 14 ; TODO from Entrance code
-          .mvy SpriteXL, # 0
-          sty SpriteXFraction
-          .mva SpriteYH, # 6 ;  TODO from Entrance code
-          sty SpriteYL
-          sty SpriteYFraction
-          .mva SpriteArtH, #>AnimationBufferPlayerNow
-          .mva SpriteArtL, #<AnimationBufferPlayerNow
+          .mva DecalXH, # 14 ; TODO from Entrance code
+          .mvy DecalXL, # 0
+          sty DecalXFraction
+          .mva DecalYH, # 6 ;  TODO from Entrance code
+          sty DecalYL
+          sty DecalYFraction
+          .mva DecalArtH, #>AnimationBufferPlayerNow
+          .mva DecalArtL, #<AnimationBufferPlayerNow
 
-LoadMapSprites:
+LoadMapDecals:
           ldx # 0
           inx
-          stx NumSprites
+          stx NumDecals
 
           ldy # 0
           
-          ;; TODO copy sprites table
+          ;; TODO copy decals table
 
 CopyMapExits:
           ldy # MapOffsetExits

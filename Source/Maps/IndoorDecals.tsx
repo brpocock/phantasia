@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="Indoor Sprites" tilewidth="8" tileheight="16" tilecount="128" columns="16">
+<tileset version="1.8" tiledversion="1.8.2" name="Indoor Decals" tilewidth="8" tileheight="16" tilecount="128" columns="16">
  <properties>
-  <property name="Sprites" type="bool" value="true"/>
+  <property name="Decals" type="bool" value="true"/>
  </properties>
- <image source="IndoorSprites.png" trans="909090" width="128" height="129"/>
+ <image source="IndoorDecals.png" trans="909090" width="128" height="129"/>
  <tile id="0">
   <objectgroup draworder="index" id="2">
    <object id="1" x="1" y="0" width="7" height="16"/>

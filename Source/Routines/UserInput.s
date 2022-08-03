@@ -22,31 +22,31 @@ CheckStick:
           beq DoneStick
 
           lda # 0
-          sta SpriteFacing
+          sta DecalFacing
 
           ldy StickY
           beq DoneUpDown
 
           lda #PlayerMovementSpeed * 2
-          ldx # 0               ; sprite number
-          jsr MoveSpriteY
+          ldx # 0               ; decal number
+          jsr MoveDecalY
 
           ldx #P0StickUp
           ldy StickY
           bmi +
           ldx #P0StickDown
 +
-          stx SpriteFacing
+          stx DecalFacing
           lda #ActionWalking
-          sta SpriteAction
+          sta DecalAction
 
 DoneUpDown:
           ldy StickX
           beq DoneStick
 
           lda #PlayerMovementSpeed
-          ldx # 0               ; sprite number
-          jsr MoveSpriteX
+          ldx # 0               ; decal number
+          jsr MoveDecalX
 
           ldx #P0StickLeft
           ldy StickX
@@ -54,10 +54,10 @@ DoneUpDown:
           ldx #P0StickRight
 +
           txa
-          ora SpriteFacing
-          sta SpriteFacing
+          ora DecalFacing
+          sta DecalFacing
           lda #ActionWalking
-          sta SpriteAction
+          sta DecalAction
 
 DoneStick:
           lda StickX
@@ -69,19 +69,19 @@ CountIdle:
           lda IdleTime
           cmp # FramesPerSecond / 10
           lda #ActionIdle
-          sta SpriteAction
+          sta DecalAction
 
 DoneIdle:
-          lda SpriteXH
+          lda DecalXH
           sta CheckX
-          lda SpriteXL
+          lda DecalXL
           cmp # 4
           blt +
           inc CheckX
 +
-          ldx SpriteYH
+          ldx DecalYH
           dex
-          lda SpriteYL
+          lda DecalYL
           beq +
           inx
 +
@@ -92,27 +92,27 @@ DoneIdle:
           lda MapAttributes + 1, y
           and #AttrSwim
           beq +
-          .mva SpriteAction, #ActionSwimming
+          .mva DecalAction, #ActionSwimming
 +
-          lda SpriteAction
+          lda DecalAction
           beq ReadyGetFrame
 
           lda MapAttributes + 1, y
           and #AttrWade
           beq +
-          .mva SpriteAction, #ActionWading
+          .mva DecalAction, #ActionWading
 +
           lda MapAttributes + 1, y
           and #AttrClimb
           beq +
-          .mva SpriteAction, #ActionClimbing
+          .mva DecalAction, #ActionClimbing
 +
 
 ReadyGetFrame:
           jsr GetPlayerFrame
 ;;; 
 CheckForScrolling:
-          lda SpriteXH
+          lda DecalXH
           sec
           sbc MapLeftColumn
           cmp # 4               ; left margin, 4 tiles
@@ -128,7 +128,7 @@ GoWestYoungMan:
           jsr ScrollMapLeft
 
 EastWestOK:
-          lda SpriteYH
+          lda DecalYH
           sec
           sbc MapTopRow
           cmp # 3

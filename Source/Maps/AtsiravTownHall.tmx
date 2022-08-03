@@ -4,7 +4,7 @@
   <property name="ID" type="int" value="1"/>
  </properties>
  <tileset firstgid="1" source="IndoorTiles.tsx"/>
- <tileset firstgid="129" source="IndoorSprites.tsx"/>
+ <tileset firstgid="129" source="IndoorDecals.tsx"/>
  <layer id="1" name="Ground" width="32" height="32">
   <properties>
    <property name="Ground" type="bool" value="true"/>
@@ -22,9 +22,9 @@
   </data>
  </layer>
  <objectgroup id="3" name="Objects">
-  <object id="1" name="East Statue" type="Sprite" gid="129" x="144" y="400" width="8" height="16"/>
-  <object id="2" name="West Statue" type="Sprite" gid="129" x="80" y="400" width="8" height="16"/>
-  <object id="3" name="Hall Statue" type="Sprite" gid="129" x="216" y="96" width="8" height="16"/>
+  <object id="1" name="East Statue" type="Decal" gid="129" x="144" y="400" width="8" height="16"/>
+  <object id="2" name="West Statue" type="Decal" gid="129" x="80" y="400" width="8" height="16"/>
+  <object id="3" name="Hall Statue" type="Decal" gid="129" x="216" y="96" width="8" height="16"/>
   <object id="19" name="West Door" x="76" y="488">
    <properties>
     <property name="Entrance" value="WestDoor"/>
