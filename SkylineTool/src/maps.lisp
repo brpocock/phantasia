@@ -145,6 +145,33 @@
             (unless (= palette-left palette-self)
               (setf (aref grid x y 0) (logior #x80 (aref grid x y 0)))))))))
 
+(defun properties->plist (properties.xml)
+  (loop for (property alist) in (cddr properties.xml)
+        for name = (cadr (assoc "name" alist :test #'equal))
+        for value = (cadr (assoc "value" alist :test #'equal))
+        appending (list (make-keyword (string-upcase name)) value)))
+
+(defun get-text-reference (text texts)
+  (or (position text texts :test #'equal :key #'unicode->minifont)
+      (and (appendf texts (list text))
+           (1- (length texts)))))
+
+(defun collect-sprite-object (object texts)
+  (let ((x (floor (parse-integer (assocdr "x" (second object))) 8))
+        (y (floor (parse-integer (assocdr "y" (second object))) 16))
+        (name (or (assocdr "name" (second object) nil) "(Unnamed object)")))
+    (when-let (gid$ (assocdr "gid" (second object)))
+      (let ((gid (- (parse-integer gid$) 128))
+            (type (or (assocdr "type" (second object) nil) "rug"))
+            (sprite-props 0))
+        (when-let (text (assocdr "text" (second object) nil))
+          (setf sprite-props (logior (ash 1 15)
+                                     (ash (get-text-reference text texts) 12)
+                                     sprite-props)))
+        (check-type gid (integer 0 (128)))
+        (format *trace-output* "~& “~a” @(~d, ~d)" name x y) 
+        (return-from collect-sprite-object (list x y gid sprite-props 0))))))
+
 (defun parse-tile-grid (layers objects tileset)
   (let* ((ground (parse-layer (first layers)))
          (detail (and (= 2 (length layers))
@@ -155,7 +182,8 @@
                              :element-type 'integer))
          (attributes-table (list #(0 0 0 0 0 0)))
          (exits-table (cons nil nil))
-         (sprites-table (cons nil nil)))
+         (sprites-table (cons nil nil))
+         (texts (cons nil nil)))
     (dotimes (y (array-dimension ground 1))
       (dotimes (x (array-dimension ground 0))
         (let* ((detailp (and detail (> (aref detail x y) 0)))
@@ -172,12 +200,11 @@
             (setf (aref output x y 0) tile-id
                   (aref output x y 1) (assign-attributes tile-attributes
                                                          attributes-table))))))
-    #+ (or)  (dotimes (y 32)
-               (fresh-line *trace-output*)
-               (dotimes (x 32)
-                 (format *trace-output* "~x " (tile-effective-palette output x y attributes-table))))
+    (loop for object in objects
+          do (when-let (sprite (collect-sprite-object object texts))
+               (appendf sprites-table (list sprite))))
     (mark-palette-transitions output attributes-table)
-    (values output attributes-table (rest sprites-table) (rest exits-table))))
+    (values output attributes-table (rest sprites-table) (rest exits-table) (rest texts))))
 
 (defun map-layer-depth (layer.xml)
   (when (and (<= 3 (length layer.xml))
@@ -420,12 +447,12 @@
         (if exits-provided-p
             (set-bit 4 (logand #x1f (assign-exit locale point exits)))
             (warn "Exit in tileset data is not supported (to point ~s in locale ~s)" point locale))))
-    (when-let (lock (tile-property-value "Lock" xml))
-      (set-bit 3 (logand #x1f (parse-integer lock :radix 16))))
+    (if-let (lock (tile-property-value "Lock" xml))
+      (set-bit 3 (logand #x1f (parse-integer lock :radix 16)))
+      (when (tile-property-value "Locked" xml)
+        (warn "Locked tile without Lock code")))
     (if-let (switch (tile-property-value "Switch" xml))
       (set-bit 4 (ash (logand #x0c (parse-integer switch :radix 16)) 3)))
-    (when (tile-property-value "Locked" xml)
-      (warn "Locked tile without Lock code"))
     (when-let (tile-id (assocdr "id" (second xml) nil))
       (when (and tile-palettes tile-id)
         (set-bit 4 (ash (aref tile-palettes (parse-integer tile-id)) 5))))
@@ -709,9 +736,9 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
               (setf layers (reversef layers))))
           (assert (<= 0 (length object-groups) 1))
           (let ((base-tileset (first tilesets))
-                (objects (first object-groups)))
+                (objects (cddr (first object-groups))))
             (format *trace-output* "~&Parsing map layers…")
-            (multiple-value-bind (tile-grid attributes-table sprites-table exits-table)
+            (multiple-value-bind (tile-grid attributes-table sprites-table exits-table texts-list)
                 (parse-tile-grid layers objects base-tileset)
               (format *trace-output* "~&Ready to write binary output…")
               (let* ((width (array-dimension tile-grid 0))
@@ -731,7 +758,8 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                                                (dotimes (y height)
                                                  (dotimes (x width)
                                                    (setf (aref string (+ (* width y) x)) (aref tile-grid x y 1))))
-                                               string))))
+                                               string)))
+                     (texts (mapcar #'unicode->minifont texts-list)))
                 (assert (<= (* width height) 1024))
                 (format *trace-output* "~&Found grid ~d×~d tiles, ~
 ~d unique attribute~:p, ~d sprite~:p, ~d unique exit~:p"
@@ -765,10 +793,25 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
                                1 (* 6 (length attributes-table))
-                               1 (* 16 (length sprites-table))) 
+                               1 (* 7 (length sprites-table))) 
                             object)
-                ;; offset 12-15, padding before name
-                (write-bytes #(0 0 0 0) object)
+                ;; offset 12-13, offset of texts list
+                (write-word (+ 16 1 (length name)
+                               2 (length compressed-art) 
+                               2 (length compressed-attributes)
+                               1 (* 6 (length attributes-table))
+                               1 (* 7 (length sprites-table))
+                               1 (* 3 (length exits-table)))
+                            object)
+                ;; offset 14-15, currently end-of-data pointer but could be a further addition?
+                (write-word (+ 16 1 (length name)
+                               2 (length compressed-art) 
+                               2 (length compressed-attributes)
+                               1 (* 6 (length attributes-table))
+                               1 (* 7 (length sprites-table))
+                               1 (* 3 (length exits-table))
+                               1 (reduce #'+ (mapcar #'length texts)))
+                            object)
                 ;; offset 16, name (Pascal string)
                 (write-byte (length name) object)
                 (write-bytes (unicode->minifont name) object)
@@ -787,18 +830,28 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                   (write-bytes attr object))
                 ;; sprites list
                 (write-byte (length sprites-table) object)
-                (assert (every (lambda (sprite) (= 8 (length sprite))) sprites-table)
+                (assert (every (lambda (sprite) (= 5 (length sprite))) sprites-table)
                         (sprites-table)
-                        "All sprites table entries must be precisely 5 bytes: ~%~s" sprites-table)
+                        "All sprites table entries must be precisely 5 values: ~%~s" sprites-table)
                 (dolist (sprite sprites-table)
-                  (write-bytes sprite object))
+                  (write-byte (first sprite) object) ; x
+                  (write-byte (second sprite) object) ; y
+                  (write-byte (third sprite) object) ; gid of first art
+                  (write-word (fourth sprite) object) ; attributes
+                  (write-word (fifth sprite) object) ; unused for now
+                  )
                 ;; exits list
                 (write-byte (length exits-table) object)
                 (dolist (exit exits-table)
                   (destructuring-bind (locale x y) exit
                     (write-byte locale object)
                     (write-word x object)
-                    (write-word y object)))))))))))
+                    (write-word y object)))
+                ;; texts list
+                (write-byte (length texts-list) object)
+                (dolist (text texts-list)
+                  (write-byte (length text) object)
+                  (write-bytes text object))))))))))
 
 (defun rip-tiles-from-tileset (tileset images)
   (let ((i 0))
