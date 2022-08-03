@@ -1,7 +1,7 @@
 (in-package :skyline-tool)
 
 (defclass level ()
-  ((sprites :accessor level-sprites :initarg :sprites)
+  ((decals :accessor level-decals :initarg :decals)
    (grid :accessor level-grid :initarg :grid)
    (objects :accessor level-objects :initarg :objects)
    (name :reader level-name :initarg :name)))
@@ -156,21 +156,21 @@
       (and (appendf texts (list text))
            (1- (length texts)))))
 
-(defun collect-sprite-object (object texts)
+(defun collect-decal-object (object texts)
   (let ((x (floor (parse-integer (assocdr "x" (second object))) 8))
         (y (floor (parse-integer (assocdr "y" (second object))) 16))
         (name (or (assocdr "name" (second object) nil) "(Unnamed object)")))
     (when-let (gid$ (assocdr "gid" (second object)))
       (let ((gid (- (parse-integer gid$) 128))
             (type (or (assocdr "type" (second object) nil) "rug"))
-            (sprite-props 0))
+            (decal-props 0))
         (when-let (text (assocdr "text" (second object) nil))
-          (setf sprite-props (logior (ash 1 15)
+          (setf decal-props (logior (ash 1 15)
                                      (ash (get-text-reference text texts) 12)
-                                     sprite-props)))
+                                     decal-props)))
         (check-type gid (integer 0 (128)))
         (format *trace-output* "~& “~a” @(~d, ~d)" name x y) 
-        (return-from collect-sprite-object (list x y gid sprite-props 0))))))
+        (return-from collect-decal-object (list x y gid decal-props 0))))))
 
 (defun parse-tile-grid (layers objects tileset)
   (let* ((ground (parse-layer (first layers)))
@@ -182,7 +182,7 @@
                              :element-type 'integer))
          (attributes-table (list #(0 0 0 0 0 0)))
          (exits-table (cons nil nil))
-         (sprites-table (cons nil nil))
+         (decals-table (cons nil nil))
          (texts (cons nil nil)))
     (dotimes (y (array-dimension ground 1))
       (dotimes (x (array-dimension ground 0))
@@ -201,10 +201,10 @@
                   (aref output x y 1) (assign-attributes tile-attributes
                                                          attributes-table))))))
     (loop for object in objects
-          do (when-let (sprite (collect-sprite-object object texts))
-               (appendf sprites-table (list sprite))))
+          do (when-let (decal (collect-decal-object object texts))
+               (appendf decals-table (list decal))))
     (mark-palette-transitions output attributes-table)
-    (values output attributes-table (rest sprites-table) (rest exits-table) (rest texts))))
+    (values output attributes-table (rest decals-table) (rest exits-table) (rest texts))))
 
 (defun map-layer-depth (layer.xml)
   (when (and (<= 3 (length layer.xml))
@@ -738,7 +738,7 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
           (let ((base-tileset (first tilesets))
                 (objects (cddr (first object-groups))))
             (format *trace-output* "~&Parsing map layers…")
-            (multiple-value-bind (tile-grid attributes-table sprites-table exits-table texts-list)
+            (multiple-value-bind (tile-grid attributes-table decals-table exits-table texts-list)
                 (parse-tile-grid layers objects base-tileset)
               (format *trace-output* "~&Ready to write binary output…")
               (let* ((width (array-dimension tile-grid 0))
@@ -762,9 +762,9 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                      (texts (mapcar #'unicode->minifont texts-list)))
                 (assert (<= (* width height) 1024))
                 (format *trace-output* "~&Found grid ~d×~d tiles, ~
-~d unique attribute~:p, ~d sprite~:p, ~d unique exit~:p"
+~d unique attribute~:p, ~d decal~:p, ~d unique exit~:p"
                         width height
-                        (length attributes-table) (length sprites-table)
+                        (length attributes-table) (length decals-table)
                         (length exits-table))
                 ;; offset 0, width
                 (write-byte width object)
@@ -782,7 +782,7 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                                2 (length compressed-art) 
                                2 (length compressed-attributes))
                             object)
-                ;; offset 8-9, offset of sprites list
+                ;; offset 8-9, offset of decals list
                 (write-word (+ 16 1 (length name)
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
@@ -793,14 +793,14 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
                                1 (* 6 (length attributes-table))
-                               1 (* 7 (length sprites-table))) 
+                               1 (* 7 (length decals-table))) 
                             object)
                 ;; offset 12-13, offset of texts list
                 (write-word (+ 16 1 (length name)
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
                                1 (* 6 (length attributes-table))
-                               1 (* 7 (length sprites-table))
+                               1 (* 7 (length decals-table))
                                1 (* 3 (length exits-table)))
                             object)
                 ;; offset 14-15, currently end-of-data pointer but could be a further addition?
@@ -808,7 +808,7 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                                2 (length compressed-art) 
                                2 (length compressed-attributes)
                                1 (* 6 (length attributes-table))
-                               1 (* 7 (length sprites-table))
+                               1 (* 7 (length decals-table))
                                1 (* 3 (length exits-table))
                                1 (reduce #'+ (mapcar #'length texts)))
                             object)
@@ -828,17 +828,17 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                         "All attributes table entries must be precisely 6 bytes: ~%~s" attributes-table)
                 (dolist (attr attributes-table)
                   (write-bytes attr object))
-                ;; sprites list
-                (write-byte (length sprites-table) object)
-                (assert (every (lambda (sprite) (= 5 (length sprite))) sprites-table)
-                        (sprites-table)
-                        "All sprites table entries must be precisely 5 values: ~%~s" sprites-table)
-                (dolist (sprite sprites-table)
-                  (write-byte (first sprite) object) ; x
-                  (write-byte (second sprite) object) ; y
-                  (write-byte (third sprite) object) ; gid of first art
-                  (write-word (fourth sprite) object) ; attributes
-                  (write-word (fifth sprite) object) ; unused for now
+                ;; decals list
+                (write-byte (length decals-table) object)
+                (assert (every (lambda (decal) (= 5 (length decal))) decals-table)
+                        (decals-table)
+                        "All decals table entries must be precisely 5 values: ~%~s" decals-table)
+                (dolist (decal decals-table)
+                  (write-byte (first decal) object) ; x
+                  (write-byte (second decal) object) ; y
+                  (write-byte (third decal) object) ; gid of first art
+                  (write-word (fourth decal) object) ; attributes
+                  (write-word (fifth decal) object) ; unused for now
                   )
                 ;; exits list
                 (write-byte (length exits-table) object)
