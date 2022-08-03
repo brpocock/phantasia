@@ -163,13 +163,15 @@
     (when-let (gid$ (assocdr "gid" (second object) nil))
       (let ((gid (mod (parse-integer gid$) 128))
             (type (or (assocdr "type" (second object) nil) "rug"))
-            (decal-props 0))
-        (when-let (text (assocdr "text" (second object) nil))
-          (setf decal-props (logior (ash 1 15)
-                                    (ash (get-text-reference text texts) 12)
-                                    decal-props)))
+            (decal-props
+              (logior (when-let (text (assocdr "text" (second object) nil))
+                        (logior (ash 1 14)
+                                (ash (get-text-reference text texts) 8)))
+                      (when-let (script (assocdr "script" (second object) nil))
+                        (logior (ash 1 15)
+                                (ash (get-text-reference script texts) 8))))))
         (format *trace-output* "~& “~a” @(~d, ~d)" name x y) 
-        (return-from collect-decal-object (list x y gid decal-props 0))))))
+        (return-from collect-decal-object (list x y gid decal-props))))))
 
 (defun parse-tile-grid (layers objects tileset)
   (let* ((ground (parse-layer (first layers)))
@@ -683,6 +685,15 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
   (write-byte (logand #x00ff number) stream)
   (write-byte (ash (logand #xff00 number) -8) stream))
 
+(defun write-dword (number stream)
+  (assert (<= 0 number #xffffffff) (number)
+          "Cannot write 32-bit double-word-sized data with number #x~x (~:d); range is 0 - #xffffffff (4,294,967,295)"
+          number number)
+  (write-byte (logand #x000000ff number) stream)
+  (write-byte (ash (logand #x0000ff00 number) -8) stream)
+  (write-byte (ash (logand #x00ff0000 number) -16) stream)
+  (write-byte (ash (logand #xff000000 number) -24) stream))
+
 (defun write-bytes (vector stream)
   (loop for byte across vector
         do (write-byte byte stream)))
@@ -829,15 +840,14 @@ only see elements: ~:*~{“~a”~^, ~} under “~a”.~]"
                   (write-bytes attr object))
                 ;; decals list
                 (write-byte (length decals-table) object)
-                (assert (every (lambda (decal) (= 5 (length decal))) decals-table)
+                (assert (every (lambda (decal) (= 4 (length decal))) decals-table)
                         (decals-table)
-                        "All decals table entries must be precisely 5 values: ~%~s" decals-table)
+                        "All decals table entries must be precisely 4 values: ~%~s" decals-table)
                 (dolist (decal decals-table)
                   (write-byte (first decal) object) ; x
                   (write-byte (second decal) object) ; y
                   (write-byte (third decal) object) ; gid of first art
-                  (write-word (fourth decal) object) ; attributes
-                  (write-word (fifth decal) object) ; unused for now
+                  (write-dword (fourth decal) object) ; attributes
                   )
                 ;; exits list
                 (write-byte (length exits-table) object)
