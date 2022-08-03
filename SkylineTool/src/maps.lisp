@@ -152,9 +152,11 @@
         appending (list (make-keyword (string-upcase name)) value)))
 
 (defun get-text-reference (text texts)
-  (or (position text texts :test #'equal :key #'unicode->minifont)
-      (and (appendf texts (list text))
-           (1- (length texts)))))
+  (let ((index (or (position text texts :test #'equal :key #'unicode->minifont)
+                   (and (appendf texts (list text))
+                        (1- (length texts))))))
+    (check-type index (integer 0 (#x100)))
+    index))
 
 (defun collect-decal-object (object texts)
   (let ((x (floor (parse-integer (assocdr "x" (second object))) 8))
@@ -168,11 +170,11 @@
                       (remove-if #'null
                                  (list
                                   (when-let (text (assocdr "text" (second object) nil))
-                                    (logior (ash 1 14)
-                                            (ash (get-text-reference text texts) 8)))
+                                    (logior (ash 1 30)
+                                            (get-text-reference text texts)))
                                   (when-let (script (assocdr "script" (second object) nil))
-                                    (logior (ash 1 15)
-                                            (ash (get-text-reference script texts) 8))))))))
+                                    (logior (ash 1 31)
+                                            (get-text-reference script texts))))))))
         (format *trace-output* "~& “~a” @(~d, ~d)" name x y) 
         (return-from collect-decal-object (list x y gid decal-props))))))
 
