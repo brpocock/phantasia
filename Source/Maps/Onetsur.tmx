@@ -13,11 +13,11 @@
   </data>
  </layer>
  <objectgroup id="3" name="Sprites">
-  <object id="1" gid="145" x="48" y="336" width="8" height="16"/>
-  <object id="2" gid="129" x="48" y="320" width="8" height="16"/>
-  <object id="3" gid="145" x="152" y="368" width="8" height="16"/>
-  <object id="4" gid="129" x="152" y="352" width="8" height="16"/>
-  <object id="5" gid="145" x="88" y="416" width="8" height="16"/>
-  <object id="6" gid="129" x="88" y="400" width="8" height="16"/>
+  <object id="1" name="Palm3 base" type="wall" gid="145" x="48" y="336" width="8" height="16"/>
+  <object id="2" name="Palm3 top" type="ceiling" gid="129" x="48" y="320" width="8" height="16"/>
+  <object id="3" name="Palm2 base" type="wall" gid="145" x="152" y="368" width="8" height="16"/>
+  <object id="4" name="Palm2 top" type="ceiling" gid="129" x="152" y="352" width="8" height="16"/>
+  <object id="5" name="Palm1 base" type="wall" gid="145" x="88" y="416" width="8" height="16"/>
+  <object id="6" name="Palm1 top" type="ceiling" gid="129" x="88" y="400" width="8" height="16"/>
  </objectgroup>
 </map>
